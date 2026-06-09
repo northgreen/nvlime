@@ -46,7 +46,7 @@ Must-have:
 
 Good to have:
 
-- [nvim-cmp][nvim-cmp] for autocompletion
+- [nvim-cmp][nvim-cmp] or [blink.cmp][blink-cmp] for autocompletion
 - parinfer or paredit plugin - Nvlime can only detect s-expressions inside
   parentheses. To make your life easier, use
   [paredit](https://github.com/kovisoft/paredit) or any of parinfer
@@ -135,6 +135,50 @@ require('cmp').setup.filetype({'lisp'}, {
 })
 ```
 
+### Using with blink.cmp
+
+To enable autocompletion with [blink.cmp][blink-cmp], first set
+`vim.g.nvlime_config.blink.enabled = true`. Then configure blink.cmp
+to use the nvlime provider:
+
+```lua
+{
+  'saghen/blink.cmp',
+  opts = {
+    sources = {
+      default = { 'lsp', 'nvlime' },
+      providers = {
+        nvlime = {
+          name = 'Nvlime',
+          module = 'nvlime.blink',
+          -- score_offset = 50,  -- optional: adjust priority
+        },
+      },
+    },
+  },
+}
+```
+
+Alternatively, you can use [blink.compat][blink-compat] to use the nvim-cmp
+source directly:
+
+```lua
+{
+  'saghen/blink.cmp',
+  dependencies = { { 'saghen/blink.compat' } },
+  opts = {
+    sources = {
+      providers = {
+        nvlime = {
+          name = 'nvlime',
+          module = 'blink.compat.source',
+        },
+      },
+    },
+  },
+}
+```
+
 See `:help nvlime-tutor` for a tutorial on how to use the main features, and
 `:help nvlime` for the full documentation.
 
@@ -161,5 +205,7 @@ Issues and pull requests are welcome. Read `CONTRIBUTING.md` for more info.
 MIT. See `LICENSE.txt`.
 
 [nvim-cmp]: https://github.com/hrsh7th/nvim-cmp
+[blink-cmp]: https://github.com/saghen/blink.cmp
+[blink-compat]: https://github.com/saghen/blink.compat
 [Vlime]: https://github.com/vlime/vlime
 [parsley]: https://github.com/monkoose/parsley

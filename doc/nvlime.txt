@@ -489,6 +489,7 @@ only with vimscript. Lua config:
             scroll_step = 3
         },
         cmp = { enabled = false },
+        blink = { enabled = false },
         arglist = { enabled = true }
     }
 <
@@ -748,6 +749,35 @@ enable_cmp                                         *g:nvlime_config.cmp*
         `boolean`
         Default: false
         Specifies whether to enable `nvim-cmp` autocompletion source.
+
+enable_blink                                     *g:nvlime_config.blink*
+    `dictionary`
+
+    enabled
+        `boolean`
+        Default: false
+        Specifies whether to enable blink.cmp autocompletion source.
+        Note: You also need to configure blink.cmp to use the nvlime
+        provider in your blink.cmp setup.
+
+        Example blink.cmp configuration with lazy.nvim:
+>lua
+{
+  'saghen/blink.cmp',
+  opts = {
+    sources = {
+      default = { 'lsp', 'nvlime' },
+      providers = {
+        nvlime = {
+          name = 'Nvlime',
+          module = 'nvlime.blink',
+          -- score_offset = 50,  -- optional: adjust priority
+        },
+      },
+    },
+  },
+}
+<
 
 arglist                                        *g:nvlime_config.arglist*
     `dictionary`
