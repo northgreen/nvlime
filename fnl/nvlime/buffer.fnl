@@ -34,12 +34,13 @@
 
 (macro with-modifiable [bufnr ...]
   "Allows making changes to the text in the buffer
-even if it's option `nomodifiable` is set."
+even if its 'nomodifiable' option is set."
   `(let [old-mod# (nvim_buf_get_option ,bufnr :modifiable)]
      (nvim_buf_set_option ,bufnr :modifiable true)
-     (do ,(unpack [...]))
-     (nvim_buf_set_option ,bufnr :modifiable old-mod#)
-     nil))
+     (let [result# (pcall (fn [] (do ,(unpack [...]))))]
+       (nvim_buf_set_option ,bufnr :modifiable old-mod#)
+       (when (not (. result# 1))
+         (error (. result# 2))))))
 
 ;;; ...string -> BufName
 (fn buffer.gen-name [...]
