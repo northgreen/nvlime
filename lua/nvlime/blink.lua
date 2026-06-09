@@ -10,6 +10,9 @@ _2bfuzzy_3f_2b = not psl["empty?"](psl.filter(_1_, opts.contribs))
 local flag_kind = {b = blink_types.CompletionItemKind.Variable, f = blink_types.CompletionItemKind.Function, g = blink_types.CompletionItemKind.Method, c = blink_types.CompletionItemKind.Class, t = blink_types.CompletionItemKind.Class, m = blink_types.CompletionItemKind.Operator, s = blink_types.CompletionItemKind.Operator, p = blink_types.CompletionItemKind.Module}
 local kind_precedence = {blink_types.CompletionItemKind.Module, blink_types.CompletionItemKind.Class, blink_types.CompletionItemKind.Operator, blink_types.CompletionItemKind.Method, blink_types.CompletionItemKind.Function, blink_types.CompletionItemKind.Variable}
 local function flags__3ekind(flags)
+  if not flags or #flags == 0 then
+    return nil
+  end
   local kinds = {}
   for i = 1, #flags do
     local kind = flag_kind[flags:sub(i, i)]
