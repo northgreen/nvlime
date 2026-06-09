@@ -97,7 +97,8 @@ function Source:get_completions(ctx, callback)
     end
     return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
   end
-  return get_completion(keyword, on_done)
+  get_completion(keyword, on_done)
+  return nil
 end
 
 function Source:resolve(item, callback)
