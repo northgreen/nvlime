@@ -22,7 +22,7 @@ local function content__3elines(content)
     if ((name == "DESIGNATOR") or (name == "designator")) then
       local _end
       do
-        local _4_
+        local case_4_
         do
           local t_5_ = item
           if (nil ~= t_5_) then
@@ -33,12 +33,12 @@ local function content__3elines(content)
             t_5_ = t_5_.name
           else
           end
-          _4_ = t_5_
+          case_4_ = t_5_
         end
-        if (_4_ == nil) then
+        if (case_4_ == nil) then
           _end = ""
-        elseif (nil ~= _4_) then
-          local str = _4_
+        elseif (nil ~= case_4_) then
+          local str = case_4_
           _end = ("  " .. string.lower(str))
         else
           _end = nil

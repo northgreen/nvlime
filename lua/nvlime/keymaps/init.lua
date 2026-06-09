@@ -1,10 +1,9 @@
 local opts = require("nvlime.config")
 local psl = require("parsley")
-local _local_1_ = vim.api
-local nvim_replace_termcodes = _local_1_["nvim_replace_termcodes"]
-local nvim_feedkeys = _local_1_["nvim_feedkeys"]
-local nvim_buf_set_keymap = _local_1_["nvim_buf_set_keymap"]
-local nvim_buf_get_keymap = _local_1_["nvim_buf_get_keymap"]
+local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
+local nvim_feedkeys = vim.api.nvim_feedkeys
+local nvim_buf_set_keymap = vim.api.nvim_buf_set_keymap
+local nvim_buf_get_keymap = vim.api.nvim_buf_get_keymap
 local keymaps = {leader = opts.leader, buffer = {}}
 local function with_leader(key)
   return (opts.leader .. key)
@@ -65,16 +64,15 @@ end
 keymaps.buffer.get = function()
   local maps = {}
   for _, mode in ipairs({"n", "i", "v"}) do
-    local tbl_17_auto = maps
+    local tbl_24_ = maps
     for _0, map in ipairs(nvim_buf_get_keymap(0, mode)) do
-      local function _5_()
-        if (map.desc and string.find(map.desc, "^nvlime:")) then
-          return {mode = map.mode, lhs = string.gsub(map.lhs, " ", "<SPACE>"), desc = string.gsub(map.desc, "^nvlime: ", "")}
-        else
-          return nil
-        end
+      local val_25_
+      if (map.desc and string.find(map.desc, "^nvlime:")) then
+        val_25_ = {mode = map.mode, lhs = string.gsub(map.lhs, " ", "<SPACE>"), desc = string.gsub(map.desc, "^nvlime: ", "")}
+      else
+        val_25_ = nil
       end
-      table.insert(tbl_17_auto, _5_())
+      table.insert(tbl_24_, val_25_)
     end
   end
   return maps

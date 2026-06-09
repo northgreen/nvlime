@@ -156,6 +156,25 @@
       (self:set-current-package old-package)
       result)))
 
+;;; VimScript shim dispatcher
+
+(fn connection._call [conn-ref method-name args]
+  "Generic method dispatcher for VimScript shim.
+  Loads all mixin modules and converts PascalCase method names to kebab-case."
+  ;; Ensure all mixin modules are loaded (idempotent require)
+  (require "nvlime.core.connection.channels")
+  (require "nvlime.core.connection.messages")
+  (require "nvlime.core.connection.sldb")
+  (require "nvlime.core.connection.inspector")
+  (require "nvlime.core.connection.swank")
+  (require "nvlime.core.connection.events")
+  (let [name (string.gsub method-name "([a-z%d])([A-Z])" "%1-%2")]
+    (let [name (string.gsub name "([A-Z]+)([A-Z][a-z])" "%1-%2")]
+      (let [kebab-name (string.lower name)]
+        (let [method (. connection kebab-name)]
+          (when method
+            (method conn-ref (unpack args))))))))
+
 ;;; Event routing
 
 (fn connection.on-server-event [self chan msg]

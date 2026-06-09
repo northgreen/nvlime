@@ -1,27 +1,26 @@
 local window = require("nvlime.window")
 local pwin = require("parsley.window")
 local opts = require("nvlime.config")
-local _local_1_ = vim.api
-local nvim_exec = _local_1_["nvim_exec"]
-local nvim_win_set_buf = _local_1_["nvim_win_set_buf"]
-local nvim_set_current_win = _local_1_["nvim_set_current_win"]
-local nvim_get_current_win = _local_1_["nvim_get_current_win"]
-local nvim_buf_get_name = _local_1_["nvim_buf_get_name"]
-local nvim_win_get_buf = _local_1_["nvim_win_get_buf"]
-local nvim_win_set_option = _local_1_["nvim_win_set_option"]
+local nvim_exec = vim.api.nvim_exec
+local nvim_win_set_buf = vim.api.nvim_win_set_buf
+local nvim_set_current_win = vim.api.nvim_set_current_win
+local nvim_get_current_win = vim.api.nvim_get_current_win
+local nvim_buf_get_name = vim.api.nvim_buf_get_name
+local nvim_win_get_buf = vim.api.nvim_win_get_buf
+local nvim_win_set_option = vim.api.nvim_win_set_option
 local main_win_pos
 do
-  local _2_ = opts.main_window.position
-  if (_2_ == "top") then
+  local case_1_ = opts.main_window.position
+  if (case_1_ == "top") then
     main_win_pos = "topleft"
-  elseif (_2_ == "left") then
+  elseif (case_1_ == "left") then
     main_win_pos = "vertical topleft"
-  elseif (_2_ == "bottom") then
+  elseif (case_1_ == "bottom") then
     main_win_pos = "botright"
-  elseif (_2_ == "right") then
+  elseif (case_1_ == "right") then
     main_win_pos = "vertical botright"
   else
-    local _ = _2_
+    local _ = case_1_
     main_win_pos = "vertical botright"
   end
 end
@@ -31,27 +30,27 @@ main_win.new = function(cmd, size, opposite)
   local vert_3f = main_win["vert?"]
   self["id"] = nil
   self["buffers"] = {}
-  local _4_
+  local _3_
   if vert_3f then
-    _4_ = cmd
+    _3_ = cmd
   else
-    _4_ = ("vertical " .. cmd)
+    _3_ = ("vertical " .. cmd)
   end
-  self["cmd"] = _4_
-  local _6_
+  self["cmd"] = _3_
+  local _5_
   if vert_3f then
-    _6_ = size
+    _5_ = size
   else
-    _6_ = nil
+    _5_ = nil
   end
-  self["size"] = _6_
+  self["size"] = _5_
   self["opposite"] = opposite
   return self
 end
 do
   local sldb_height = 0.65
   main_win["sldb"] = main_win.new("", sldb_height, "repl")
-  do end (main_win)["repl"] = main_win.new("leftabove", (1 - sldb_height), "sldb")
+  main_win["repl"] = main_win.new("leftabove", (1 - sldb_height), "sldb")
 end
 main_win["set-id"] = function(self, winid)
   self["id"] = winid

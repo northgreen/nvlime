@@ -126,4 +126,6 @@
       (first-fn (fn [...]
                     (chain-cb (vim.list_slice cbs 2) ...))))))
 
+(set connection.check-return-status check-return-status)
+(set connection.try-to-call try-to-call)
 connection
