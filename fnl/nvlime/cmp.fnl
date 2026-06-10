@@ -28,14 +28,16 @@
 
 ;;; string -> ?number
 (fn flags->kind [flags]
-  (local kinds {})
-  (for [i 1 (length flags)]
-    (let [kind (. flag-kind (flags:sub i i))]
-      (when kind
-        (tset kinds kind true))))
-  (for [i 1 (length kind-precedence)]
-    (when (. kinds (. kind-precedence i))
-      (values (. kind-precedence i)))))
+  (when (and flags (> (length flags) 0))
+    (local kinds {})
+    (for [i 1 (length flags)]
+      (let [kind (. flag-kind (flags:sub i i))]
+        (when kind
+          (tset kinds kind true))))
+    (accumulate [result nil
+                 _ kind (ipairs kind-precedence)
+                 &until result]
+      (if (. kinds kind) kind result))))
 
 ;;; {any} ->
 (fn set-documentation [item]
@@ -72,16 +74,19 @@
   "\\k\\+")
 
 (fn source.complete [self params callback]
+  (var called false)
   (let [on-done (fn [candidates]
-                  (callback
-                    (icollect [_ c (ipairs (or candidates []))]
-                      (get-lsp-kind c))))
+                  (when (not called)
+                    (set called true)
+                    (callback
+                      (icollect [_ c (ipairs (or (. candidates 1) []))]
+                        (get-lsp-kind c)))))
         input (string.sub params.context.cursor_before_line
                           params.offset)]
     (get-completion input on-done)))
 
 (fn source.resolve [self item callback]
-  (set-documentation item)
+  (set-documentation (vim.deepcopy item))
   ;; defer_fn required for documentation to show up
   (vim.defer_fn #(callback item) 5))
 

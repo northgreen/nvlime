@@ -89,7 +89,7 @@
     (local on-done (fn [candidates]
       (when (not called)
         (set called true)
-        (let [items (icollect [_ c (ipairs (or candidates []))]
+        (let [items (icollect [_ c (ipairs (or (. candidates 1) []))]
                       (let [item (get-lsp-kind c)]
                         (when item
                           (tset item :textEdit
