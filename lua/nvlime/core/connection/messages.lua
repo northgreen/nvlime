@@ -10,7 +10,7 @@ local function check_return_status(return_msg, caller)
 end
 local function try_to_call(callback, args)
   if (type(callback) == "function") then
-    return apply(callback, args)
+    return callback(unpack(args))
   else
     return nil
   end
@@ -119,7 +119,7 @@ connection["chain-callbacks"] = function(self, ...)
     do
       local cb = remaining[1]
       if cb then
-        apply(cb, {...})
+        cb(unpack({...}))
       else
       end
     end

@@ -16,6 +16,30 @@ Also exports private callbacks used by input buffer completion."
 (local xref (require "nvlime.core.ui.xref"))
 
 ;;; ============================================================================
+;;; Private callbacks — exported for input buffer completion
+;;; ============================================================================
+;;; These were s:ReturnMiniBufferContent and s:ReadStringInputComplete in ui.vim.
+;;; They are called by the input buffer's completion callback and need to access
+;;; b:nvlime_conn and the current buffer content.
+
+(fn return-mini-buffer-content [thread ttag]
+  "Returns minibuffer content to Lisp via conn.Return.
+  Called when user submits input from minibuffer."
+  (let [content (ui.cur-buffer-content false)]
+    (call (. vim.b.nvlime_conn :Return)
+          [thread ttag content])))
+
+(fn return-string-input-complete [thread ttag]
+  "Returns string input to Lisp via conn.ReturnString.
+  Ensures content ends with newline before sending."
+  (let [content (ui.cur-buffer-content false)
+        content (if (and (> (length content) 0)
+                         (not= (. content (length content)) "\n"))
+                  (.. content "\n")
+                  content)]
+    (call (. vim.b.nvlime_conn :ReturnString)
+          [thread ttag content])))
+;;; ============================================================================
 ;;; Debug events
 ;;; ============================================================================
 
@@ -190,30 +214,6 @@ Also exports private callbacks used by input buffer completion."
   (call (. vim.fn "nvlime#ui#threads#FillThreadsBuf")
         [conn thread-list]))
 
-;;; ============================================================================
-;;; Private callbacks — exported for input buffer completion
-;;; ============================================================================
-;;; These were s:ReturnMiniBufferContent and s:ReadStringInputComplete in ui.vim.
-;;; They are called by the input buffer's completion callback and need to access
-;;; b:nvlime_conn and the current buffer content.
-
-(fn return-mini-buffer-content [thread ttag]
-  "Returns minibuffer content to Lisp via conn.Return.
-  Called when user submits input from minibuffer."
-  (let [content (ui.cur-buffer-content false)]
-    (call (. vim.b.nvlime_conn :Return)
-          [thread ttag content])))
-
-(fn return-string-input-complete [thread ttag]
-  "Returns string input to Lisp via conn.ReturnString.
-  Ensures content ends with newline before sending."
-  (let [content (ui.cur-buffer-content false)
-        content (if (and (> (length content) 0)
-                         (not= (. content (length content)) "\n"))
-                  (.. content "\n")
-                  content)]
-    (call (. vim.b.nvlime_conn :ReturnString)
-          [thread ttag content])))
 
 ;;; ============================================================================
 ;;; Module export

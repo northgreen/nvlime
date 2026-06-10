@@ -11,10 +11,18 @@ connection.cl = function(name)
   return connection.sym("COMMON-LISP", name)
 end
 connection["has-key"] = function(dict, key)
-  return (dict[key] or dict[string.upper(key)] or dict[string.lower(key)])
+  if (type(key) == "string") then
+    return (dict[key] or dict[string.upper(key)] or dict[string.lower(key)])
+  else
+    return dict[key]
+  end
 end
 connection.get = function(dict, key, default)
-  return (dict[key] or dict[string.upper(key)] or dict[string.lower(key)] or default)
+  if (type(key) == "string") then
+    return (dict[key] or dict[string.upper(key)] or dict[string.lower(key)] or default)
+  else
+    return (dict[key] or default)
+  end
 end
 connection.new = function(cb_data, ui)
   local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui, server_event_handlers = {}}
@@ -24,10 +32,10 @@ end
 connection.connect = function(self, host, port, prefix, timeout)
   do
     local callback
-    local function _1_(chan, msg)
+    local function _3_(chan, msg)
       return self["on-server-event"](self, chan, msg)
     end
-    callback = _1_
+    callback = _3_
     self.channel = async["ch-open"](host, port, callback, timeout)
   end
   if not self.channel.is_connected then
@@ -66,10 +74,10 @@ connection["fix-remote-path"] = function(self, path)
   if (string.len(prefix) == 0) then
     return path
   else
-    local case_5_ = type(path)
-    if (case_5_ == "string") then
+    local case_7_ = type(path)
+    if (case_7_ == "string") then
       return (prefix .. path)
-    elseif (case_5_ == "table") then
+    elseif (case_7_ == "table") then
       local loc_data = path[2]
       if loc_data then
         local loc_type = loc_data[1]
@@ -86,7 +94,7 @@ connection["fix-remote-path"] = function(self, path)
         return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
       end
     else
-      local _ = case_5_
+      local _ = case_7_
       return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
     end
   end

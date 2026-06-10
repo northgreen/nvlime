@@ -6,19 +6,33 @@ local call = vim.fn.call
 local ui = require("nvlime.core.ui")
 local connection = require("nvlime.core.connection")
 local xref = require("nvlime.core.ui.xref")
+local function return_mini_buffer_content(thread, ttag)
+  local content = ui["cur-buffer-content"](false)
+  return call(vim.b.nvlime_conn.Return, {thread, ttag, content})
+end
+local function return_string_input_complete(thread, ttag)
+  local content = ui["cur-buffer-content"](false)
+  local content0
+  if ((#content > 0) and (content[#content] ~= "\n")) then
+    content0 = (content .. "\n")
+  else
+    content0 = content
+  end
+  return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
+end
 ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames, conts)
-  local _let_1_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
-  local _ = _let_1_[1]
-  local bufnr = _let_1_[2]
-  local function _2_()
+  local _let_2_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
+  local _ = _let_2_[1]
+  local bufnr = _let_2_[2]
+  local function _3_()
     return call(vim.fn["nvlime#ui#sldb#FillSLDBBuf"], {thread, level, condition, restarts, frames})
   end
-  return ui["with-buffer"](bufnr, _2_)
+  return ui["with-buffer"](bufnr, _3_)
 end
 ui["on-debug-activate"] = function(self, conn, thread, level, select)
-  local _let_3_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread}})
-  local _ = _let_3_[1]
-  local bufnr = _let_3_[2]
+  local _let_4_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread}})
+  local _ = _let_4_[1]
+  local bufnr = _let_4_[2]
   if (bufnr > 0) then
     return cursor({1, 1, 0, 1})
   else
@@ -37,16 +51,16 @@ ui["on-write-string"] = function(self, conn, str, str_type, thread)
   end
 end
 ui["on-read-string"] = function(self, conn, thread, ttag)
-  local function _6_()
-    return __fnl_global__return_2dmini_2dbuffer_2dcontent(thread, ttag)
+  local function _7_()
+    return return_mini_buffer_content(thread, ttag)
   end
-  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, "Input string:", nil, _6_})
+  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, "Input string:", nil, _7_})
 end
 ui["on-read-from-minibuffer"] = function(self, conn, thread, ttag, prompt, init_val)
-  local function _7_()
-    return __fnl_global__return_2dstring_2dinput_2dcomplete(thread, ttag)
+  local function _8_()
+    return return_string_input_complete(thread, ttag)
   end
-  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, prompt, init_val, _7_})
+  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, prompt, init_val, _8_})
 end
 ui["on-indentation-update"] = function(self, conn, indent_info)
   if not conn.cb_data["indent-info"] then
@@ -59,30 +73,30 @@ ui["on-indentation-update"] = function(self, conn, indent_info)
   return nil
 end
 ui["on-new-features"] = function(self, conn, new_features)
-  local _9_
+  local _10_
   if new_features then
-    _9_ = new_features
+    _10_ = new_features
   else
-    _9_ = {}
+    _10_ = {}
   end
-  conn.cb_data["features"] = _9_
+  conn.cb_data["features"] = _10_
   return nil
 end
 ui["on-invalid-rpc"] = function(self, conn, rpc_id, err_msg)
   return ui["err-msg"](err_msg)
 end
 ui["on-inspect"] = function(self, conn, content, thread, tag)
-  local _let_11_ = luaeval("require('nvlime.window.inspector').open(_A)", content)
-  local _ = _let_11_[1]
-  local bufnr = _let_11_[2]
+  local _let_12_ = luaeval("require('nvlime.window.inspector').open(_A)", content)
+  local _ = _let_12_[1]
+  local bufnr = _let_12_[2]
   if thread then
     self["set-current-thread"](self, thread, bufnr)
     if tag then
       local ret_callback
-      local function _12_()
+      local function _13_()
         return call(vim.b.nvlime_conn.Return, {thread, tag, nil})
       end
-      ret_callback = _12_
+      ret_callback = _13_
       return nvim_create_autocmd("BufWinLeave", {buffer = bufnr, once = true, callback = ret_callback})
     else
       return nil
@@ -103,9 +117,9 @@ ui["on-compiler-notes"] = function(self, conn, note_list, orig_win)
   if not note_list then
   else
   end
-  local _let_16_ = luaeval("require('nvlime.window.main.notes').open(_A)", {["conn-name"] = conn.cb_data.name})
-  local _ = _let_16_[1]
-  local bufnr = _let_16_[2]
+  local _let_17_ = luaeval("require('nvlime.window.main.notes').open(_A)", {["conn-name"] = conn.cb_data.name})
+  local _ = _let_17_[1]
+  local bufnr = _let_17_[2]
   nvim_buf_set_var(bufnr, "nvlime_notes_orig_win", orig_win)
   nvim_buf_set_var(bufnr, "nvlime_conn", conn)
   return call(vim.fn["nvlime#ui#compiler_notes#FillCompilerNotesBuf"], {note_list})
@@ -116,20 +130,6 @@ ui["on-threads"] = function(self, conn, thread_list)
   else
   end
   return call(vim.fn["nvlime#ui#threads#FillThreadsBuf"], {conn, thread_list})
-end
-local function return_mini_buffer_content(thread, ttag)
-  local content = ui["cur-buffer-content"](false)
-  return call(vim.b.nvlime_conn.Return, {thread, ttag, content})
-end
-local function return_string_input_complete(thread, ttag)
-  local content = ui["cur-buffer-content"](false)
-  local content0
-  if ((#content > 0) and (content[#content] ~= "\n")) then
-    content0 = (content .. "\n")
-  else
-    content0 = content
-  end
-  return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
 end
 local function _19_(self, key)
   return self[string.gsub(key, "_", "-")]

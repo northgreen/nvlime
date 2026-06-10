@@ -15,7 +15,7 @@
 (fn try-to-call [callback args]
   "Calls callback with args if it is a function."
   (when (= (type callback) "function")
-    (apply callback args)))
+    (callback (unpack args))))
 
 ;;; Connection methods
 
@@ -117,7 +117,7 @@
       (when (< (length remaining) 1)
         (values))
       (let [cb (. remaining 1)]
-        (when cb (apply cb [...])))
+        (when cb (cb (unpack [...]))))
       (when (>= (length remaining) 2)
         (let [next-fn (. remaining 2)]
           (next-fn (fn [...]

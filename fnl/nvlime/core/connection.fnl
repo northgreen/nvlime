@@ -23,16 +23,15 @@
 
 (fn connection.has-key [dict key]
   "Checks if dict has key (case-insensitive)."
-  (or (. dict key)
-      (. dict (string.upper key))
-      (. dict (string.lower key))))
+  (if (= (type key) "string")
+      (or (. dict key) (. dict (string.upper key)) (. dict (string.lower key)))
+      (. dict key)))
 
 (fn connection.get [dict key default]
   "Gets dict value by key (case-insensitive), returns default if not found."
-  (or (. dict key)
-      (. dict (string.upper key))
-      (. dict (string.lower key))
-      default))
+  (if (= (type key) "string")
+      (or (. dict key) (. dict (string.upper key)) (. dict (string.lower key)) default)
+      (or (. dict key) default)))
 
 ;;; Connection factory
 
