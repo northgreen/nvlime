@@ -7,6 +7,13 @@
 (local input (require "nvlime.core.ui.input"))
 (local async (require "nvlime.core.async"))
 (local connection (require "nvlime.core.connection"))
+;; Load connection mixin modules (they register methods on the connection table)
+(require "nvlime.core.connection.channels")
+(require "nvlime.core.connection.messages")
+(require "nvlime.core.connection.sldb")
+(require "nvlime.core.connection.inspector")
+(require "nvlime.core.connection.swank")
+(require "nvlime.core.connection.events")
 
 ;;; Initialize global options
 (tset vim.g :nvlime-options config)
