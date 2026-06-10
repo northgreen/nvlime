@@ -228,7 +228,7 @@ connection["to-raw-form"] = function(self, expr)
       delta = sub_delta
     else
       if (paren_level <= 0) then
-        __fnl_global__return({form, (idx + 1), true})
+        do local _ = {form, (idx + 1), true} end
       else
       end
     end

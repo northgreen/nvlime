@@ -11,7 +11,7 @@
 (fn find-banner-endline [lines]
   (for [idx 3 (length lines)]
     (when (string.find (. lines idx) "^%s*%x+:")
-      (return idx))))
+      (values idx))))
 
 ;;; string -> {..}
 (fn content->lines [content]

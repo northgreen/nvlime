@@ -127,7 +127,7 @@
   If auto-connect is true, connects to the REPL automatically."
   ;; Guard: skip if port already discovered
   (when (> (or server-obj.port 0) 0)
-    (return))
+    (values))
 
   (each [_ line (ipairs data)]
     (let [matched (matchlist line "Server created: (#([[:digit:][:blank:]]\\+)\\s\\+\\(\\d\\+\\))")]
@@ -144,7 +144,7 @@
                 (tset server-obj :connections
                       {[(. auto-conn :cb_data :id)] auto-conn}))))
 
-        (return)))))
+        (values)))))
 
 (fn server-exit-cb [server-obj exit-status]
   "Callback for server job exit.
@@ -243,7 +243,7 @@
   Returns selected server object, or nil if canceled/invalid."
   (when (= (length vim.g.nvlime_servers) 0)
     (ui.err-msg "No server started.")
-    (return nil))
+    (values nil))
 
   ;; Build numbered list of servers
   (let [server-names []]
@@ -281,7 +281,7 @@
       (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not running.")))
 
   (when (not port)
-    (return))
+    (values))
 
   (let [conn ((. vim.fn "nvlime#plugin#ConnectREPL") "127.0.0.1" port)]
     (when conn
@@ -294,7 +294,7 @@
   "Stop current buffer's server with confirmation prompt."
   (when (not (. vim.g.nvlime_servers (. vim.b :nvlime_server :id)))
     (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not running."))
-    (return))
+    (values))
 
   (let [answer (input (.. "Stop server "
                           ((. vim.fn "string") (. vim.b :nvlime_server :name))

@@ -121,7 +121,6 @@ ui["get-cur-window-layout"] = function()
 end
 ui["restore-window-layout"] = function(layout)
   if not (#layout == vim.fn.winnr("$")) then
-    __fnl_global__return()
   else
   end
   local old_win = win_getid()
@@ -222,7 +221,6 @@ end
 ui["open-buffer"] = function(name, create, pos, vertical, initial_size)
   local buf = bufnr(name, (create or false))
   if (buf <= 0) then
-    __fnl_global__return(buf)
   else
   end
   if (bufwinid(buf) < 0) then
@@ -260,7 +258,6 @@ end
 ui["close-buffer"] = function(buf)
   local win_id_list = win_findbuf(buf)
   if (#win_id_list <= 0) then
-    __fnl_global__return()
   else
   end
   local cur_win_id = win_getid()

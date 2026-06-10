@@ -31,7 +31,7 @@ Provides buffer-based and inline input dialogs for nvlime."
   If no history and cancellable, show an error."
   (when (> (length str-val) 0)
     (cb str-val)
-    (return))
+    (values))
   (let [history-len (length vim.g.nvlime_input_history)]
     (when (> history-len 0)
       (cb (. vim.g.nvlime_input_history history-len)))
@@ -96,7 +96,7 @@ Provides buffer-based and inline input dialogs for nvlime."
   (let [buf (bufnr "%")
         callback (vim.fn.getbufvar buf "nvlime_input_complete_cb" nil)]
     (when (not callback)
-      (return))
+      (values))
     (let [content (ui.cur-buffer-content true)]
       (when (> (length content) 0)
         (input.save-history content)))
@@ -113,7 +113,7 @@ Provides buffer-based and inline input dialogs for nvlime."
     ;; Skip if same as last entry
     (when (and (> (length history) 0)
                (= (. history (length history)) text))
-      (return))
+      (values))
     ;; Remove all previous occurrences
     (var prev-idx (vim.fn.index history text))
     (while (>= prev-idx 0)

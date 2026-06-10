@@ -111,7 +111,6 @@ conn_manager.get = function(quiet)
       elseif quiet then
         vim.b.nvlime_conn = nil
       else
-        __fnl_global__return(nil)
       end
     end
   else

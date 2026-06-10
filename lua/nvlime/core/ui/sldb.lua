@@ -156,7 +156,6 @@ end
 sldb["show-frame-source-location-cb"] = function(frame, line0, conn, result)
   if not (result[1].name == "LOCATION") then
     ui["err-msg"](result[2])
-    __fnl_global__return()
   else
   end
   local snippet = ""
@@ -213,7 +212,6 @@ sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn, r
   if ((#valid_loc > 0) and valid_loc[2]) then
     if (win_to_go > 0) then
       if (win_id2win(win_to_go) <= 0) then
-        __fnl_global__return()
       else
       end
       win_gotoid(win_to_go)
@@ -232,7 +230,6 @@ sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn, 
   local locals = msg[1]
   if not locals then
     ui["err-msg"]("No local variable.")
-    __fnl_global__return()
   else
   end
   local options = {}
@@ -251,7 +248,6 @@ sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn, 
         return sldb["open-frame-source-cb"](edit_cmd, win_to_go, force_open, c, r)
       end
       conn("FindSourceLocationForEmacs", {"SLDB", frame, (nth_var - 1)}, _31_)
-      __fnl_global__return()
     else
     end
   end
@@ -360,12 +356,10 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
       local nth = sldb["match-restart"]()
       if (nth >= 0) then
         vim.b.nvlime_conn("InvokeNthRestartForEmacs", vim.b.nvlime_sldb_level, nth)
-        __fnl_global__return()
       else
       end
     end
     if (sldb["show-frame-details"]() > -1) then
-      __fnl_global__return()
     else
     end
     local _let_49_ = sldb["match-file"]()
@@ -380,7 +374,6 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
   sldb["show-frame-details"] = function()
     local nth = sldb["match-frame"]()
     if (nth < 0) then
-      __fnl_global__return(-1)
     else
     end
     do
@@ -425,7 +418,6 @@ sldb["open-frame-source"] = function(...)
   local win_to_go = _let_58_[1]
   local count_specified = _let_58_[2]
   if ((win_to_go <= 0) and count_specified) then
-    __fnl_global__return()
   else
   end
   local function _60_(c, r)
@@ -444,7 +436,6 @@ sldb["find-source"] = function(...)
   local win_to_go = _let_62_[1]
   local count_specified = _let_62_[2]
   if ((win_to_go <= 0) and count_specified) then
-    __fnl_global__return()
   else
   end
   local function _64_(c, msg)
@@ -491,7 +482,6 @@ sldb["inspect-var-in-cur-frame"] = function()
   local varname = sldb["match-var-name"]()
   local nth = sldb["match-frame"](true)
   if (nth < 0) then
-    __fnl_global__return()
   else
   end
   local thread = vim.b.nvlime_conn("GetCurrentThread")

@@ -97,7 +97,7 @@
       (set (index capture) (find-forward text pattern index))
       (if index
           (let [line_ (+ (- i 1) line)]
-            (return line_ index capture))
+            (values line_ index capture))
           (do
             (set i (+ i 1))
             (set text (. lines i)))))))
@@ -118,7 +118,7 @@
       (set (index capture) (find-backward reversed-text pattern index))
       (if index
           (let [line_ (+ offset i)]
-            (return line_ index capture))
+            (values line_ index capture))
           (do
             (set i (- i 1))
             (set reversed-text (reverse lines i)))))))

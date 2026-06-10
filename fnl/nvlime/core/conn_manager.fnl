@@ -125,7 +125,7 @@
                     quiet
                     (set vim.b.nvlime_conn nil)
                     ;; quiet is false and selection was canceled/failed
-                    (return nil)))))
+                    (values nil)))))
         ;; Buffer already has a valid connection - nothing to do
         )
     vim.b.nvlime_conn))

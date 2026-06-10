@@ -23,7 +23,6 @@ local function flags__3ekind(flags)
     end
     for _, kind in ipairs(kind_precedence) do
       if kinds[kind] then
-        __fnl_global__return(kind)
       else
       end
     end

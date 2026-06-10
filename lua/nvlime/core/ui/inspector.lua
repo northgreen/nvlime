@@ -11,7 +11,6 @@ inspector["get-cur-coord"] = function()
   for _, c in ipairs(vim.b.nvlime_inspector_coords) do
     if vim.fn["nvlime#ui#MatchCoord"](c, line, col) then
       coord = c
-      __fnl_global__return()
     else
     end
   end
@@ -79,7 +78,6 @@ end
 inspector["inspector-select"] = function()
   local coord = inspector["get-cur-coord"]()
   if not coord then
-    __fnl_global__return()
   else
   end
   local case_11_ = coord.type
@@ -130,7 +128,6 @@ end
 inspector["send-cur-value-to-repl"] = function()
   local coord = inspector["get-cur-coord"]()
   if (not coord or __fnl_global___21_3d(coord.type, "VALUE")) then
-    __fnl_global__return()
   else
   end
   local conn = vim.b.nvlime_conn
@@ -159,7 +156,6 @@ inspector["find-source"] = function(type, ...)
   elseif (type == "part") then
     local coord = inspector["get-cur-coord"]()
     if (not coord or __fnl_global___21_3d(coord.type, "VALUE")) then
-      __fnl_global__return()
     else
     end
     local function _25_(c, msg)
@@ -172,7 +168,6 @@ inspector["find-source"] = function(type, ...)
 end
 inspector["next-field"] = function(forward)
   if (#vim.b.nvlime_inspector_coords <= 0) then
-    __fnl_global__return()
   else
   end
   local cur_pos = getcurpos()

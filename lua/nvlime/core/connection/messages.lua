@@ -110,12 +110,10 @@ end
 connection["chain-callbacks"] = function(self, ...)
   local cbs = {...}
   if (#cbs < 1) then
-    __fnl_global__return()
   else
   end
   local function chain_cb(remaining, ...)
     if (#remaining < 1) then
-      __fnl_global__return()
     else
     end
     do

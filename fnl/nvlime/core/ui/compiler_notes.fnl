@@ -41,7 +41,7 @@ and interactive source location jumping."
     (ui.replace-content "No message from the compiler.")
     (set vim.b.nvlime_compiler_note_coords [])
     (set vim.b.nvlime_compiler_note_list [])
-    (return))
+    (values))
 
   (var coords [])
   (var nlist [])
@@ -84,10 +84,10 @@ and interactive source location jumping."
     (each [_ c (ipairs vim.b.nvlime_compiler_note_coords)]
       (when ((. vim.fn "nvlime#ui#MatchCoord") c (. cur-pos 1) (. cur-pos 2))
         (set note-coord c)
-        (return)))
+        (values)))
 
     (when (not note-coord)
-      (return))
+      (values))
 
     (let [raw-note-loc ((. vim.fn "nvlime#Get")
                         (. vim.b.nvlime_compiler_note_list (. note-coord :id))
@@ -111,7 +111,7 @@ and interactive source location jumping."
               (when (> win-to-go 0)
                 (win_gotoid win-to-go))
               (when (and (<= win-to-go 0) count-specified)
-                (return))
+                (values))
               (ui.show-source vim.b.nvlime_conn valid-loc edit-cmd
                               count-specified)))
           ;; No valid location

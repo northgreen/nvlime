@@ -168,7 +168,7 @@ Also exports private callbacks used by input buffer completion."
 (fn ui.on-compiler-notes [self conn note-list orig-win]
   "Opens compiler notes window and fills with notes."
   (when (not note-list)
-    (return))
+    (values))
   (let [[_ bufnr] (luaeval
                     "require('nvlime.window.main.notes').open(_A)"
                     {:conn-name (. (. conn :cb_data) :name)})]
@@ -186,7 +186,7 @@ Also exports private callbacks used by input buffer completion."
   Shows error if thread-list is empty."
   (when (not thread-list)
     (ui.err-msg "The thread list is empty.")
-    (return))
+    (values))
   (call (. vim.fn "nvlime#ui#threads#FillThreadsBuf")
         [conn thread-list]))
 

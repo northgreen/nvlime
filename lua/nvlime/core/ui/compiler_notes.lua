@@ -23,7 +23,6 @@ compiler_notes["fill-buffer"] = function(note_list)
     ui["replace-content"]("No message from the compiler.")
     vim.b.nvlime_compiler_note_coords = {}
     vim.b.nvlime_compiler_note_list = {}
-    __fnl_global__return()
   else
   end
   local coords = {}
@@ -59,12 +58,10 @@ compiler_notes["open-cur-note"] = function(edit_cmd)
   for _, c in ipairs(vim.b.nvlime_compiler_note_coords) do
     if vim.fn["nvlime#ui#MatchCoord"](c, cur_pos[1], cur_pos[2]) then
       note_coord = c
-      __fnl_global__return()
     else
     end
   end
   if not note_coord then
-    __fnl_global__return()
   else
   end
   local raw_note_loc = vim.fn["nvlime#Get"](vim.b.nvlime_compiler_note_list[note_coord.id], "LOCATION", nil)
@@ -90,7 +87,6 @@ compiler_notes["open-cur-note"] = function(edit_cmd)
     else
     end
     if ((win_to_go <= 0) and count_specified) then
-      __fnl_global__return()
     else
     end
     return ui["show-source"](vim.b.nvlime_conn, valid_loc, edit_cmd0, count_specified)

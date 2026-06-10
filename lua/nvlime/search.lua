@@ -107,7 +107,6 @@ local function forward_matches(pattern, line, col, _end, same_column_3f)
     index, capture = find_forward(text, pattern, index)
     if index then
       local line_ = ((i - 1) + line)
-      __fnl_global__return(line_, index, capture)
     else
       i = (i + 1)
       text = lines[i]
@@ -142,7 +141,6 @@ local function backward_matches(pattern, line, col, start, same_column_3f)
     index, capture = find_backward(reversed_text, pattern, index)
     if index then
       local line_ = (offset + i)
-      __fnl_global__return(line_, index, capture)
     else
       i = (i - 1)
       reversed_text = reverse(lines, i)

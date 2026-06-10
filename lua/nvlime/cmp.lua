@@ -23,7 +23,7 @@ local function flags__3ekind(flags)
   end
   for i = 1, #kind_precedence do
     if kinds[kind_precedence[i]] then
-      __fnl_global__return(kind_precedence[i])
+      do local _ = kind_precedence[i] end
     else
     end
   end

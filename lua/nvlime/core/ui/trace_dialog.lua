@@ -51,7 +51,6 @@ trace_dialog["get-cur-coord"] = function()
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_specs_coords) do
       if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
-        __fnl_global__return(c)
       else
       end
     end
@@ -63,7 +62,6 @@ trace_dialog["get-cur-coord"] = function()
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_entries_header_coords) do
       if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
-        __fnl_global__return(c)
       else
       end
     end
@@ -75,7 +73,6 @@ trace_dialog["get-cur-coord"] = function()
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_entries_coords) do
       if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
-        __fnl_global__return(c)
       else
       end
     end
@@ -511,7 +508,6 @@ trace_dialog.select = function(...)
   local action = (varargs[1] or "button")
   local coord = trace_dialog["get-cur-coord"]()
   if not coord then
-    __fnl_global__return()
   else
   end
   if (action == "button") then
@@ -614,7 +610,6 @@ trace_dialog["next-field"] = function(forward)
       if found then
         next_coord = found
         next_line_range = line_range
-        __fnl_global__return()
       else
       end
     else
@@ -626,7 +621,6 @@ trace_dialog["next-field"] = function(forward)
       if (#sorted_coords > 0) then
         next_coord = sorted_coords[1]
         next_line_range = group[1]
-        __fnl_global__return()
       else
       end
     end

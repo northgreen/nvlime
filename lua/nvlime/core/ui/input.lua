@@ -10,7 +10,6 @@ vim.g["nvlime_input_history"] = {}
 input["check-input-validity"] = function(str_val, cb, cancellable)
   if (#str_val > 0) then
     cb(str_val)
-    __fnl_global__return()
   else
   end
   local history_len = #vim.g.nvlime_input_history
@@ -72,7 +71,6 @@ input["from-buffer-complete"] = function()
   local buf = bufnr("%")
   local callback = vim.fn.getbufvar(buf, "nvlime_input_complete_cb", nil)
   if not callback then
-    __fnl_global__return()
   else
   end
   do
@@ -97,7 +95,6 @@ input["save-history"] = function(text)
   local max_items = (vim.g.nvlime_options.input_history_limit or 100)
   local history = vim.g.nvlime_input_history
   if ((#history > 0) and (history[#history] == text)) then
-    __fnl_global__return()
   else
   end
   local prev_idx = vim.fn.index(history, text)

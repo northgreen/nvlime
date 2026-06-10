@@ -112,10 +112,10 @@
   When cb finishes, continuation calls next fn."
   (let [cbs [...]]
     (when (< (length cbs) 1)
-      (return))
+      (values))
     (fn chain-cb [remaining ...]
       (when (< (length remaining) 1)
-        (return))
+        (values))
       (let [cb (. remaining 1)]
         (when cb (apply cb [...])))
       (when (>= (length remaining) 2)

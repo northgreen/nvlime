@@ -7,7 +7,6 @@ local _2bfiletype_2b = buffer["gen-filetype"](buffer.names.disassembly)
 local function find_banner_endline(lines)
   for idx = 3, #lines do
     if string.find(lines[idx], "^%s*%x+:") then
-      __fnl_global__return(idx)
     else
     end
   end

@@ -26,7 +26,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
     (each [_ c (ipairs vim.b.nvlime_inspector_coords)]
       (when ((. vim.fn "nvlime#ui#MatchCoord") c line col)
         (set coord c)
-        (return)))
+        (values)))
     coord))
 
 (fn inspector.on-inspector-pop-complete [which conn result]
@@ -101,7 +101,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
   Supports ACTION (call action), VALUE (inspect part), and RANGE (navigate pages)."
   (let [coord (inspector.get-cur-coord)]
     (when (not coord)
-      (return))
+      (values))
 
     (case coord.type
       "ACTION"
@@ -167,7 +167,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
   (let [coord (inspector.get-cur-coord)]
     (when (or (not coord)
               (!= coord.type "VALUE"))
-      (return))
+      (values))
 
     (let [conn vim.b.nvlime_conn]
       ((. (: conn :ui) :OnWriteString)
@@ -213,7 +213,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
         (let [coord (inspector.get-cur-coord)]
           (when (or (not coord)
                     (!= coord.type "VALUE"))
-            (return))
+            (values))
           (: conn
              :FindSourceLocationForEmacs
              ["INSPECTOR" coord.id]
@@ -227,7 +227,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
   forward: true for next, false for previous.
   Wraps around to first coordinate if none found in direction."
   (when (<= (length vim.b.nvlime_inspector_coords) 0)
-    (return))
+    (values))
 
   (let [cur-pos (getcurpos)
         sorted-coords ((. vim.fn "nvlime#ui#CoordSorter")

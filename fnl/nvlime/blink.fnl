@@ -35,7 +35,7 @@
           (tset kinds kind true))))
     (each [_ kind (ipairs kind-precedence)]
       (when (. kinds kind)
-        (return kind)))))
+        (values kind)))))
 
 ;;; {any} (fn [nil]) ->
 (fn set-documentation [item callback]

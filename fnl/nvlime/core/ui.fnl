@@ -174,7 +174,7 @@ Functions deferred to later files:
   "Restore a previously captured window layout.
   No-op if window count doesn't match."
   (when (not (= (length layout) (vim.fn.winnr "$")))
-    (return))
+    (values))
   (let [old-win (win_getid)
         old-ei vim.o.eventignore]
     (set vim.o.eventignore "all")
@@ -261,7 +261,7 @@ Functions deferred to later files:
   initial-size: initial window size."
   (let [buf (bufnr name (or create false))]
     (when (<= buf 0)
-      (return buf))
+      (values buf))
     (when (< (bufwinid buf) 0)
       (let [split-cmd (.. "split #" buf)]
         (let [split-cmd (if vertical
@@ -288,7 +288,7 @@ Functions deferred to later files:
   "Close all windows containing buf. Buffer remains loaded."
   (let [win-id-list (win_findbuf buf)]
     (when (<= (length win-id-list) 0)
-      (return))
+      (values))
     (let [cur-win-id (win_getid)
           old-lazyredraw vim.o.lazyredraw]
       (var close-cur-win false)

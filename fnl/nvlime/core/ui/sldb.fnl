@@ -186,7 +186,7 @@ lookup, eval, inspect, disassemble, return."
   result: [type-name data] pair"
   (when (not (= (. result 1 "name") "LOCATION"))
     (ui.err-msg (. result 2))
-    (return))
+    (values))
 
   (var snippet "")
   (var content "")
@@ -251,7 +251,7 @@ lookup, eval, inspect, disassemble, return."
         (do
           (when (> win-to-go 0)
             (when (<= (win_id2win win-to-go) 0)
-              (return))
+              (values))
             (win_gotoid win-to-go))
           ((. vim.fn "nvlime#ui#ShowSource") conn valid-loc edit-cmd force-open))
         ;; Check for error or no source
@@ -271,7 +271,7 @@ lookup, eval, inspect, disassemble, return."
   (let [locals (. msg 1)]
     (when (not locals)
       (ui.err-msg "No local variable.")
-      (return))
+      (values))
 
     (var options [])
     (each [idx lc (ipairs locals)]
@@ -289,7 +289,7 @@ lookup, eval, inspect, disassemble, return."
               ["SLDB" frame (- nth-var 1)]
               (fn [c r]
                 (sldb.open-frame-source-cb edit-cmd win-to-go force-open c r)))
-        (return)))
+        (values)))
     (ui.err-msg "Canceled.")))
 
 (fn sldb.inspect-in-cur-frame-input-complete [frame thread]
@@ -433,10 +433,10 @@ lookup, eval, inspect, disassemble, return."
        :InvokeNthRestartForEmacs
        vim.b.nvlime_sldb_level
        nth)
-      (return)))
+      (values)))
 
   (when (> (sldb.show-frame-details) -1)
-    (return))
+    (values))
 
   (let [[fn-name pos] (sldb.match-file)]
     (when (> (length fn-name) 0)
@@ -447,7 +447,7 @@ lookup, eval, inspect, disassemble, return."
   Returns 1 if frame was matched, -1 if not on a frame line."
   (let [nth (sldb.match-frame)]
     (when (< nth 0)
-      (return -1))
+      (values -1))
     (let [cur-line (line ".")
           frame-line-pattern "^\\s*F \\d\\+\\|^\\%$"]
       (if (!= (vim.fn.match (getline (+ cur-line 1)) frame-line-pattern) -1)
@@ -482,7 +482,7 @@ lookup, eval, inspect, disassemble, return."
     (let [[win-to-go count-specified]
           ((. vim.fn "nvlime#ui#ChooseWindowWithCount") nil)]
       (when (and (<= win-to-go 0) count-specified)
-        (return))
+        (values))
 
       (vim.b.nvlime_conn
        :FrameSourceLocation
@@ -501,7 +501,7 @@ lookup, eval, inspect, disassemble, return."
     (let [[win-to-go count-specified]
           ((. vim.fn "nvlime#ui#ChooseWindowWithCount") nil)]
       (when (and (<= win-to-go 0) count-specified)
-        (return))
+        (values))
 
       (vim.b.nvlime_conn
        :FrameLocalsAndCatchTags
@@ -545,7 +545,7 @@ lookup, eval, inspect, disassemble, return."
   (let [varname (sldb.match-var-name)
         nth (sldb.match-frame true)]
     (when (< nth 0)
-      (return))
+      (values))
 
     (let [thread (vim.b.nvlime_conn :GetCurrentThread)
           var-num (sldb.match-var-index)]

@@ -75,7 +75,7 @@
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_specs_coords)]
           (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
-            (return c)))
+            (values c)))
         nil)
 
       ;; Check entries header region
@@ -86,7 +86,7 @@
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_entries_header_coords)]
           (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
-            (return c)))
+            (values c)))
         nil)
 
       ;; Check entries region
@@ -97,7 +97,7 @@
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_entries_coords)]
           (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
-            (return c)))
+            (values c)))
         nil)
 
       :else nil)))
@@ -573,7 +573,7 @@
         coord (trace-dialog.get-cur-coord)]
 
     (when (not coord)
-      (return))
+      (values))
 
     (if (= action "button")
         ;; Button actions
@@ -702,7 +702,7 @@
             (when found
               (set next-coord found)
               (set next-line-range line-range)
-              (return))))))
+              (values))))))
 
     ;; Wrap around to first coord if none found
     (when (not next-coord)
@@ -711,7 +711,7 @@
           (when (> (length sorted-coords) 0)
             (set next-coord (. sorted-coords 1))
             (set next-line-range (. group 1))
-            (return)))))
+            (values)))))
 
     ;; Move cursor
     (when (and next-coord next-line-range)

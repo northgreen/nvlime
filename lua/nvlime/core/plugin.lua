@@ -180,7 +180,7 @@ plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
     local h = vim.fn.input("Host: ", vim.g.nvlime_options.address.host)
     if (string.len(h) <= 0) then
       ui["err-msg"]("Canceled.")
-      or_18_ = __fnl_global__return(nil)
+      or_18_ = nil
     else
       or_18_ = h
     end
@@ -192,7 +192,7 @@ plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
     local p = vim.fn.input("Port: ", tostring(vim.g.nvlime_options.address.port))
     if (string.len(p) <= 0) then
       ui["err-msg"]("Canceled.")
-      or_21_ = __fnl_global__return(nil)
+      or_21_ = nil
     else
       or_21_ = tonumber(p)
     end
@@ -213,7 +213,6 @@ plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
   if not conn["is-connected"](conn) then
     conn_manager.close(conn)
     ui["err-msg"]("nvlime#Connect: failed to connect")
-    __fnl_global__return(nil)
   else
   end
   clean_up_null_buf_connections()
@@ -254,7 +253,6 @@ end
 plugin["close-cur-connection"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local server = conn.cb_data.server
@@ -278,7 +276,6 @@ end
 plugin["rename-cur-connection"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local new_name = vim.fn.input("New name: ", conn.cb_data.name)
@@ -300,7 +297,6 @@ end
 plugin["send-to-repl"] = function(content, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_43_ = input_check_edit_flag((edit or false), content)
@@ -318,7 +314,6 @@ end
 plugin.compile = function(content, policy, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_47_ = input_check_edit_flag((edit or false), content)
@@ -341,7 +336,6 @@ end
 plugin["load-file"] = function(file_name, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_51_ = input_check_edit_flag((edit or false), file_name)
@@ -358,7 +352,6 @@ end
 plugin["set-package"] = function(pkg)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local cur_pkg = conn["get-current-package"](conn)
@@ -376,7 +369,6 @@ end
 plugin.inspect = function(content, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_58_ = input_check_edit_flag((edit or false), content)
@@ -393,7 +385,6 @@ end
 plugin["compile-file"] = function(file_name, policy, load, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_62_ = input_check_edit_flag((edit or false), file_name)
@@ -414,7 +405,6 @@ end
 plugin["expand-macro"] = function(expr, type, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_66_ = input_check_edit_flag((edit or false), expr)
@@ -446,7 +436,6 @@ end
 plugin["disassemble-form"] = function(content, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_73_ = input_check_edit_flag((edit or false), content)
@@ -460,7 +449,6 @@ end
 plugin["describe-symbol"] = function(symbol, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_76_ = input_check_edit_flag((edit or false), symbol)
@@ -474,7 +462,6 @@ end
 plugin["documentation-symbol"] = function(symbol, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_79_ = input_check_edit_flag((edit or false), symbol)
@@ -488,7 +475,6 @@ end
 plugin["apropos-list"] = function(pattern, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_82_ = input_check_edit_flag((edit or false), pattern)
@@ -502,7 +488,6 @@ end
 plugin["find-definition"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_85_ = input_check_edit_flag((edit or false), sym)
@@ -516,7 +501,6 @@ end
 plugin["xref-symbol"] = function(ref_type, sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_88_ = input_check_edit_flag((edit or false), sym)
@@ -530,7 +514,6 @@ end
 plugin["xref-symbol-wrapper"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local ref_types = {"calls", "calls-who", "references", "binds", "sets", "macroexpands", "specializes", "definition"}
@@ -552,12 +535,10 @@ end
 local function dispatch_xref_by_index(ref_types, answer)
   if (answer <= 0) then
     ui["err-msg"]("Canceled.")
-    __fnl_global__return()
   else
   end
   if (answer > #ref_types) then
     ui["err-msg"](("Invalid xref type: " .. tostring(answer)))
-    __fnl_global__return()
   else
   end
   local rtype = ref_types[answer]
@@ -570,7 +551,6 @@ end
 plugin["show-operator-arglist"] = function(op, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_96_ = input_check_edit_flag((edit or false), op)
@@ -593,7 +573,6 @@ end
 plugin["cur-autodoc"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   if conn_has_contrib(conn, "SWANK-ARGLISTS") then
@@ -605,7 +584,6 @@ end
 plugin["set-breakpoint"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_103_ = input_check_edit_flag((edit or false), sym)
@@ -619,7 +597,6 @@ end
 plugin["list-threads"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local function _106_(c, result)
@@ -634,7 +611,6 @@ end
 plugin["undefine-function"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_109_ = input_check_edit_flag((edit or false), sym)
@@ -648,7 +624,6 @@ end
 plugin["unintern-symbol"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local _let_112_ = input_check_edit_flag((edit or false), sym)
@@ -679,7 +654,6 @@ end
 plugin["undefine-unintern-wrapper"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local options = {"1. Undefine a function", "2. Unintern a symbol"}
@@ -692,7 +666,6 @@ end
 plugin["swank-require"] = function(contribs, do_init)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   local function _119_(c, r)
@@ -703,12 +676,10 @@ end
 plugin["dialog-toggle-trace"] = function(func, edit)
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   if not conn_has_contrib(conn, "SWANK-TRACE-DIALOG") then
     ui["err-msg"]("SWANK-TRACE-DIALOG is not available.")
-    __fnl_global__return()
   else
   end
   local _let_122_ = input_check_edit_flag((edit or false), func)
@@ -722,12 +693,10 @@ end
 plugin["open-trace-dialog"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   if not conn_has_contrib(conn, "SWANK-TRACE-DIALOG") then
     ui["err-msg"]("SWANK-TRACE-DIALOG is not available.")
-    __fnl_global__return()
   else
   end
   return ui["err-msg"]("open-trace-dialog: not yet implemented")
@@ -735,7 +704,6 @@ end
 plugin["create-mrepl"] = function()
   local conn = conn_manager.get(true)
   if not conn then
-    __fnl_global__return()
   else
   end
   if conn_has_contrib(conn, "SWANK-MREPL") then
@@ -767,7 +735,6 @@ local function on_fuzzy_completions_complete(start_col, cur_pos, conn, result)
   local comps = (result[1] or {})
   local r_comps = {}
   if (cur_pos0 ~= vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
-    __fnl_global__return()
   else
   end
   for _, c in ipairs(comps) do
@@ -779,7 +746,6 @@ local function on_simple_completions_complete(start_col, cur_pos, conn, result)
   local cur_pos0 = vim.list_slice(vim.fn.getcurpos(), 2, 3)
   local comps = (result[1] or {})
   if (cur_pos0 ~= vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
-    __fnl_global__return()
   else
   end
   return pcall(vim.fn.complete, start_col, comps)

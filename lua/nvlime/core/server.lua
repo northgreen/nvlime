@@ -96,7 +96,6 @@ local function match_server_created_port()
 end
 local function server_output_cb(server_obj, auto_connect, data)
   if ((server_obj.port or 0) > 0) then
-    __fnl_global__return()
   else
   end
   for _, line in ipairs(data) do
@@ -114,7 +113,6 @@ local function server_output_cb(server_obj, auto_connect, data)
         end
       else
       end
-      __fnl_global__return()
     else
     end
   end
@@ -186,7 +184,6 @@ local function server_output_cb(server_obj, auto_connect, data)
   server.select = function()
     if (#vim.g.nvlime_servers == 0) then
       ui["err-msg"]("No server started.")
-      __fnl_global__return(nil)
     else
     end
     local server_names = {}
@@ -224,7 +221,6 @@ local function server_output_cb(server_obj, auto_connect, data)
       ui["err-msg"]((vim.b.nvlime_server.name .. " is not running."))
     end
     if not port then
-      __fnl_global__return()
     else
     end
     local conn = vim.fn["nvlime#plugin#ConnectREPL"]("127.0.0.1", port)
@@ -241,7 +237,6 @@ local function server_output_cb(server_obj, auto_connect, data)
   server["stop-cur-server"] = function()
     if not vim.g.nvlime_servers[vim.b.nvlime_server.id] then
       ui["err-msg"]((vim.b.nvlime_server.name .. " is not running."))
-      __fnl_global__return()
     else
     end
     local answer = input(("Stop server " .. vim.fn.string(vim.b.nvlime_server.name) .. "? (y/n) "))

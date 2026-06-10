@@ -204,13 +204,13 @@
         host (or host
                  (let [h (vim.fn.input "Host: " vim.g.nvlime_options.address.host)]
                    (if (<= (string.len h) 0)
-                       (do (ui.err-msg "Canceled.") (return nil))
+                       (do (ui.err-msg "Canceled.") (values nil))
                        h)))
         port (or port
                  (let [p (vim.fn.input "Port: "
                                        (tostring vim.g.nvlime_options.address.port))]
                    (if (<= (string.len p) 0)
-                       (do (ui.err-msg "Canceled.") (return nil))
+                       (do (ui.err-msg "Canceled.") (values nil))
                        (tonumber p))))
         conn (if name
                (conn-manager.new name)
@@ -222,7 +222,7 @@
     (when (not (conn:is-connected))
       (conn-manager.close conn)
       (ui.err-msg "nvlime#Connect: failed to connect")
-      (return nil))
+      (values nil))
     (clean-up-null-buf-connections)
     (set conn.cb_data.remote_host host)
     (set conn.cb_data.remote_port port)
@@ -246,7 +246,7 @@
 (fn plugin.close-cur-connection []
   "Close the connection bound to the current buffer."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [server (. conn.cb_data :server)]
       (if (not server)
           (do
@@ -266,7 +266,7 @@
 (fn plugin.rename-cur-connection []
   "Rename the connection bound to the current buffer."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [new-name (vim.fn.input "New name: " conn.cb_data.name)]
       (if (> (string.len new-name) 0)
           (conn-manager.rename conn new-name)
@@ -285,7 +285,7 @@
 (fn plugin.send-to-repl [content edit]
   "Evaluate content in the REPL and show result."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) content)]
       (input.maybe-input
         text
@@ -303,7 +303,7 @@
 (fn plugin.compile [content policy edit]
   "Compile content with optional policy."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) content)]
       (input.maybe-input
         text
@@ -327,7 +327,7 @@
 (fn plugin.load-file [file-name edit]
   "Load a Lisp file."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) file-name)]
       (input.maybe-input
         text
@@ -342,7 +342,7 @@
 (fn plugin.set-package [pkg]
   "Set the current Common Lisp package."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [cur-pkg (conn:get-current-package)
           default (if (= (type cur-pkg) "table")
                     (. cur-pkg 1)
@@ -357,7 +357,7 @@
 (fn plugin.inspect [content edit]
   "Evaluate content and launch inspector."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) content)]
       (input.maybe-input
         text
@@ -377,7 +377,7 @@
 (fn plugin.compile-file [file-name policy load edit]
   "Compile a Lisp file with optional policy."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) file-name)]
       (input.maybe-input
         text
@@ -402,7 +402,7 @@
 (fn plugin.expand-macro [expr type edit]
   "Perform macro expansion on expr."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) expr)]
       (let [cb-fn (match (or type "expand")
                     "all"   (fn [e] (conn:swank-macro-expand-all e show-async-result))
@@ -413,7 +413,7 @@
 (fn plugin.disassemble-form [content edit]
   "Compile and disassemble content."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) content)]
       (input.maybe-input
         text
@@ -430,7 +430,7 @@
 (fn plugin.describe-symbol [symbol edit]
   "Show description for symbol."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) symbol)]
       (input.maybe-input
         text
@@ -442,7 +442,7 @@
 (fn plugin.documentation-symbol [symbol edit]
   "Show documentation for symbol."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) symbol)]
       (input.maybe-input
         text
@@ -454,7 +454,7 @@
 (fn plugin.apropos-list [pattern edit]
   "Apropos search for pattern."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) pattern)]
       (input.maybe-input
         text
@@ -467,7 +467,7 @@
 (fn plugin.find-definition [sym edit]
   "Find definition for symbol."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) sym)]
       (input.maybe-input
         text
@@ -479,7 +479,7 @@
 (fn plugin.xref-symbol [ref-type sym edit]
   "Cross reference lookup for symbol."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) sym)]
       (input.maybe-input
         text
@@ -491,7 +491,7 @@
 (fn plugin.xref-symbol-wrapper []
   "Interactive XRef type picker, then dispatch."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [ref-types ["calls" "calls-who" "references" "binds" "sets"
                      "macroexpands" "specializes" "definition"]]
       (if (> vim.v.count 0)
@@ -510,10 +510,10 @@
   "Dispatch XRef based on numeric answer."
   (when (<= answer 0)
     (ui.err-msg "Canceled.")
-    (return))
+    (values nil))
   (when (> answer (length ref-types))
     (ui.err-msg (.. "Invalid xref type: " (tostring answer)))
-    (return))
+    (values nil))
   (let [rtype (. ref-types answer)]
     (if (= rtype "definition")
         (plugin.find-definition)
@@ -526,7 +526,7 @@
 (fn plugin.show-operator-arglist [op edit]
   "Show arglist for operator."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) op)]
       (input.maybe-input
         text
@@ -544,7 +544,7 @@
 (fn plugin.cur-autodoc []
   "Show autodoc for current expression at cursor."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (if (conn-has-contrib conn "SWANK-ARGLISTS")
         ;; Autodoc path - requires ui.CurRawForm (deferred to ui_cursor.fnl)
         (do
@@ -561,7 +561,7 @@
 (fn plugin.set-breakpoint [sym edit]
   "Set a breakpoint at function sym."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) sym)]
       (input.maybe-input
         text
@@ -573,7 +573,7 @@
 (fn plugin.list-threads []
   "Show thread list window."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (conn:list-threads
       (fn [c result]
         (when (. c :ui)
@@ -586,7 +586,7 @@
 (fn plugin.undefine-function [sym edit]
   "Undefine a function."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) sym)]
       (input.maybe-input
         text
@@ -598,7 +598,7 @@
 (fn plugin.unintern-symbol [sym edit]
   "Unintern a symbol."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) sym)]
       (input.maybe-input
         text
@@ -621,7 +621,7 @@
 (fn plugin.undefine-unintern-wrapper []
   "Interactive picker for undefine vs unintern."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (let [options ["1. Undefine a function" "2. Unintern a symbol"]]
       (vim.cmd "echohl Question")
       (vim.cmd "echom 'What to do?'")
@@ -640,7 +640,7 @@
 (fn plugin.swank-require [contribs do-init]
   "Require SWANK contrib modules."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (conn:swank-require
       contribs
       (fn [c r]
@@ -653,10 +653,10 @@
 (fn plugin.dialog-toggle-trace [func edit]
   "Toggle traced state of func."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (when (not (conn-has-contrib conn "SWANK-TRACE-DIALOG"))
       (ui.err-msg "SWANK-TRACE-DIALOG is not available.")
-      (return))
+      (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) func)]
       (input.maybe-input
         text
@@ -670,10 +670,10 @@
 (fn plugin.open-trace-dialog []
   "Show the trace dialog."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (when (not (conn-has-contrib conn "SWANK-TRACE-DIALOG"))
       (ui.err-msg "SWANK-TRACE-DIALOG is not available.")
-      (return))
+      (values nil))
     ;; ReportSpecs not yet in connection methods (deferred)
     (ui.err-msg "open-trace-dialog: not yet implemented")))
 
@@ -684,7 +684,7 @@
 (fn plugin.create-mrepl []
   "Create a new REPL thread using SWANK-MREPL."
   (let [conn (conn-manager.get true)]
-    (when (not conn) (return))
+    (when (not conn) (values nil))
     (if (conn-has-contrib conn "SWANK-MREPL")
         ;; CreateMREPL not yet in connection methods (deferred)
         (ui.err-msg "create-mrepl: not yet implemented")
@@ -734,7 +734,7 @@
         comps (or (. result 1) [])
         r-comps []]
     (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
-      (return))
+      (values nil))
     (each [_ c (ipairs comps)]
       (table.insert r-comps {:word (. c 1) :menu (. c 4)}))
     (pcall vim.fn.complete start-col r-comps)))
@@ -744,7 +744,7 @@
   (let [cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3)
         comps (or (. result 1) [])]
     (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
-      (return))
+      (values nil))
     (pcall vim.fn.complete start-col comps)))
 
 (fn plugin.completefunc [find-start base]

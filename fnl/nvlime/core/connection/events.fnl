@@ -197,7 +197,7 @@
             (set delta sub-delta))
 
           (when (<= paren-level 0)
-            (return [form (+ idx 1) true])))
+            (values [form (+ idx 1) true])))
 
       (set idx (+ idx delta))))
 

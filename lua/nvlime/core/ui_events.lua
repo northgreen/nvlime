@@ -101,7 +101,6 @@ ui["on-xref"] = function(self, conn, xref_list)
 end
 ui["on-compiler-notes"] = function(self, conn, note_list, orig_win)
   if not note_list then
-    __fnl_global__return()
   else
   end
   local _let_16_ = luaeval("require('nvlime.window.main.notes').open(_A)", {["conn-name"] = conn.cb_data.name})
@@ -114,7 +113,6 @@ end
 ui["on-threads"] = function(self, conn, thread_list)
   if not thread_list then
     ui["err-msg"]("The thread list is empty.")
-    __fnl_global__return()
   else
   end
   return call(vim.fn["nvlime#ui#threads#FillThreadsBuf"], {conn, thread_list})

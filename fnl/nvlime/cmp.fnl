@@ -35,7 +35,7 @@
         (tset kinds kind true))))
   (for [i 1 (length kind-precedence)]
     (when (. kinds (. kind-precedence i))
-      (return (. kind-precedence i)))))
+      (values (. kind-precedence i)))))
 
 ;;; {any} ->
 (fn set-documentation [item]
