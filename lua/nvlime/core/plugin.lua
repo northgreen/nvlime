@@ -10,6 +10,7 @@ require("nvlime.core.connection.sldb")
 require("nvlime.core.connection.inspector")
 require("nvlime.core.connection.swank")
 require("nvlime.core.connection.events")
+local contrib = require("nvlime.core.contrib")
 vim.g["nvlime-options"] = config
 local plugin = {}
 local function input_check_edit_flag(edit, text)

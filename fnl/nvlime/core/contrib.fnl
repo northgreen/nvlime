@@ -33,7 +33,7 @@
    If CONTRIBS is nil, uses self.cb_data.contribs.
    Calls CALLBACK(self) after all initializers complete."
   (let [contribs (or ?contribs (. self.cb_data :contribs) [])]
-    (for [_ contrib (ipairs contribs)]
+    (each [_ contrib (ipairs contribs)]
       (let [init-fn (. contrib-initializers contrib)]
         (when init-fn
           (init-fn self)))))

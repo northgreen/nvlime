@@ -34,7 +34,7 @@ end
 connection["call-initializers"] = function(self, _3fcontribs, _3fcallback)
   do
     local contribs = (_3fcontribs or self.cb_data.contribs or {})
-    for _ = contrib, ipairs(contribs) do
+    for _, contrib in ipairs(contribs) do
       local init_fn = contrib_initializers[contrib]
       if init_fn then
         init_fn(self)

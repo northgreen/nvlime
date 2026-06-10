@@ -14,6 +14,8 @@
 (require "nvlime.core.connection.inspector")
 (require "nvlime.core.connection.swank")
 (require "nvlime.core.connection.events")
+;; Load contrib module (registers call-initializers on connection table)
+(local contrib (require "nvlime.core.contrib"))
 
 ;;; Initialize global options
 (tset vim.g :nvlime-options config)
