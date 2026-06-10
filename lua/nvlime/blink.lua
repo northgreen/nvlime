@@ -70,51 +70,56 @@ Source.get_trigger_characters = function(self)
 end
 Source.get_completions = function(self, ctx, callback)
   local called = false
-  local cursor_line = ctx.cursor[1]
-  local cursor_col = ctx.cursor[2]
-  local keyword = (ctx.keyword or "")
-  local start_col = (cursor_col - #keyword)
-  local conn = buffer["get-conn-var!"](0)
-  local completion_fn
-  if _2bfuzzy_3f_2b then
-    completion_fn = conn["fuzzy-completions"]
-  else
-    completion_fn = conn["simple-completions"]
-  end
-  local on_done
-  local function _10_(_self, candidates)
-    if not called then
-      called = true
-      local items
-      do
-        local tbl_26_ = {}
-        local i_27_ = 0
-        for _, c in ipairs((candidates[1] or {})) do
-          local val_28_
-          do
-            local item = get_lsp_kind(c)
-            if item then
-              item["textEdit"] = {newText = item.label, range = {start = {line = (cursor_line - 1), character = start_col}, ["end"] = {line = (cursor_line - 1), character = cursor_col}}}
-              val_28_ = item
-            else
-              val_28_ = nil
-            end
-          end
-          if (nil ~= val_28_) then
-            i_27_ = (i_27_ + 1)
-            tbl_26_[i_27_] = val_28_
-          else
-          end
-        end
-        items = tbl_26_
+  do
+    local cursor_line = ctx.cursor[1]
+    local cursor_col = ctx.cursor[2]
+    local keyword = (ctx.keyword or "")
+    local start_col = (cursor_col - #keyword)
+    local conn = buffer["get-conn-var!"](0)
+    if conn then
+      local completion_fn
+      if _2bfuzzy_3f_2b then
+        completion_fn = conn["fuzzy-completions"]
+      else
+        completion_fn = conn["simple-completions"]
       end
-      return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
+      local on_done
+      local function _10_(_self, candidates)
+        if not called then
+          called = true
+          local items
+          do
+            local tbl_26_ = {}
+            local i_27_ = 0
+            for _, c in ipairs((candidates[1] or {})) do
+              local val_28_
+              do
+                local item = get_lsp_kind(c)
+                if item then
+                  item["textEdit"] = {newText = item.label, range = {start = {line = (cursor_line - 1), character = start_col}, ["end"] = {line = (cursor_line - 1), character = cursor_col}}}
+                  val_28_ = item
+                else
+                  val_28_ = nil
+                end
+              end
+              if (nil ~= val_28_) then
+                i_27_ = (i_27_ + 1)
+                tbl_26_[i_27_] = val_28_
+              else
+              end
+            end
+            items = tbl_26_
+          end
+          return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
+        else
+          return nil
+        end
+      end
+      on_done = _10_
+      completion_fn(conn, keyword, on_done)
     else
-      return nil
     end
   end
-  on_done = _10_
-  completion_fn(conn, keyword, on_done)
   return nil
 end
 Source.resolve = function(self, item, callback)

@@ -82,27 +82,28 @@
         keyword (or ctx.keyword "")
         start-col (- cursor-col (# keyword))
         conn (buffer.get-conn-var! 0)]
-    (local completion-fn (if +fuzzy?+
-                             (. conn "fuzzy-completions")
-                             (. conn "simple-completions")))
-    (local on-done (fn [_self candidates]
-      (when (not called)
-        (set called true)
-        (let [items (icollect [_ c (ipairs (or (. candidates 1) []))]
-                      (let [item (get-lsp-kind c)]
-                        (when item
-                          (tset item :textEdit
-                                {:newText item.label
-                                 :range {:start {:line (- cursor-line 1)
-                                                 :character start-col}
-                                         :end {:line (- cursor-line 1)
-                                               :character cursor-col}}})
-                          item)))]
-          (callback {:items items
-                     :is_incomplete_backward false
-                     :is_incomplete_forward false})))))
-    (completion-fn conn keyword on-done)
-    nil))
+    (when conn
+      (local completion-fn (if +fuzzy?+
+                               (. conn "fuzzy-completions")
+                               (. conn "simple-completions")))
+      (local on-done (fn [_self candidates]
+        (when (not called)
+          (set called true)
+          (let [items (icollect [_ c (ipairs (or (. candidates 1) []))]
+                        (let [item (get-lsp-kind c)]
+                          (when item
+                            (tset item :textEdit
+                                  {:newText item.label
+                                   :range {:start {:line (- cursor-line 1)
+                                                   :character start-col}
+                                           :end {:line (- cursor-line 1)
+                                                 :character cursor-col}}})
+                            item)))]
+            (callback {:items items
+                       :is_incomplete_backward false
+                       :is_incomplete_forward false})))))
+      (completion-fn conn keyword on-done)))
+  nil)
 
 (fn Source.resolve [self item callback]
   (let [conn (buffer.get-conn-var! 0)]

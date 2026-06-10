@@ -69,44 +69,49 @@ end
 source.complete = function(self, params, callback)
   local called = false
   local conn = buffer["get-conn-var!"](0)
-  local completion_fn
-  if _2bfuzzy_3f_2b then
-    completion_fn = conn["fuzzy-completions"]
-  else
-    completion_fn = conn["simple-completions"]
-  end
-  local on_done
-  local function _10_(_self, candidates)
-    if not called then
-      called = true
-      local function _11_()
-        local tbl_26_ = {}
-        local i_27_ = 0
-        for _, c in ipairs((candidates[1] or {})) do
-          local val_28_ = get_lsp_kind(c)
-          if (nil ~= val_28_) then
-            i_27_ = (i_27_ + 1)
-            tbl_26_[i_27_] = val_28_
-          else
-          end
-        end
-        return tbl_26_
-      end
-      return callback(_11_())
+  if conn then
+    local completion_fn
+    if _2bfuzzy_3f_2b then
+      completion_fn = conn["fuzzy-completions"]
     else
-      return nil
+      completion_fn = conn["simple-completions"]
     end
+    local on_done
+    local function _10_(_self, candidates)
+      if not called then
+        called = true
+        local function _11_()
+          local tbl_26_ = {}
+          local i_27_ = 0
+          for _, c in ipairs((candidates[1] or {})) do
+            local val_28_ = get_lsp_kind(c)
+            if (nil ~= val_28_) then
+              i_27_ = (i_27_ + 1)
+              tbl_26_[i_27_] = val_28_
+            else
+            end
+          end
+          return tbl_26_
+        end
+        return callback(_11_())
+      else
+        return nil
+      end
+    end
+    on_done = _10_
+    local input = string.sub(params.context.cursor_before_line, params.offset)
+    return completion_fn(conn, input, on_done)
+  else
+    return nil
   end
-  on_done = _10_
-  local input = string.sub(params.context.cursor_before_line, params.offset)
-  return completion_fn(conn, input, on_done)
 end
 source.resolve = function(self, item, callback)
   local conn = buffer["get-conn-var!"](0)
-  set_documentation(conn, vim.deepcopy(item))
-  local function _14_()
+  local doc_fn = conn["documentation-symbol"]
+  local function _15_(_self, doc_string)
+    item["documentation"] = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)
     return callback(item)
   end
-  return vim.defer_fn(_14_, 5)
+  return doc_fn(conn, item.label, _15_)
 end
 return source

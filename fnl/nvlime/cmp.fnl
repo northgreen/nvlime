@@ -70,24 +70,29 @@
 
 (fn source.complete [self params callback]
   (var called false)
-  (let [conn (buffer.get-conn-var! 0)
-        completion-fn (if +fuzzy?+
-                          (. conn "fuzzy-completions")
-                          (. conn "simple-completions"))
-        on-done (fn [_self candidates]
-                  (when (not called)
-                    (set called true)
-                    (callback
-                      (icollect [_ c (ipairs (or (. candidates 1) []))]
-                        (get-lsp-kind c)))))
-        input (string.sub params.context.cursor_before_line
-                          params.offset)]
-    (completion-fn conn input on-done)))
+  (let [conn (buffer.get-conn-var! 0)]
+    (when conn
+      (local completion-fn (if +fuzzy?+
+                               (. conn "fuzzy-completions")
+                               (. conn "simple-completions")))
+      (local on-done (fn [_self candidates]
+                       (when (not called)
+                         (set called true)
+                         (callback
+                           (icollect [_ c (ipairs (or (. candidates 1) []))]
+                             (get-lsp-kind c))))))
+      (let [input (string.sub params.context.cursor_before_line
+                              params.offset)]
+        (completion-fn conn input on-done)))))
 
 (fn source.resolve [self item callback]
   (let [conn (buffer.get-conn-var! 0)]
-    (set-documentation conn (vim.deepcopy item))
-    ;; defer_fn required for documentation to show up
-    (vim.defer_fn #(callback item) 5)))
+    (local doc-fn (. conn "documentation-symbol"))
+    (doc-fn conn
+      item.label
+      (fn [_self doc-string]
+        (tset item :documentation
+              (string.gsub doc-string "^Documentation for the symbol.-\n\n" "" 1))
+        (callback item)))))
 
 source
