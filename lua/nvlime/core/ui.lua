@@ -18,7 +18,9 @@ vim.g["nvlime_vert_sep"] = "\226\148\130"
 vim.g["nvlime_default_window_settings"] = {mrepl = {pos = "botright", size = 0, vertical = false}, trace = {pos = "botright", size = 0, vertical = false}}
 local ui_instance = nil
 ui.new = function()
-  return {["buffer-package-map"] = {}, ["buffer-thread-map"] = {}}
+  local self = {["buffer-package-map"] = {}, ["buffer-thread-map"] = {}}
+  setmetatable(self, {__index = ui})
+  return self
 end
 ui["get-ui"] = function()
   if not ui_instance then

@@ -198,7 +198,7 @@
   "Connect to a SWANK server.
   Prompts for host/port if not provided.
   Returns connection object or nil on failure."
-  (let [def-timeout (if (!= vim.g.nvlime_options.connect_timeout -1)
+  (let [def-timeout (if (not= vim.g.nvlime_options.connect_timeout -1)
                       vim.g.nvlime_options.connect_timeout
                       nil)
         host (or host
@@ -733,7 +733,7 @@
   (let [cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3)
         comps (or (. result 1) [])
         r-comps []]
-    (when (!= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
+    (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
       (return))
     (each [_ c (ipairs comps)]
       (table.insert r-comps {:word (. c 1) :menu (. c 4)}))
@@ -743,7 +743,7 @@
   "Handle simple completion results."
   (let [cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3)
         comps (or (. result 1) [])]
-    (when (!= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
+    (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
       (return))
     (pcall vim.fn.complete start-col comps)))
 

@@ -44,8 +44,10 @@ Functions deferred to later files:
 
 (fn ui.new []
   "Creates a new NvlimeUI object with buffer-package and buffer-thread maps."
-  {:buffer-package-map {}
-   :buffer-thread-map {}})
+  (let [self {:buffer-package-map {}
+              :buffer-thread-map {}}]
+    (setmetatable self {:__index ui})
+    self))
 
 (fn ui.get-ui []
   "Returns the NvlimeUI singleton, creating it on first call."

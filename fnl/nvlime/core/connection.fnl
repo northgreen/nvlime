@@ -49,7 +49,9 @@
               :remote_channels {}
               :ui ui
               :server_event_handlers {}}]
-    ;; Server event handlers will be populated when ui is available (Phase 4)
+     ;; Server event handlers will be populated when ui is available (Phase 4)
+    ;; Make conn objects inherit methods from the connection module
+    (setmetatable self {:__index connection})
     self))
 
 ;;; Core connection methods

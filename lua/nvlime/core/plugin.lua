@@ -169,7 +169,7 @@ local function clean_up_null_buf_connections()
 end
 plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
   local def_timeout
-  if __fnl_global___21_3d(vim.g.nvlime_options.connect_timeout, -1) then
+  if (vim.g.nvlime_options.connect_timeout ~= -1) then
     def_timeout = vim.g.nvlime_options.connect_timeout
   else
     def_timeout = nil
@@ -766,7 +766,7 @@ local function on_fuzzy_completions_complete(start_col, cur_pos, conn, result)
   local cur_pos0 = vim.list_slice(vim.fn.getcurpos(), 2, 3)
   local comps = (result[1] or {})
   local r_comps = {}
-  if __fnl_global___21_3d(cur_pos0, vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
+  if (cur_pos0 ~= vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
     __fnl_global__return()
   else
   end
@@ -778,7 +778,7 @@ end
 local function on_simple_completions_complete(start_col, cur_pos, conn, result)
   local cur_pos0 = vim.list_slice(vim.fn.getcurpos(), 2, 3)
   local comps = (result[1] or {})
-  if __fnl_global___21_3d(cur_pos0, vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
+  if (cur_pos0 ~= vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
     __fnl_global__return()
   else
   end

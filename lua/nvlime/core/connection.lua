@@ -18,6 +18,7 @@ connection.get = function(dict, key, default)
 end
 connection.new = function(cb_data, ui)
   local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui, server_event_handlers = {}}
+  setmetatable(self, {__index = connection})
   return self
 end
 connection.connect = function(self, host, port, prefix, timeout)
