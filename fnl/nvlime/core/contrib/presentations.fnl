@@ -5,7 +5,7 @@
 
 ;;; Public methods (added to connection)
 
-(fn connection.inspect-presentation [self pres-id reset &optional callback]
+(fn connection.inspect-presentation [self pres-id reset callback]
   "Start inspecting an object saved by SWANK-PRESENTATIONS.
    PRES-ID should be a valid ID from PRESENTATION-START messages.
    If RESET is truthy, the inspector will be reset first.

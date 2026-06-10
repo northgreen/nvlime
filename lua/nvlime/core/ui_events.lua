@@ -5,6 +5,7 @@ local cursor = vim.fn.cursor
 local call = vim.fn.call
 local ui = require("nvlime.core.ui")
 local connection = require("nvlime.core.connection")
+local xref = require("nvlime.core.ui.xref")
 ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames, conts)
   local _let_1_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
   local _ = _let_1_[1]
@@ -96,7 +97,7 @@ ui["on-trace-dialog"] = function(self, conn, spec_list, trace_count)
   return call(vim.fn["nvlime#ui#trace_dialog#FillTraceDialogBuf"], {spec_list, trace_count})
 end
 ui["on-xref"] = function(self, conn, xref_list)
-  return cond(not xref_list, ui["err-msg"]("No xref found."), ((type(xref_list) == "table") and (xref_list.name == "NOT-IMPLEMENTED")), ui["err-msg"]("Not implemented."), "else", call(vim.fn["nvlime#ui#xref#OpenXRefBuf"], {conn, xref_list}))
+  return cond(not xref_list, ui["err-msg"]("No xref found."), ((type(xref_list) == "table") and (xref_list.name == "NOT-IMPLEMENTED")), ui["err-msg"]("Not implemented."), "else", xref["open-xref-buf"](conn, xref_list))
 end
 ui["on-compiler-notes"] = function(self, conn, note_list, orig_win)
   if not note_list then

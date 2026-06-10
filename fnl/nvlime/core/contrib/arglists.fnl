@@ -3,7 +3,7 @@
 
 (local connection (require "nvlime.core.connection"))
 
-(fn connection.autodoc [self raw-form &optional margin callback]
+(fn connection.autodoc [self raw-form margin callback]
   "Get autodoc string for RAW-FORM with optional PRINT-RIGHT-MARGIN.
   Returns results via ASYNC callback: (callback self results)."
   (let [cmd (if (not= margin nil)

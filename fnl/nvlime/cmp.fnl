@@ -3,7 +3,10 @@
 (local opts (require "nvlime.config"))
 (require "cmp.types.cmp")
 
-(local +fuzzy?+ (not (= (# (icollect [_ v (ipairs opts.contribs) &when (= "SWANK-FUZZY" $)] v)) 0)))
+(var has-fuzzy? false)
+(each [_ v (ipairs opts.contribs)]
+  (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
+(local +fuzzy?+ has-fuzzy?)
 
 (local flag-kind
        {:b lsp-types.CompletionItemKind.Variable

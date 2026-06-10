@@ -2,10 +2,10 @@
 (local buffer (require "nvlime.buffer"))
 (local opts (require "nvlime.config"))
 
-(local +fuzzy?+
-       (not (= 0 (# (icollect [_ v (ipairs opts.contribs)
-                               &when (= "SWANK-FUZZY" v)]
-                    v)))))
+(var has-fuzzy? false)
+(each [_ v (ipairs opts.contribs)]
+  (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
+(local +fuzzy?+ has-fuzzy?)
 
 (local flag-kind
        {:b blink-types.CompletionItemKind.Variable
@@ -72,20 +72,20 @@
   (tset self :opts (or opts {}))
   self)
 
-(fn Source:enabled []
+(fn Source.enabled [self]
   (let [conn (buffer.get-conn-var! 0)]
     (not (= conn nil))))
 
-(fn Source:get_trigger_characters []
+(fn Source.get_trigger_characters [self]
   [":"])
 
-(fn Source:get_completions [ctx callback]
+(fn Source.get_completions [self ctx callback]
+  (var called false)
   (let [cursor-line (. ctx.cursor 1)
         cursor-col (. ctx.cursor 2)
         keyword (or ctx.keyword "")
-        start-col (- cursor-col (# keyword))
-        called false]
-    (local function on-done [candidates]
+        start-col (- cursor-col (# keyword))]
+    (local on-done (fn [candidates]
       (when (not called)
         (set called true)
         (local items [])
@@ -98,14 +98,14 @@
                                      :character start-col}
                              :end {:line (- cursor-line 1)
                                    :character cursor-col}}})
-              (table.insert items item))))
+               (table.insert items item)))))
         (callback {:items items
                    :is_incomplete_backward false
                    :is_incomplete_forward false})))
     (get-completion keyword on-done)
     nil))
 
-(fn Source:resolve [item callback]
+(fn Source.resolve [self item callback]
   (set-documentation (vim.deepcopy item) callback))
 
 Source

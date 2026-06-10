@@ -75,7 +75,7 @@
 
 ;;; Public methods (added to connection)
 
-(fn connection.create-mrepl [self &optional chan-id callback]
+(fn connection.create-mrepl [self chan-id callback]
   (let [chan-id (or chan-id vim.v.null)
         callback (or callback vim.v.null)
         chan-obj (self:make-local-channel chan-id mrepl-channel-cb)]

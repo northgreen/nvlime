@@ -2,110 +2,99 @@ local lsp_types = require("cmp.types.lsp")
 local buffer = require("nvlime.buffer")
 local opts = require("nvlime.config")
 require("cmp.types.cmp")
-
--- Check if SWANK-FUZZY is in contribs
-local fuzzy_QMARK = false
+local has_fuzzy_3f = false
 for _, v in ipairs(opts.contribs) do
-  if v == "SWANK-FUZZY" then
-    fuzzy_QMARK = true
-    break
+  if ("SWANK-FUZZY" == v) then
+    has_fuzzy_3f = true
+  else
   end
 end
-
-local flag_kind = {
-  b = lsp_types.CompletionItemKind.Variable,
-  f = lsp_types.CompletionItemKind.Function,
-  g = lsp_types.CompletionItemKind.Method,
-  c = lsp_types.CompletionItemKind.Class,
-  t = lsp_types.CompletionItemKind.Class,
-  m = lsp_types.CompletionItemKind.Operator,
-  s = lsp_types.CompletionItemKind.Operator,
-  p = lsp_types.CompletionItemKind.Module
-}
-
-local kind_precedence = {
-  lsp_types.CompletionItemKind.Module,
-  lsp_types.CompletionItemKind.Class,
-  lsp_types.CompletionItemKind.Operator,
-  lsp_types.CompletionItemKind.Method,
-  lsp_types.CompletionItemKind.Function,
-  lsp_types.CompletionItemKind.Variable
-}
-
---- @param flags string
---- @return number|nil
-local function flags_to_kind(flags)
+local _2bfuzzy_3f_2b = has_fuzzy_3f
+local flag_kind = {b = lsp_types.CompletionItemKind.Variable, f = lsp_types.CompletionItemKind.Function, g = lsp_types.CompletionItemKind.Method, c = lsp_types.CompletionItemKind.Class, t = lsp_types.CompletionItemKind.Class, m = lsp_types.CompletionItemKind.Operator, s = lsp_types.CompletionItemKind.Operator, p = lsp_types.CompletionItemKind.Module}
+local kind_precedence = {lsp_types.CompletionItemKind.Module, lsp_types.CompletionItemKind.Class, lsp_types.CompletionItemKind.Operator, lsp_types.CompletionItemKind.Method, lsp_types.CompletionItemKind.Function, lsp_types.CompletionItemKind.Variable}
+local function flags__3ekind(flags)
   local kinds = {}
   for i = 1, #flags do
     local kind = flag_kind[flags:sub(i, i)]
     if kind then
       kinds[kind] = true
+    else
     end
   end
   for i = 1, #kind_precedence do
     if kinds[kind_precedence[i]] then
-      return kind_precedence[i]
+      __fnl_global__return(kind_precedence[i])
+    else
     end
   end
   return nil
 end
-
---- @param item table
 local function set_documentation(item)
   local get_documentation = vim.fn["nvlime#cmp#get_docs"]
-  get_documentation(item.label, function(doc)
-    item.documentation = {
-      kind = "markdown",
-      value = string.gsub(doc, "^Documentation for the symbol.-\n\n", "", 1)
-    }
-  end)
-end
-
-local get_lsp_kind
-if fuzzy_QMARK then
-  get_lsp_kind = function(item)
-    local flags = item[4]
-    return {
-      label = item[1],
-      labelDetails = {detail = flags},
-      kind = flags_to_kind(flags) or lsp_types.CompletionItemKind.Keyword
-    }
+  local function _4_(_241)
+    item["documentation"] = string.gsub(_241, "^Documentation for the symbol.-\n\n", "", 1)
+    return nil
   end
+  return get_documentation(item.label, _4_)
+end
+local get_lsp_kind
+if _2bfuzzy_3f_2b then
+  local function _5_(item)
+    local flags = item[4]
+    return {label = item[1], labelDetails = {detail = flags}, kind = (flags__3ekind(flags) or lsp_types.CompletionItemKind.Keyword)}
+  end
+  get_lsp_kind = _5_
 else
-  get_lsp_kind = function(item)
+  local function _6_(item)
     return {label = item}
   end
+  get_lsp_kind = _6_
 end
-
-local get_completion = vim.fn[fuzzy_QMARK and "nvlime#cmp#get_fuzzy" or "nvlime#cmp#get_simple"]
-
+local get_completion
+local _8_
+if _2bfuzzy_3f_2b then
+  _8_ = "nvlime#cmp#get_fuzzy"
+else
+  _8_ = "nvlime#cmp#get_simple"
+end
+get_completion = vim.fn[_8_]
 local source = {}
-
-function source.is_available(self)
-  return buffer["get-conn-var!"](0) ~= nil
+source.is_available = function(self)
+  return not (buffer["get-conn-var!"](0) == nil)
 end
-
-function source.get_debug_name(self)
+source.get_debug_name = function(self)
   return "CMP Nvlime"
 end
-
-function source.get_keyword_pattern(self)
+source.get_keyword_pattern = function(self)
   return "\\k\\+"
 end
-
-function source.complete(self, params, callback)
-  local on_done = function(candidates)
-    callback(vim.tbl_map(get_lsp_kind, candidates or {}))
+source.complete = function(self, params, callback)
+  local on_done
+  local function _10_(candidates)
+    local function _11_()
+      local tbl_26_ = {}
+      local i_27_ = 0
+      for _, c in ipairs((candidates or {})) do
+        local val_28_ = get_lsp_kind(c)
+        if (nil ~= val_28_) then
+          i_27_ = (i_27_ + 1)
+          tbl_26_[i_27_] = val_28_
+        else
+        end
+      end
+      return tbl_26_
+    end
+    return callback(_11_())
   end
+  on_done = _10_
   local input = string.sub(params.context.cursor_before_line, params.offset)
-  get_completion(input, on_done)
+  return get_completion(input, on_done)
 end
-
-function source.resolve(self, item, callback)
+source.resolve = function(self, item, callback)
   set_documentation(item)
-  vim.defer_fn(function()
-    callback(item)
-  end, 5)
+  local function _13_()
+    return callback(item)
+  end
+  return vim.defer_fn(_13_, 5)
 end
-
 return source

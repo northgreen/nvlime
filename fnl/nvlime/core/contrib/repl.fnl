@@ -27,7 +27,7 @@
 
 ;;; Public methods (added to connection)
 
-(fn connection.create-repl [self &optional coding-system callback]
+(fn connection.create-repl [self coding-system callback]
   "Create a new REPL session on the Lisp server.
   CODING-SYSTEM is optional. Results delivered via CALLBACK: (callback self result)."
   (let [cmd [(connection.sym "SWANK-REPL" "CREATE-REPL") nil]]
@@ -39,7 +39,7 @@
                  (self:check-return-status msg "nvlime#contrib#repl#CreateREPL")
                  (self:try-to-call callback [self (. msg 2 2)])))))
 
-(fn connection.listener-eval [self expr &optional callback]
+(fn connection.listener-eval [self expr callback]
   "Evaluate EXPR in the listener REPL.
   Results delivered via CALLBACK: (callback self result).
   Handles ABORT status by writing to UI instead of throwing."

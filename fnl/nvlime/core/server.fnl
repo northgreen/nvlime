@@ -105,9 +105,9 @@
 (fn match-server-created-port []
   "Search buffer for 'Server created' line and extract port number.
   Returns port as number, or nil if not found."
+  (var port-line-nr 0)
   (let [old-pos (getcurpos)
-        pattern "Server created: (#([[:digit:][:blank:]]\\+)\\s\\+\\(\\d\\+\\))"
-        port-line-nr (var 0)]
+        pattern "Server created: (#([[:digit:][:blank:]]\\+)\\s\\+\\(\\d\\+\\))"]
     ;; Move cursor to line 1 and search (result captured in port-line-nr)
     (pcall (fn []
              (cursor [1 1 0 1])
@@ -142,7 +142,7 @@
               (when auto-conn
                 (tset (. auto-conn :cb_data) :server server-obj)
                 (tset server-obj :connections
-                      {[(. auto-conn :cb_data :id) auto-conn]}))))
+                      {[(. auto-conn :cb_data :id)] auto-conn}))))
 
         (return)))))
 
@@ -174,9 +174,9 @@
                         (.. "nvlime server " vim.g.nvlime_next_server_id))
         server-id vim.g.nvlime_next_server_id]
 
-    ;; Open server window, get [window-id bufnr]
+     ;; Open server window, get [window-id bufnr]
     (let [[_win bufnr] ((. vim.fn "luaeval")
-                         'require("nvlime.window.server").open(_A)'
+                         "require('nvlime.window.server').open(_A)"
                          server-name)
 
           server-obj {:id server-id
@@ -197,7 +197,7 @@
       ;; Fail fast: job must be active
       (when (not (async.job-is-active server-job))
         ((. vim.fn "luaeval")
-         'require("nvlime.buffer")["fill!"](_A[1], _A[2])'
+         "require('nvlime.buffer')['fill!'](_A[1], _A[2])"
          [bufnr "Failed to start server."])
         (error "nvlime.core.server.new: failed to start server job"))
 
@@ -235,7 +235,7 @@
   (let [server-id (normalize-server-id server)
         r-server (. vim.g.nvlime_servers server-id)]
     ((. vim.fn "luaeval")
-     'require("nvlime.window.server").open(_A)'
+     "require('nvlime.window.server').open(_A)"
      r-server.name)))
 
 (fn server.select []
@@ -272,23 +272,23 @@
 
 (fn server.connect-to-cur-server []
   "Connect current buffer's server to REPL."
-  (let [port nil]
-    (if (async.job-is-active (. vim.b :nvlime_server :job))
-        (do
-          (set port (or (. vim.b :nvlime_server :port) nil))
-          (when (not port)
-            (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not ready."))))
-        (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not running.")))
+  (var port nil)
+  (if (async.job-is-active (. vim.b :nvlime_server :job))
+      (do
+        (set port (or (. vim.b :nvlime_server :port) nil))
+        (when (not port)
+          (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not ready."))))
+      (ui.err-msg (.. (. vim.b :nvlime_server :name) " is not running.")))
 
-    (when (not port)
-      (return))
+  (when (not port)
+    (return))
 
-    (let [conn ((. vim.fn "nvlime#plugin#ConnectREPL") "127.0.0.1" port)]
-      (when conn
-        (tset (. conn :cb_data) :server (. vim.b :nvlime_server))
-        (let [conn-list (or (. vim.b :nvlime_server :connections) {})]
-          (tset conn-list (. conn :cb_data :id) conn)
-          (tset (. vim.b :nvlime_server) :connections conn-list))))))
+  (let [conn ((. vim.fn "nvlime#plugin#ConnectREPL") "127.0.0.1" port)]
+    (when conn
+      (tset (. conn :cb_data) :server (. vim.b :nvlime_server))
+      (let [conn-list (or (. vim.b :nvlime_server :connections) {})]
+        (tset conn-list (. conn :cb_data :id) conn)
+        (tset (. vim.b :nvlime_server) :connections conn-list)))))
 
 (fn server.stop-cur-server []
   "Stop current buffer's server with confirmation prompt."
@@ -301,6 +301,6 @@
                           "? (y/n) "))]
     (if (ui.is-yes-string answer)
         (server.stop (. vim.b :nvlime_server))
-        (ui.err-msg "Canceled."))))
+        (ui.err-msg "Canceled.")))))
 
 server

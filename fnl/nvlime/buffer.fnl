@@ -171,22 +171,25 @@ And also would be wiped out after becomeing hidden."
     (buffer.create-if-not-exists name false #(callback $))))
 
 ;;; BufNr [string] ...[string] ->
-(fn buffer.fill! [bufnr lines ...]
+(fn buffer.fill! [bufnr ...]
   "Changes all lines of the buffer with `bufnr` to `lines` and
 any other variable number of [string] appended right after the `lines`."
-  (with-modifiable bufnr
-    (nvim_buf_set_lines bufnr 0 -1 false lines)
-    (when ...
-      (each [_ ls (ipairs [...])]
+  (let [args [...]
+        lines (args 1)]
+    (table.remove args 1)
+    (with-modifiable bufnr
+      (nvim_buf_set_lines bufnr 0 -1 false lines)
+      (each [_ ls (ipairs args)]
         (nvim_buf_set_lines bufnr -1 -1 false ls)))))
 
 ;;; BufNr ...[string] ->
 (fn buffer.append! [bufnr ...]
   "Appends `...` any number of list of strings to the end of the
   buffer with `bufnr`."
-  (with-modifiable bufnr
-    (when ...
-      (each [_ ls (ipairs [...])]
-        (nvim_buf_set_lines bufnr -1 -1 false ls)))))
+  (let [args [...]]
+    (with-modifiable bufnr
+      (when (> (length args) 0)
+        (each [_ ls (ipairs args)]
+          (nvim_buf_set_lines bufnr -1 -1 false ls))))))
 
 buffer

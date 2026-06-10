@@ -28,17 +28,17 @@
 (when mrepl (tset contrib-initializers "SWANK-MREPL" mrepl.init-mrepl))
 (when trace-dialog (tset contrib-initializers "SWANK-TRACE-DIALOG" trace-dialog.init-trace-dialog))
 
-(fn connection.call-initializers [self &optional contribs callback]
+(fn connection.call-initializers [self ?contribs ?callback]
   "Iterates over CONTRIBS list and calls the appropriate init function for each.
    If CONTRIBS is nil, uses self.cb_data.contribs.
    Calls CALLBACK(self) after all initializers complete."
-  (let [contribs (or contribs (. self.cb_data :contribs) [])]
+  (let [contribs (or ?contribs (. self.cb_data :contribs) [])]
     (for [_ contrib (ipairs contribs)]
       (let [init-fn (. contrib-initializers contrib)]
         (when init-fn
           (init-fn self)))))
-  (when (= (type callback) "function")
-    (callback self))
+  (when (= (type ?callback) "function")
+    (?callback self))
   self)
 
 connection

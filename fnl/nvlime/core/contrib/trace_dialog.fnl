@@ -20,14 +20,14 @@
 
 ;;; Public methods (added to connection)
 
-(fn connection.clear-trace-tree [self &optional callback]
+(fn connection.clear-trace-tree [self ?callback]
   "Clear all trace entries in SWANK-TRACE-DIALOG."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "CLEAR-TRACE-TREE")])
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#ClearTraceTree" chan msg))))
 
-(fn connection.dialog-toggle-trace [self name &optional callback]
+(fn connection.dialog-toggle-trace [self name ?callback]
   "Toggle the traced state of a function in SWANK-TRACE-DIALOG.
    NAME can be a plain string or a raw spec object."
   (self:send (self:emacs-rex
@@ -36,7 +36,7 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#DialogToggleTrace" chan msg))))
 
-(fn connection.dialog-trace [self name &optional callback]
+(fn connection.dialog-trace [self name ?callback]
   "Trace a function in SWANK-TRACE-DIALOG."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "DIALOG-TRACE")
@@ -44,7 +44,7 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#DialogTrace" chan msg))))
 
-(fn connection.dialog-untrace [self name &optional callback]
+(fn connection.dialog-untrace [self name ?callback]
   "Untrace a function in SWANK-TRACE-DIALOG."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "DIALOG-UNTRACE")
@@ -52,21 +52,21 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#DialogUntrace" chan msg))))
 
-(fn connection.dialog-untrace-all [self &optional callback]
+(fn connection.dialog-untrace-all [self ?callback]
   "Untrace all functions in SWANK-TRACE-DIALOG."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "DIALOG-UNTRACE-ALL")])
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#DialogUntraceAll" chan msg))))
 
-(fn connection.find-trace [self id &optional callback]
+(fn connection.find-trace [self id ?callback]
   "Retrieve a trace entry by ID."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "FIND-TRACE") id])
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#FindTrace" chan msg))))
 
-(fn connection.find-trace-part [self id part-id type &optional callback]
+(fn connection.find-trace-part [self id part-id type ?callback]
   "Retrieve an argument or return value saved in a trace entry.
    TYPE can be :ARG or :RETVAL."
   (self:send (self:emacs-rex
@@ -75,7 +75,7 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#FindTracePart" chan msg))))
 
-(fn connection.inspect-trace-part [self id part-id type &optional callback]
+(fn connection.inspect-trace-part [self id part-id type ?callback]
   "Inspect an argument or return value saved in a trace entry."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "INSPECT-TRACE-PART")
@@ -83,7 +83,7 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#InspectTracePart" chan msg))))
 
-(fn connection.report-partial-tree [self key &optional callback]
+(fn connection.report-partial-tree [self key ?callback]
   "Retrieve at most SWANK-TRACE-DIALOG:*TRACES-PER-REPORT* trace entries.
    KEY should be a unique number or string to identify the requesting entity."
   (self:send (self:emacs-rex
@@ -91,21 +91,21 @@
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#ReportPartialTree" chan msg))))
 
-(fn connection.report-specs [self &optional callback]
+(fn connection.report-specs [self ?callback]
   "Retrieve traced function specs from SWANK-TRACE-DIALOG."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "REPORT-SPECS")])
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#ReportSpecs" chan msg))))
 
-(fn connection.report-total [self &optional callback]
+(fn connection.report-total [self callback]
   "Retrieve the total count of trace entries."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "REPORT-TOTAL")])
              (fn [chan msg]
                (self:simple-send-cb callback "nvlime#contrib#trace_dialog#ReportTotal" chan msg))))
 
-(fn connection.report-trace-detail [self id &optional callback]
+(fn connection.report-trace-detail [self id callback]
   "Retrieve the details of a trace entry by ID."
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-TRACE-DIALOG" "REPORT-TRACE-DETAIL") id])

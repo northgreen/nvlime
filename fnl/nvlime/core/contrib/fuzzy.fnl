@@ -3,7 +3,7 @@
 
 (local connection (require "nvlime.core.connection"))
 
-(fn connection.fuzzy-completions [self symbol &optional callback]
+(fn connection.fuzzy-completions [self symbol ?callback]
   "Get fuzzy completion list for SYMBOL in the current package.
   Returns results via ASYNC callback: (callback self results)."
   (let [cur-package (let [pkg-info (self:get-current-package)]
