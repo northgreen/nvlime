@@ -519,4 +519,9 @@ Functions deferred to later files:
 ;;; Module export
 ;;; ============================================================================
 
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable ui
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
 ui

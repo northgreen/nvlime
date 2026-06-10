@@ -219,4 +219,9 @@ Also exports private callbacks used by input buffer completion."
 ;;; Module export
 ;;; ============================================================================
 
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable ui
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
 ui

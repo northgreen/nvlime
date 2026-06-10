@@ -181,4 +181,8 @@ end
 async["job-getbufnr"] = function(job)
   return (job.out_buf or 0)
 end
+local function _24_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(async, {__index = _24_})
 return async

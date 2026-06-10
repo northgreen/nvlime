@@ -38,7 +38,7 @@ else
 end
 local nvlime_home
 do
-  local rtp = vim.o.runtimepath()
+  local rtp = vim.o.runtimepath
   if (#rtp > 0) then
     local first_entry = vim.split(rtp, ",", {trimempty = true})
     nvlime_home = first_entry[1]
@@ -253,4 +253,8 @@ local function server_output_cb(server_obj, auto_connect, data)
   end
   return server["stop-cur-server"]
 end
+local function _31_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(server, {__index = _31_})
 return server

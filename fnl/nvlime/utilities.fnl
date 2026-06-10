@@ -77,6 +77,7 @@
  : echo-error
  : plist->table
  : calc-lines-size
+ : coord-range
+ : in-coord-range?
  : get-win-cursor
- : set-win-cursor
- : in-coord-range?}
+ : set-win-cursor}

@@ -165,4 +165,9 @@ Returns job object."
   "Return output buffer number."
   (or job.out_buf 0))
 
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable async
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
 async

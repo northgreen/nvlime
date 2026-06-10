@@ -1,5 +1,27 @@
 FENNEL := /usr/bin/fennel
 
+# Test dependencies
+DEPDIR ?= .test-deps
+CURL ?= curl -sL --create-dirs
+
+# Platform detection
+ifeq ($(shell uname -s),Darwin)
+    ARCH ?= macos-arm64
+else
+    ARCH ?= linux-x86_64
+endif
+
+# Optional: Download nvim binary (only when NVIM_VERSION is explicitly set)
+ifdef NVIM_VERSION
+NVIM := $(DEPDIR)/nvim-$(ARCH)
+NVIM_BIN := $(NVIM)/bin/nvim
+else
+NVIM_BIN ?= $(shell which nvim)
+endif
+
+# nvim-test framework
+NVIM_TEST := $(DEPDIR)/nvim-test
+
 # Source files: fnl/ all .fnl, excluding *macros.fnl
 FNLS := $(shell find fnl -name '*.fnl' ! -name '*macros.fnl' -type f)
 # Source files: after/ all .fnl
@@ -10,7 +32,15 @@ LUAS := $(FNLS:fnl/%.fnl=lua/%.lua)
 # after/xxx.fnl -> after/xxx.lua (in-place)
 LUAS_AFTER := $(FNLS_AFTER:.fnl=.lua)
 
-.PHONY: all clean check watch status compile help
+.DEFAULT_GOAL := all
+
+.PHONY: all clean clean-deps check watch status compile help
+.PHONY: test test-check test-run
+.PHONY: nvim nvim-test-dep
+
+# ============================================================================
+# Compilation
+# ============================================================================
 
 all: $(LUAS) $(LUAS_AFTER)
 
@@ -23,8 +53,59 @@ lua/%.lua: fnl/%.fnl
 after/%.lua: after/%.fnl
 	$(FENNEL) --compile $< > $@.tmp && mv $@.tmp $@
 
+# ============================================================================
+# Dependency downloads
+# ============================================================================
+
+nvim: $(NVIM)
+
+$(NVIM):
+	mkdir -p $(DEPDIR)
+	$(CURL) https://github.com/neovim/neovim/releases/download/$(NVIM_VERSION)/nvim-$(ARCH).tar.gz | \
+		tar -xz -C $(DEPDIR) && mv $(DEPDIR)/nvim-* $(NVIM)
+
+nvim-test-dep: $(NVIM_TEST)
+
+$(NVIM_TEST):
+	git clone --depth 1 --branch v1.2.0 \
+		https://github.com/lewis6991/nvim-test $@
+
+# ============================================================================
+# Tests
+# ============================================================================
+
+test-check: all
+	@echo "Checking Lua syntax..."
+	@fail=0; \
+	for f in $(LUAS) $(LUAS_AFTER); do \
+		if ! luac -p "$$f" 2>/dev/null; then \
+			echo "  [FAIL] $$f"; fail=1; \
+		fi; \
+	done; \
+	if [ $$fail -eq 0 ]; then \
+		echo "All $$(( $(words $(LUAS)) + $(words $(LUAS_AFTER)) )) Lua files syntax OK"; \
+	else \
+		exit 1; \
+	fi
+
+test-run: $(NVIM_TEST) all
+	@PARSLEY_PATH="$(CURDIR)/.test-deps/parsley/lua/?.lua;$(CURDIR)/.test-deps/parsley/lua/?/init.lua"; \
+	$(NVIM_TEST)/bin/nvim-test tests \
+		--lpath="$(CURDIR)/lua/?.lua;$$PARSLEY_PATH" \
+		--verbose
+
+test: test-check test-run
+	@echo "All tests passed"
+
+# ============================================================================
+# Utility targets
+# ============================================================================
+
 clean:
 	rm -f $(LUAS) $(LUAS_AFTER)
+
+clean-deps:
+	rm -rf $(DEPDIR)
 
 check:
 	@missing=""; \
@@ -37,7 +118,7 @@ check:
 		for m in $$missing; do echo "  $$m"; done; \
 		exit 1; \
 	else \
-		echo "All $$(( $(words $(FNLS)) + $(words $(FNLS_AFTER)) )) files compiled ✓"; \
+		echo "All $$(( $(words $(FNLS)) + $(words $(FNLS_AFTER)) )) files compiled"; \
 	fi
 
 watch:
@@ -77,10 +158,14 @@ help:
 	@echo "NVLIME Fennel Build"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all      - Compile all Fennel files (default)"
-	@echo "  clean    - Remove all compiled .lua files"
-	@echo "  check    - Verify all .fnl files have corresponding .lua"
-	@echo "  status   - Show compilation statistics"
-	@echo "  watch    - Watch for changes and auto-compile (requires inotify-tools)"
-	@echo "  compile  - Compile a single file (e.g. make compile FILE=fnl/foo.fnl)"
-	@echo "  help     - Show this help"
+	@echo "  all        - Compile all Fennel files (default)"
+	@echo "  clean      - Remove all compiled .lua files"
+	@echo "  check      - Verify all .fnl files have corresponding .lua"
+	@echo "  status     - Show compilation statistics"
+	@echo "  watch      - Watch for changes and auto-compile (requires inotify-tools)"
+	@echo "  compile    - Compile a single file (e.g. make compile FILE=fnl/foo.fnl)"
+	@echo "  test       - Run all tests (luac syntax check + nvim-test)"
+	@echo "  test-check - Check Lua syntax of all compiled files"
+	@echo "  test-run   - Run nvim-test functional tests in tests/"
+	@echo "  clean-deps - Remove downloaded dependencies (.test-deps/)"
+	@echo "  help       - Show this help"

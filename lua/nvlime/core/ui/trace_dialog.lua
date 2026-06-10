@@ -668,4 +668,8 @@ trace_dialog["build-fold-text"] = function(...)
     return "..."
   end
 end
+local function _82_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(trace_dialog, {__index = _82_})
 return trace_dialog

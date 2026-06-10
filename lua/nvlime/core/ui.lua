@@ -494,4 +494,8 @@ end
 ui.pad = function(prefix, sep, max_len)
   return (prefix .. sep .. string.rep(" ", ((max_len - strdisplaywidth(prefix)) + 1)))
 end
+local function _51_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(ui, {__index = _51_})
 return ui

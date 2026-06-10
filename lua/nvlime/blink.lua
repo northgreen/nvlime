@@ -104,4 +104,5 @@ end
 Source.resolve = function(self, item, callback)
   return set_documentation(vim.deepcopy(item), callback)
 end
+Source["flags->kind"] = flags__3ekind
 return Source

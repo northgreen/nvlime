@@ -749,4 +749,9 @@
 ;;; Module exports
 ;;; ============================================================================
 
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable trace-dialog
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
 trace-dialog

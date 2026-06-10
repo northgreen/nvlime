@@ -861,4 +861,8 @@ plugin["interaction-mode"] = function(enable)
   end
   return vim.cmd(("echom 'Interaction mode " .. _139_ .. "."))
 end
+local function _141_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(plugin, {__index = _141_})
 return plugin

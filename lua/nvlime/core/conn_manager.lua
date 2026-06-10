@@ -118,4 +118,8 @@ conn_manager.get = function(quiet)
   end
   return vim.b.nvlime_conn
 end
+local function _16_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(conn_manager, {__index = _16_})
 return conn_manager

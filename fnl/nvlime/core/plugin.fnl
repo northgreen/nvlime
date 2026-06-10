@@ -841,4 +841,14 @@
 ;;; Module export
 ;;; ============================================================================
 
+
+;;; Hyphen/underscore compatibility for VimScript shim calls
+;;; VimScript shim calls s:P.send_to_repl which becomes plugin["send_to_repl"]
+;;; but Fennel exports as plugin["send-to-repl"] (kebab-case)
+;;; This metatable maps snake_case access to kebab-case keys
+(setmetatable plugin
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
+;;; Module export
 plugin

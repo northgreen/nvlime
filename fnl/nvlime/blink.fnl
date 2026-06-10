@@ -108,4 +108,5 @@
 (fn Source.resolve [self item callback]
   (set-documentation (vim.deepcopy item) callback))
 
+(tset Source "flags->kind" flags->kind)
 Source

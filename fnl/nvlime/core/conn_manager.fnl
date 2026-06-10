@@ -130,4 +130,9 @@
         )
     vim.b.nvlime_conn))
 
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable conn-manager
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
+
 conn-manager

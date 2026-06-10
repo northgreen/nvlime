@@ -133,4 +133,8 @@ local function return_string_input_complete(thread, ttag)
   end
   return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
 end
+local function _19_(self, key)
+  return self[string.gsub(key, "_", "-")]
+end
+setmetatable(ui, {__index = _19_})
 return ui

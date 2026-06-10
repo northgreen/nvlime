@@ -44,7 +44,7 @@
 ;; nvlime_home: project root directory
 ;; Derived from first runtimepath entry (points to nvlime plugin dir)
 (local nvlime-home
-  (let [rtp (vim.o.runtimepath)]
+  (let [rtp vim.o.runtimepath]
     (if (> (length rtp) 0)
         (let [first-entry (vim.split rtp "," {:trimempty true})]
           (. first-entry 1))
@@ -301,6 +301,11 @@
                           "? (y/n) "))]
     (if (ui.is-yes-string answer)
         (server.stop (. vim.b :nvlime_server))
-        (ui.err-msg "Canceled.")))))
+         (ui.err-msg "Canceled.")))))
+
+;;; Hyphen/underscore compatibility for VimScript shim
+(setmetatable server
+  {:__index (fn [self key]
+              (. self (string.gsub key "_" "-")))})
 
 server
