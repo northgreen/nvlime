@@ -171,8 +171,4 @@ function! nvlime#plugin#InteractionMode(...)
   return luaeval('require"nvlime.core.plugin".interaction_mode(unpack(_A))', a:000)
 endfunction
 
-function! nvlime#ChainCallbacks(...)
-  return s:P.chain_callbacks(a:000)
-endfunction
-
 " vim: sw=2
