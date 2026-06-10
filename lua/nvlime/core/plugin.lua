@@ -147,7 +147,7 @@ local function on_call_initializers_complete(conn)
   return vim.cmd(("echom '" .. conn.cb_data.name .. " connection established.'"))
 end
 local function maybe_send_secret(conn)
-  local secret_file = (vim.g.nvlime_secret_file or vim.fn.expand((vim.fn["$HOME"] .. "/.slime-secret")))
+  local secret_file = (vim.g.nvlime_secret_file or vim.fn.expand("~/.slime-secret"))
   if (vim.fn.filereadable(secret_file) == 1) then
     local content = vim.fn.readfile(secret_file, "", 1)
     if (#content > 0) then

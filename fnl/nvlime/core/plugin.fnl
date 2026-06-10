@@ -177,7 +177,7 @@
 (fn maybe-send-secret [conn]
   "Send .slime-secret to server if file exists."
   (let [secret-file (or vim.g.nvlime_secret_file
-                        (vim.fn.expand (.. vim.fn.$HOME "/.slime-secret")))]
+                        (vim.fn.expand "~/.slime-secret"))]
     (when (= (vim.fn.filereadable secret-file) 1)
       (let [content (vim.fn.readfile secret-file "" 1)]
         (when (> (length content) 0)
