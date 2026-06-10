@@ -2,7 +2,7 @@
 ;;; Migrated from autoload/nvlime/plugin.vim (1466 lines)
 
 (local config (require "nvlime.config"))
-(local conn-manager (require "nvlime.core.conn-manager"))
+(local conn-manager (require "nvlime.core.conn_manager"))
 (local ui (require "nvlime.core.ui"))
 (local input (require "nvlime.core.ui.input"))
 (local async (require "nvlime.core.async"))

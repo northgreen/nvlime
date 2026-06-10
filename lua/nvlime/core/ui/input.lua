@@ -5,7 +5,7 @@ local getline = vim.fn.getline
 local cursor = vim.fn.cursor
 local mode = vim.fn.mode
 local ui = require("nvlime.core.ui")
-input({})
+local input = {}
 vim.g["nvlime_input_history"] = {}
 input["check-input-validity"] = function(str_val, cb, cancellable)
   if (#str_val > 0) then

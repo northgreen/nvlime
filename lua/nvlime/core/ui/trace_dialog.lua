@@ -652,7 +652,7 @@ trace_dialog["calc-fold-level"] = function(...)
     else
       id_width = 0
     end
-    return ((string.len(matched[2]) - id_width) // 2)
+    return math.floor(((string.len(matched[2]) - id_width) / 2))
   else
     return 0
   end

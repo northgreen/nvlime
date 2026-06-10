@@ -12,7 +12,7 @@ and interactive source location jumping."
 
 (local ui (require "nvlime.core.ui"))
 
-(compiler-notes {})
+(local compiler-notes {})
 
 ;;; ============================================================================
 ;;; Private helpers

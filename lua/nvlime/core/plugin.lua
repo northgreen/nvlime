@@ -1,5 +1,5 @@
 local config = require("nvlime.config")
-local conn_manager = require("nvlime.core.conn-manager")
+local conn_manager = require("nvlime.core.conn_manager")
 local ui = require("nvlime.core.ui")
 local input = require("nvlime.core.ui.input")
 local async = require("nvlime.core.async")

@@ -7,13 +7,13 @@
 ;;; Use pcall for modules that may not be migrated to Fennel yet
 (local repl (require "nvlime.core.contrib.repl"))
 (local presentations (require "nvlime.core.contrib.presentations"))
-(local presentation-streams (require "nvlime.core.contrib.presentation-streams"))
+(local presentation-streams (require "nvlime.core.contrib.presentation_streams"))
 (local fuzzy (require "nvlime.core.contrib.fuzzy"))
 (local arglists (require "nvlime.core.contrib.arglists"))
 
 (local mrepl (let [(ok mod) (pcall require "nvlime.core.contrib.mrepl")]
                (if ok mod nil)))
-(local trace-dialog (let [(ok mod) (pcall require "nvlime.core.contrib.trace-dialog")]
+(local trace-dialog (let [(ok mod) (pcall require "nvlime.core.contrib.trace_dialog")]
                       (if ok mod nil)))
 
 ;;; Contrib name -> Init function mapping

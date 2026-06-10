@@ -2,7 +2,7 @@ local nvim_win_close = vim.api.nvim_win_close
 local getcurpos = vim.fn.getcurpos
 local setpos = vim.fn.setpos
 local ui = require("nvlime.core.ui")
-inspector({})
+local inspector = {}
 inspector["get-cur-coord"] = function()
   local cur_pos = getcurpos()
   local line = cur_pos[2]

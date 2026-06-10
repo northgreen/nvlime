@@ -731,7 +731,7 @@
         (let [id-width (if vim.b.nvlime_trace_max_id
                          (string.len (tostring vim.b.nvlime_trace_max_id))
                          0)]
-          (// (- (string.len (. matched 2)) id-width) 2))
+          (math.floor (/ (- (string.len (. matched 2)) id-width) 2)))
         0)))
 
 (fn trace-dialog.build-fold-text [...]

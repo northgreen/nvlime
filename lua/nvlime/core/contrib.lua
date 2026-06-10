@@ -1,7 +1,7 @@
 local connection = require("nvlime.core.connection")
 local repl = require("nvlime.core.contrib.repl")
 local presentations = require("nvlime.core.contrib.presentations")
-local presentation_streams = require("nvlime.core.contrib.presentation-streams")
+local presentation_streams = require("nvlime.core.contrib.presentation_streams")
 local fuzzy = require("nvlime.core.contrib.fuzzy")
 local arglists = require("nvlime.core.contrib.arglists")
 local mrepl
@@ -15,7 +15,7 @@ do
 end
 local trace_dialog
 do
-  local ok, mod = pcall(require, "nvlime.core.contrib.trace-dialog")
+  local ok, mod = pcall(require, "nvlime.core.contrib.trace_dialog")
   if ok then
     trace_dialog = mod
   else

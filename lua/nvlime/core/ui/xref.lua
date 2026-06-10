@@ -4,7 +4,7 @@ local setbufvar = vim.fn.setbufvar
 local float2nr = vim.fn.float2nr
 local line = vim.fn.line
 local ui = require("nvlime.core.ui")
-xref({})
+local xref = {}
 xref["open-xref-buf"] = function(conn, xref_list)
   local _let_1_ = luaeval("require(\"nvlime.window.xref\").open(_A[1], _A[2])", {xref_list, {["conn-name"] = conn.cb_data.name}})
   local _ = _let_1_[1]

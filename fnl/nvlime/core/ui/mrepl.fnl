@@ -13,7 +13,7 @@ Provides MREPL buffer management: init, submit, clear, disconnect, interrupt."
 (local ui (require "nvlime.core.ui"))
 (local connection (require "nvlime.core.connection"))
 
-(mrepl {})
+(local mrepl {})
 
 ;;; ============================================================================
 ;;; Private helpers

@@ -5,8 +5,8 @@ local getcurpos = vim.fn.getcurpos
 local setpos = vim.fn.setpos
 local win_gotoid = vim.fn.win_gotoid
 local ui = require("nvlime.core.ui")
-__fnl_global__compiler_2dnotes({})
-__fnl_global__compiler_2dnotes["init-buffer"] = function(conn, orig_win)
+local compiler_notes = {}
+compiler_notes["init-buffer"] = function(conn, orig_win)
   local buf_name = ui["compiler-notes-buf-name"](conn)
   local buf = bufnr(buf_name, true)
   if not ui["nvlime-buffer-initialized"](buf) then
@@ -17,7 +17,7 @@ __fnl_global__compiler_2dnotes["init-buffer"] = function(conn, orig_win)
   setbufvar(buf, "nvlime_notes_orig_win", orig_win)
   return buf
 end
-__fnl_global__compiler_2dnotes["fill-buffer"] = function(note_list)
+compiler_notes["fill-buffer"] = function(note_list)
   vim.cmd("setlocal modifiable")
   if not note_list then
     ui["replace-content"]("No message from the compiler.")
@@ -52,7 +52,7 @@ __fnl_global__compiler_2dnotes["fill-buffer"] = function(note_list)
   vim.b.nvlime_compiler_note_list = nlist
   return nil
 end
-__fnl_global__compiler_2dnotes["open-cur-note"] = function(edit_cmd)
+compiler_notes["open-cur-note"] = function(edit_cmd)
   local note_coord = nil
   local edit_cmd0 = (edit_cmd or "hide edit")
   local cur_pos = getcurpos()
@@ -102,4 +102,4 @@ __fnl_global__compiler_2dnotes["open-cur-note"] = function(edit_cmd)
     end
   end
 end
-return __fnl_global__compiler_2dnotes
+return compiler_notes

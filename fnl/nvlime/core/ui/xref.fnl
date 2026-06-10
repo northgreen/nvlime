@@ -12,7 +12,7 @@ Provides cross-reference buffer display and source location navigation."
 
 (local ui (require "nvlime.core.ui"))
 
-(xref {})
+(local xref {})
 
 ;;; ============================================================================
 ;;; Public API

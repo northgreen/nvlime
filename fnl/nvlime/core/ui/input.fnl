@@ -13,7 +13,7 @@ Provides buffer-based and inline input dialogs for nvlime."
 
 (local ui (require "nvlime.core.ui"))
 
-(input {})
+(local input {})
 
 ;;; ============================================================================
 ;;; Global variables

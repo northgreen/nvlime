@@ -10,7 +10,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
 
 (local ui (require "nvlime.core.ui"))
 
-(inspector {})
+(local inspector {})
 
 ;;; ============================================================================
 ;;; Private helpers

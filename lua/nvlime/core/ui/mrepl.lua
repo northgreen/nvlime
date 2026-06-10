@@ -7,7 +7,7 @@ local searchpos = vim.fn.searchpos
 local feedkeys = vim.fn.feedkeys
 local ui = require("nvlime.core.ui")
 local connection = require("nvlime.core.connection")
-mrepl({})
+local mrepl = {}
 mrepl["show-prompt-or-result"] = function(content)
   local last_line = getline("$")
   if (#last_line > 0) then

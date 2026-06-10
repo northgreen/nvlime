@@ -343,7 +343,7 @@ ui["indent-cur-line"] = function(indent)
   if vim.o.expandtab then
     indent_str = string.rep(" ", indent)
   else
-    local tabs = (indent // vim.o.tabstop)
+    local tabs = math.floor((indent / vim.o.tabstop))
     local remainder = (indent % vim.o.tabstop)
     indent_str = (string.rep("\t", tabs) .. string.rep(" ", remainder))
   end

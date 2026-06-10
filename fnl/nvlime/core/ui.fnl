@@ -351,7 +351,7 @@ Functions deferred to later files:
   "Adjust indentation of the current line by indent spaces."
   (let [indent-str (if vim.o.expandtab
                      (string.rep " " indent)
-                     (let [tabs (// indent vim.o.tabstop)
+                      (let [tabs (math.floor (/ indent vim.o.tabstop))
                            remainder (% indent vim.o.tabstop)]
                        (.. (string.rep "\t" tabs)
                            (string.rep " " remainder))))]
