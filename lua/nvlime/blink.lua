@@ -35,13 +35,12 @@ local function flags__3ekind(flags)
     return nil
   end
 end
-local function set_documentation(item, callback)
-  local get_documentation = vim.fn["nvlime#cmp#get_docs"]
-  local function _5_(_241)
-    item["documentation"] = {kind = "markdown", value = string.gsub(_241, "^Documentation for the symbol.-\n\n", "", 1)}
+local function set_documentation(conn, item, callback)
+  local function _5_(_self, doc_string)
+    item["documentation"] = {kind = "markdown", value = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)}
     return callback(item)
   end
-  return get_documentation(item.label, _5_)
+  return conn["documentation-symbol"](conn, item.label, _5_)
 end
 local get_lsp_kind
 if _2bfuzzy_3f_2b then
@@ -56,14 +55,6 @@ else
   end
   get_lsp_kind = _7_
 end
-local get_completion
-local _9_
-if _2bfuzzy_3f_2b then
-  _9_ = "nvlime#cmp#get_fuzzy"
-else
-  _9_ = "nvlime#cmp#get_simple"
-end
-get_completion = vim.fn[_9_]
 local Source = {__index = Source}
 Source.new = function(_, opts0)
   local self = setmetatable({}, Source)
@@ -83,8 +74,15 @@ Source.get_completions = function(self, ctx, callback)
   local cursor_col = ctx.cursor[2]
   local keyword = (ctx.keyword or "")
   local start_col = (cursor_col - #keyword)
+  local conn = buffer["get-conn-var!"](0)
+  local completion_fn
+  if _2bfuzzy_3f_2b then
+    completion_fn = conn["fuzzy-completions"]
+  else
+    completion_fn = conn["simple-completions"]
+  end
   local on_done
-  local function _11_(candidates)
+  local function _10_(_self, candidates)
     if not called then
       called = true
       local items
@@ -115,12 +113,13 @@ Source.get_completions = function(self, ctx, callback)
       return nil
     end
   end
-  on_done = _11_
-  get_completion(keyword, on_done)
+  on_done = _10_
+  completion_fn(conn, keyword, on_done)
   return nil
 end
 Source.resolve = function(self, item, callback)
-  return set_documentation(vim.deepcopy(item), callback)
+  local conn = buffer["get-conn-var!"](0)
+  return set_documentation(conn, vim.deepcopy(item), callback)
 end
 Source["flags->kind"] = flags__3ekind
 return Source

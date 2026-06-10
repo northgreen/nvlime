@@ -39,13 +39,13 @@
                  &until result]
       (if (. kinds kind) kind result))))
 
-;;; {any} ->
-(fn set-documentation [item]
-  (let [get-documentation (. vim.fn "nvlime#cmp#get_docs")]
-    (get-documentation
-      item.label
-      #(tset item :documentation
-             (string.gsub $ "^Documentation for the symbol.-\n\n" "" 1)))))
+;;; connection {any} ->
+(fn set-documentation [conn item]
+  (conn:documentation-symbol
+    item.label
+    (fn [_self doc-string]
+      (tset item :documentation
+            (string.gsub doc-string "^Documentation for the symbol.-\n\n" "" 1)))))
 
 (local get-lsp-kind
        (if +fuzzy?+
@@ -55,12 +55,7 @@
                 :labelDetails {:detail flags}
                 :kind (or (flags->kind flags)
                           lsp-types.CompletionItemKind.Keyword)}))
-           (fn [item] {:label item})))
-
-(local get-completion
-       (. vim.fn (if +fuzzy?+
-                     "nvlime#cmp#get_fuzzy"
-                     "nvlime#cmp#get_simple")))
+            (fn [item] {:label item})))
 
 (local source {})
 
@@ -75,7 +70,11 @@
 
 (fn source.complete [self params callback]
   (var called false)
-  (let [on-done (fn [candidates]
+  (let [conn (buffer.get-conn-var! 0)
+        completion-fn (if +fuzzy?+
+                          (. conn "fuzzy-completions")
+                          (. conn "simple-completions"))
+        on-done (fn [_self candidates]
                   (when (not called)
                     (set called true)
                     (callback
@@ -83,11 +82,12 @@
                         (get-lsp-kind c)))))
         input (string.sub params.context.cursor_before_line
                           params.offset)]
-    (get-completion input on-done)))
+    (completion-fn conn input on-done)))
 
 (fn source.resolve [self item callback]
-  (set-documentation (vim.deepcopy item))
-  ;; defer_fn required for documentation to show up
-  (vim.defer_fn #(callback item) 5))
+  (let [conn (buffer.get-conn-var! 0)]
+    (set-documentation conn (vim.deepcopy item))
+    ;; defer_fn required for documentation to show up
+    (vim.defer_fn #(callback item) 5)))
 
 source

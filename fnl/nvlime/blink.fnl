@@ -38,16 +38,15 @@
                  &until result]
       (if (. kinds kind) kind result))))
 
-;;; {any} (fn [nil]) ->
-(fn set-documentation [item callback]
-  (let [get-documentation (. vim.fn "nvlime#cmp#get_docs")]
-    (get-documentation
-      item.label
-      #(do
-         (tset item :documentation
-               {:kind "markdown"
-                :value (string.gsub $ "^Documentation for the symbol.-\n\n" "" 1)})
-         (callback item)))))
+;;; connection {any} (fn [nil]) ->
+(fn set-documentation [conn item callback]
+  (conn:documentation-symbol
+    item.label
+    (fn [_self doc-string]
+      (tset item :documentation
+            {:kind "markdown"
+             :value (string.gsub doc-string "^Documentation for the symbol.-\n\n" "" 1)})
+      (callback item))))
 
 (local get-lsp-kind
        (if +fuzzy?+
@@ -60,10 +59,6 @@
            (fn [item]
              {:label item})))
 
-(local get-completion
-       (. vim.fn (if +fuzzy?+
-                     "nvlime#cmp#get_fuzzy"
-                     "nvlime#cmp#get_simple")))
 
 ;; blink.cmp Source class
 (local Source {:__index Source})
@@ -85,8 +80,12 @@
   (let [cursor-line (. ctx.cursor 1)
         cursor-col (. ctx.cursor 2)
         keyword (or ctx.keyword "")
-        start-col (- cursor-col (# keyword))]
-    (local on-done (fn [candidates]
+        start-col (- cursor-col (# keyword))
+        conn (buffer.get-conn-var! 0)]
+    (local completion-fn (if +fuzzy?+
+                             (. conn "fuzzy-completions")
+                             (. conn "simple-completions")))
+    (local on-done (fn [_self candidates]
       (when (not called)
         (set called true)
         (let [items (icollect [_ c (ipairs (or (. candidates 1) []))]
@@ -102,11 +101,12 @@
           (callback {:items items
                      :is_incomplete_backward false
                      :is_incomplete_forward false})))))
-    (get-completion keyword on-done)
+    (completion-fn conn keyword on-done)
     nil))
 
 (fn Source.resolve [self item callback]
-  (set-documentation (vim.deepcopy item) callback))
+  (let [conn (buffer.get-conn-var! 0)]
+    (set-documentation conn (vim.deepcopy item) callback)))
 
 (tset Source "flags->kind" flags->kind)
 Source

@@ -36,13 +36,12 @@ local function flags__3ekind(flags)
     return nil
   end
 end
-local function set_documentation(item)
-  local get_documentation = vim.fn["nvlime#cmp#get_docs"]
-  local function _5_(_241)
-    item["documentation"] = string.gsub(_241, "^Documentation for the symbol.-\n\n", "", 1)
+local function set_documentation(conn, item)
+  local function _5_(_self, doc_string)
+    item["documentation"] = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)
     return nil
   end
-  return get_documentation(item.label, _5_)
+  return conn["documentation-symbol"](conn, item.label, _5_)
 end
 local get_lsp_kind
 if _2bfuzzy_3f_2b then
@@ -57,14 +56,6 @@ else
   end
   get_lsp_kind = _7_
 end
-local get_completion
-local _9_
-if _2bfuzzy_3f_2b then
-  _9_ = "nvlime#cmp#get_fuzzy"
-else
-  _9_ = "nvlime#cmp#get_simple"
-end
-get_completion = vim.fn[_9_]
 local source = {}
 source.is_available = function(self)
   return not (buffer["get-conn-var!"](0) == nil)
@@ -77,11 +68,18 @@ source.get_keyword_pattern = function(self)
 end
 source.complete = function(self, params, callback)
   local called = false
+  local conn = buffer["get-conn-var!"](0)
+  local completion_fn
+  if _2bfuzzy_3f_2b then
+    completion_fn = conn["fuzzy-completions"]
+  else
+    completion_fn = conn["simple-completions"]
+  end
   local on_done
-  local function _11_(candidates)
+  local function _10_(_self, candidates)
     if not called then
       called = true
-      local function _12_()
+      local function _11_()
         local tbl_26_ = {}
         local i_27_ = 0
         for _, c in ipairs((candidates[1] or {})) do
@@ -94,20 +92,21 @@ source.complete = function(self, params, callback)
         end
         return tbl_26_
       end
-      return callback(_12_())
+      return callback(_11_())
     else
       return nil
     end
   end
-  on_done = _11_
+  on_done = _10_
   local input = string.sub(params.context.cursor_before_line, params.offset)
-  return get_completion(input, on_done)
+  return completion_fn(conn, input, on_done)
 end
 source.resolve = function(self, item, callback)
-  set_documentation(vim.deepcopy(item))
-  local function _15_()
+  local conn = buffer["get-conn-var!"](0)
+  set_documentation(conn, vim.deepcopy(item))
+  local function _14_()
     return callback(item)
   end
-  return vim.defer_fn(_15_, 5)
+  return vim.defer_fn(_14_, 5)
 end
 return source
