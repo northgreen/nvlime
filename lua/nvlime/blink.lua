@@ -21,12 +21,16 @@ local function flags__3ekind(flags)
       else
       end
     end
+    local result = nil
     for _, kind in ipairs(kind_precedence) do
+      if result then break end
       if kinds[kind] then
+        result = kind
       else
+        result = result
       end
     end
-    return nil
+    return result
   else
     return nil
   end

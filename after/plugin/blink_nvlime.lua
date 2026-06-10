@@ -8,5 +8,6 @@ end
 
 local opts = require("nvlime.config")
 if opts.blink.enabled then
-  vim.g.nvlime_blink_registered = true
+  local blink = require("blink.cmp")
+  return blink.register_source("nvlime", require("nvlime.blink"))
 end

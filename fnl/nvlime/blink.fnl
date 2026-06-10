@@ -33,9 +33,10 @@
       (let [kind (. flag-kind (flags:sub i i))]
         (when kind
           (tset kinds kind true))))
-    (each [_ kind (ipairs kind-precedence)]
-      (when (. kinds kind)
-        (values kind)))))
+    (accumulate [result nil
+                 _ kind (ipairs kind-precedence)
+                 &until result]
+      (if (. kinds kind) kind result))))
 
 ;;; {any} (fn [nil]) ->
 (fn set-documentation [item callback]
