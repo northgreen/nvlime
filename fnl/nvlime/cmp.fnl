@@ -1,14 +1,9 @@
-(import-macros {: return} "parsley.macros")
 (local lsp-types (require "cmp.types.lsp"))
 (local buffer (require "nvlime.buffer"))
 (local opts (require "nvlime.config"))
-(local psl (require "parsley"))
 (require "cmp.types.cmp")
 
-(local +fuzzy?+ (not (psl.empty?
-                       (psl.filter
-                         #(= "SWANK-FUZZY" $)
-                         opts.contribs))))
+(local +fuzzy?+ (not (= (# (icollect [_ v (ipairs opts.contribs) &when (= "SWANK-FUZZY" $)] v)) 0)))
 
 (local flag-kind
        {:b lsp-types.CompletionItemKind.Variable
@@ -35,9 +30,9 @@
     (let [kind (. flag-kind (flags:sub i i))]
       (when kind
         (tset kinds kind true))))
-  (each [_ kind (ipairs kind-precedence)]
-    (when (. kinds kind)
-      (return kind))))
+  (for [i 1 (length kind-precedence)]
+    (when (. kinds (. kind-precedence i))
+      (return (. kind-precedence i)))))
 
 ;;; {any} ->
 (fn set-documentation [item]
@@ -51,11 +46,11 @@
        (if +fuzzy?+
            (fn [item]
              (let [flags (. item 4)]
-               {:label (psl.first item)
-               :labelDetails {:detail flags}
-               :kind (or (flags->kind flags)
-                         lsp-types.CompletionItemKind.Keyword)}))
-           #{:label $}))
+               {:label (. item 1)
+                :labelDetails {:detail flags}
+                :kind (or (flags->kind flags)
+                          lsp-types.CompletionItemKind.Keyword)}))
+           (fn [item] {:label item})))
 
 (local get-completion
        (. vim.fn (if +fuzzy?+
@@ -65,7 +60,7 @@
 (local source {})
 
 (fn source.is_available [self]
-  (not (psl.null? (buffer.get-conn-var! 0))))
+  (not (= (buffer.get-conn-var! 0) nil)))
 
 (fn source.get_debug_name [self]
   "CMP Nvlime")

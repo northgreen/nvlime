@@ -1,4 +1,3 @@
-(import-macros {: return} "parsley.macros")
 (local window (require "nvlime.window"))
 (local buffer (require "nvlime.buffer"))
 (local ut (require "nvlime.utilities"))

@@ -1,4 +1,3 @@
-(import-macros {: return} "parsley.macros")
 (local {: nvim_buf_get_lines
         : nvim_buf_line_count}
        vim.api)
@@ -92,18 +91,16 @@
   (let [lines (get-lines line end)]
     (var i 1)
     (var text (. lines i))
-    (var index (if same-column?
-                   (- col 1)
-                   col))
+    (var index (if same-column? (- col 1) col))
     (var capture nil)
-    #(while text
-       (set (index capture) (find-forward text pattern index))
-       (if index
-           (let [line_ (+ (- i 1) line)]
-             (return line_ index capture))
-           (do
-             (set i (+ 1 i))
-             (set text (. lines i)))))))
+    (while text
+      (set (index capture) (find-forward text pattern index))
+      (if index
+          (let [line_ (+ (- i 1) line)]
+            (return line_ index capture))
+          (do
+            (set i (+ i 1))
+            (set text (. lines i)))))))
 
 (fn backward-matches [pattern line col start same-column?]
   (let [lines (get-lines start line)
@@ -117,14 +114,14 @@
     (var index (if same-column? (+ 1 col) col))
     (var capture nil)
     (var reversed-text (reverse lines i))
-    #(while reversed-text
-       (set (index capture) (find-backward reversed-text pattern index))
-       (if index
-           (let [line_ (+ offset i)]
-             (return line_ index capture))
-           (do
-             (set i (- i 1))
-             (set reversed-text (reverse lines i)))))))
+    (while reversed-text
+      (set (index capture) (find-backward reversed-text pattern index))
+      (if index
+          (let [line_ (+ offset i)]
+            (return line_ index capture))
+          (do
+            (set i (- i 1))
+            (set reversed-text (reverse lines i)))))))
 
 ;;; boolean -> integer
 (fn search.top_form_line [backward?]
