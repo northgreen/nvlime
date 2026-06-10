@@ -1,9 +1,5 @@
+" Shim: forwards to Fennel nvlime.core.contrib.presentation_streams
 function! nvlime#contrib#presentation_streams#Init(conn)
-  call a:conn.Send(
-        \ a:conn.EmacsRex(
-        \ [nvlime#SYM('SWANK', 'INIT-PRESENTATION-STREAMS')]),
-        \ function('nvlime#SimpleSendCB',
-        \ [a:conn, v:null, 'nvlime#contrib#presentation_streams#Init']))
+  return luaeval('require("nvlime.core.contrib.presentation_streams").init-presentation-streams(_A[1])', a:conn)
 endfunction
-
 " vim: sw=2

@@ -1,27 +1,9 @@
-""
-" @dict NvlimeConnection.Autodoc
-" @usage {raw_form} [margin] [callback]
-" @public
-"
-" Get the arglist description for {raw_form}. {raw_form} should be a value
-" returned by @function(nvlime#ui#CurRawForm) or @function(nvlime#ToRawForm).
-" See the source of SWANK:AUTODOC for an explanation of the raw forms.
-" [margin], if specified and not v:null, gives the line width to wrap to.
-"
-" This method needs the SWANK-ARGLISTS contrib module. See
-" @function(NvlimeConnection.SwankRequire).
-function! nvlime#contrib#arglists#Autodoc(raw_form, margin = v:null, Callback = v:null) dict
-  let cmd = a:margin is v:null ?
-        \ [nvlime#SYM('SWANK', 'AUTODOC'), a:raw_form] :
-        \ [nvlime#SYM('SWANK', 'AUTODOC'), a:raw_form,
-        \ nvlime#KW('PRINT-RIGHT-MARGIN'), a:margin]
-  call self.Send(self.EmacsRex(cmd),
-        \ function('nvlime#SimpleSendCB',
-        \ [self, a:Callback, 'nvlime#contrib#arglists#Autodoc']))
+" Shim: forwards to Fennel nvlime.core.contrib.arglists
+function! nvlime#contrib#arglists#Autodoc(raw_form, ...) dict
+  return luaeval('require("nvlime.core.contrib.arglists").autodoc(_A[1], _A[2], _A[3], _A[4])', [self, a:raw_form, a:0 ? a:1 : v:null, a:0 ? a:2 : v:null])
 endfunction
 
 function! nvlime#contrib#arglists#Init(conn)
-  let a:conn['Autodoc'] = function('nvlime#contrib#arglists#Autodoc')
+  return luaeval('require("nvlime.core.contrib.arglists").init-arglists(_A[1])', a:conn)
 endfunction
-
 " vim: sw=2

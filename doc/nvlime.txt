@@ -682,7 +682,7 @@ user_contrib_initializers   *g:nvlime_config.user_contrib_initializers*
     |Funcref|s for initializing user contrib modules. The keys should
     be contrib module names (usually in uppercase). If your Swank
     contrib module needs special initialization, add an initializer
-    function here. See autoload/nvlime/contrib.vim for examples.
+    function here. See fnl/nvlime/core/contrib.fnl for examples.
     Can be configured only with vimscript.
 
 autodoc                                       *g:nvlime_config.autodoc*

@@ -1,25 +1,9 @@
-""
-" @dict NvlimeConnection.FuzzyCompletions
-" @public
-"
-" Get a completion list for {symbol}, using a more clever fuzzy algorithm.
-" {symbol} should be a plain string containing a (partial) symbol name.
-"
-" This method needs the SWANK-FUZZY contrib module. See
-" @function(NvlimeConnection.SwankRequire).
-function! nvlime#contrib#fuzzy#FuzzyCompletions(symbol, Callback = v:null) dict
-  let cur_package = self.GetCurrentPackage()
-  if cur_package isnot v:null
-    let cur_package = cur_package[0]
-  endif
-  call self.Send(self.EmacsRex(
-        \ [nvlime#SYM('SWANK', 'FUZZY-COMPLETIONS'), a:symbol, cur_package]),
-        \ function('nvlime#SimpleSendCB',
-        \ [self, a:Callback, 'nvlime#contrib#fuzzy#FuzzyCompletions']))
+" Shim: forwards to Fennel nvlime.core.contrib.fuzzy
+function! nvlime#contrib#fuzzy#FuzzyCompletions(symbol, ...) dict
+  return luaeval('require("nvlime.core.contrib.fuzzy").fuzzy-completions(_A[1], _A[2], _A[3])', [self, a:symbol, a:0 ? a:1 : v:null])
 endfunction
 
 function! nvlime#contrib#fuzzy#Init(conn)
-  let a:conn['FuzzyCompletions'] = function('nvlime#contrib#fuzzy#FuzzyCompletions')
+  return luaeval('require("nvlime.core.contrib.fuzzy").init-fuzzy(_A[1])', a:conn)
 endfunction
-
 " vim: sw=2

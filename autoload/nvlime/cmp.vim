@@ -1,21 +1,27 @@
-" Helper functions for nvim-cmp
+" Helper functions for nvim-cmp - bridge to Fennel connection methods
 
 function nvlime#cmp#get_fuzzy(base, callback)
-  silent let connection = nvlime#connection#Get(v:true)
-  call l:connection.FuzzyCompletions(a:base,
-        \ {c, r -> luaeval('_A[1](_A[2])', [a:callback, r[0]])})
+  silent let conn_dict = nvlime#connection#Get(v:true)
+  if type(conn_dict) == v:t_dict && has_key(conn_dict, '__lua_ref')
+    let lua_conn = conn_dict['__lua_ref']
+    call luaeval('local fn = _A[1]["fuzzy-completions"] or _A[1]["FuzzyCompletions"]; if fn then fn(_A[1], _A[2], function(conn, r) _A[3](r or {}) end) end', [lua_conn, a:base, a:callback])
+  endif
 endfunction
 
 function nvlime#cmp#get_simple(base, callback)
-  silent let connection = nvlime#connection#Get(v:true)
-  call connection.SimpleCompletions(a:base,
-        \ {c, r -> luaeval('_A[1](_A[2])', [a:callback, r[0]])})
+  silent let conn_dict = nvlime#connection#Get(v:true)
+  if type(conn_dict) == v:t_dict && has_key(conn_dict, '__lua_ref')
+    let lua_conn = conn_dict['__lua_ref']
+    call luaeval('_A[1]["simple-completions"](_A[1], _A[2], function(conn, r) _A[3](r or {}) end)', [lua_conn, a:base, a:callback])
+  endif
 endfunction
 
 function! nvlime#cmp#get_docs(symbol, callback)
-  silent let connection = nvlime#connection#Get(v:true)
-  call connection.DocumentationSymbol(a:symbol,
-        \ {c, r -> luaeval('_A[1](_A[2])', [a:callback, r])})
+  silent let conn_dict = nvlime#connection#Get(v:true)
+  if type(conn_dict) == v:t_dict && has_key(conn_dict, '__lua_ref')
+    let lua_conn = conn_dict['__lua_ref']
+    call luaeval('_A[1]["documentation-symbol"](_A[1], _A[2], function(conn, r) _A[3](r or "") end)', [lua_conn, a:symbol, a:callback])
+  endif
 endfunction
 
 " vim: sw=2
