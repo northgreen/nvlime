@@ -87,18 +87,33 @@ Source.get_completions = function(self, ctx, callback)
   local function _11_(candidates)
     if not called then
       called = true
-      local items = {}
-      for _, c in ipairs((candidates or {})) do
-        local item = get_lsp_kind(c)
-        if item then
-          item["textEdit"] = {newText = item.label, range = {start = {line = (cursor_line - 1), character = start_col}, ["end"] = {line = (cursor_line - 1), character = cursor_col}}}
-          table.insert(items, item)
-        else
+      local items
+      do
+        local tbl_26_ = {}
+        local i_27_ = 0
+        for _, c in ipairs((candidates or {})) do
+          local val_28_
+          do
+            local item = get_lsp_kind(c)
+            if item then
+              item["textEdit"] = {newText = item.label, range = {start = {line = (cursor_line - 1), character = start_col}, ["end"] = {line = (cursor_line - 1), character = cursor_col}}}
+              val_28_ = item
+            else
+              val_28_ = nil
+            end
+          end
+          if (nil ~= val_28_) then
+            i_27_ = (i_27_ + 1)
+            tbl_26_[i_27_] = val_28_
+          else
+          end
         end
+        items = tbl_26_
       end
+      return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
     else
+      return nil
     end
-    return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
   end
   on_done = _11_
   get_completion(keyword, on_done)

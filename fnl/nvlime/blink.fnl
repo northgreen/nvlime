@@ -89,20 +89,19 @@
     (local on-done (fn [candidates]
       (when (not called)
         (set called true)
-        (local items [])
-        (each [_ c (ipairs (or candidates []))]
-          (let [item (get-lsp-kind c)]
-            (when item
-              (tset item :textEdit
-                    {:newText item.label
-                     :range {:start {:line (- cursor-line 1)
-                                     :character start-col}
-                             :end {:line (- cursor-line 1)
-                                   :character cursor-col}}})
-               (table.insert items item)))))
-        (callback {:items items
-                   :is_incomplete_backward false
-                   :is_incomplete_forward false})))
+        (let [items (icollect [_ c (ipairs (or candidates []))]
+                      (let [item (get-lsp-kind c)]
+                        (when item
+                          (tset item :textEdit
+                                {:newText item.label
+                                 :range {:start {:line (- cursor-line 1)
+                                                 :character start-col}
+                                         :end {:line (- cursor-line 1)
+                                               :character cursor-col}}})
+                          item)))]
+          (callback {:items items
+                     :is_incomplete_backward false
+                     :is_incomplete_forward false})))))
     (get-completion keyword on-done)
     nil))
 

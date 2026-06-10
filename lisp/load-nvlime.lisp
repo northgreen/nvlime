@@ -4,7 +4,6 @@
     (:use #:cl)))
 (in-package #:nvlime-loader)
 
-
 (require :asdf)
 
 (defparameter *nvlime-home*
