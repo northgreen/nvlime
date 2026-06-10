@@ -185,7 +185,7 @@
     (when msg-type
       (let [event-name msg-type.name
             handler (self:get self.server_event_handlers event-name nil)]
-        (when handler
+        (when (= (type handler) "function")
           (handler self msg))))))
 
 connection

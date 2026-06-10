@@ -116,19 +116,16 @@ connection["chain-callbacks"] = function(self, ...)
     if (#remaining < 1) then
     else
     end
-    do
-      local cb = remaining[1]
-      if cb then
-        cb(unpack({...}))
-      else
+    local cb = remaining[1]
+    if cb then
+      local function _16_(...)
+        if (#remaining >= 2) then
+          return chain_cb(vim.list_slice(remaining, 2), ...)
+        else
+          return nil
+        end
       end
-    end
-    if (#remaining >= 2) then
-      local next_fn = remaining[2]
-      local function _17_(...)
-        return chain_cb(vim.list_slice(remaining, 3), ...)
-      end
-      return next_fn(_17_)
+      return cb(_16_)
     else
       return nil
     end

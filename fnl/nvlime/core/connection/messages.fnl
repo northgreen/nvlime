@@ -117,11 +117,10 @@
       (when (< (length remaining) 1)
         (values))
       (let [cb (. remaining 1)]
-        (when cb (cb (unpack [...]))))
-      (when (>= (length remaining) 2)
-        (let [next-fn (. remaining 2)]
-          (next-fn (fn [...]
-                       (chain-cb (vim.list_slice remaining 3) ...))))))
+        (when cb
+          (cb (fn [...]
+                (when (>= (length remaining) 2)
+                  (chain-cb (vim.list_slice remaining 2) ...)))))))
     (let [first-fn (. cbs 1)]
       (first-fn (fn [...]
                     (chain-cb (vim.list_slice cbs 2) ...))))))

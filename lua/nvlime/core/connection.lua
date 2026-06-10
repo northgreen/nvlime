@@ -176,7 +176,7 @@ connection["on-server-event"] = function(self, chan, msg)
   if msg_type then
     local event_name = msg_type.name
     local handler = self:get(self.server_event_handlers, event_name, nil)
-    if handler then
+    if (type(handler) == "function") then
       return handler(self, msg)
     else
       return nil
