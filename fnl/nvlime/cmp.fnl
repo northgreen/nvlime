@@ -13,6 +13,11 @@
   (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
 (local +fuzzy?+ has-fuzzy?)
 
+(fn server-has-fuzzy? [conn]
+  "Check if SWANK-FUZZY is actually loaded on the server."
+  (let [contribs (. conn.cb_data :contribs)]
+    (and contribs (>= (vim.fn.index contribs "SWANK-FUZZY") 0))))
+
 (local flag-kind
        {:b lsp-types.CompletionItemKind.Variable
         :f lsp-types.CompletionItemKind.Function
@@ -52,15 +57,14 @@
       (tset item :documentation
             (string.gsub doc-string "^Documentation for the symbol.-\n\n" "" 1)))))
 
-(local get-lsp-kind
-       (if +fuzzy?+
-           (fn [item]
-             (let [flags (. item 4)]
-               {:label (. item 1)
-                :labelDetails {:detail flags}
-                :kind (or (flags->kind flags)
-                          lsp-types.CompletionItemKind.Keyword)}))
-            (fn [item] {:label item})))
+(fn get-lsp-kind [use-fuzzy? item]
+  (if use-fuzzy?
+      (let [flags (. item 4)]
+        {:label (. item 1)
+         :labelDetails {:detail flags}
+         :kind (or (flags->kind flags)
+                   lsp-types.CompletionItemKind.Keyword)})
+      {:label item}))
 
 (local source {})
 
@@ -77,14 +81,16 @@
   (var called false)
   (let [conn (buffer.get-conn-var! 0)]
     (when conn
-      (local completion-fn (or (and +fuzzy?+ connection.fuzzy-completions)
+      (local use-fuzzy? (and +fuzzy?+ (server-has-fuzzy? conn)))
+      (local completion-fn (if use-fuzzy?
+                               connection.fuzzy-completions
                                connection.simple-completions))
       (local on-done (fn [_self candidates]
                        (when (not called)
                          (set called true)
                           (callback
-                            (icollect [_ c (ipairs (or (if +fuzzy?+ (vim.list_slice candidates 2) candidates) []))]
-                              (get-lsp-kind c))))))
+                            (icollect [_ c (ipairs (or (if use-fuzzy? (vim.list_slice candidates 2) candidates) []))]
+                              (get-lsp-kind use-fuzzy? c))))))
       (let [input (string.sub params.context.cursor_before_line
                               params.offset)]
         (completion-fn conn input on-done)))))
