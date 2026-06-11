@@ -11,7 +11,6 @@ require("nvlime.core.connection.inspector")
 require("nvlime.core.connection.swank")
 require("nvlime.core.connection.events")
 local contrib = require("nvlime.core.contrib")
-vim.g["nvlime-options"] = config
 local plugin = {}
 local function input_check_edit_flag(edit, text)
   if edit then
@@ -176,15 +175,15 @@ local function clean_up_null_buf_connections()
 end
 plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
   local def_timeout
-  if (vim.g.nvlime_options.connect_timeout ~= -1) then
-    def_timeout = vim.g.nvlime_options.connect_timeout
+  if (config.connect_timeout ~= -1) then
+    def_timeout = config.connect_timeout
   else
     def_timeout = nil
   end
   local host0
   local or_18_ = host
   if not or_18_ then
-    local h = vim.fn.input("Host: ", vim.g.nvlime_options.address.host)
+    local h = vim.fn.input("Host: ", config.address.host)
     if (string.len(h) <= 0) then
       ui["err-msg"]("Canceled.")
       or_18_ = nil
@@ -196,7 +195,7 @@ plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
   local port0
   local or_21_ = port
   if not or_21_ then
-    local p = vim.fn.input("Port: ", tostring(vim.g.nvlime_options.address.port))
+    local p = vim.fn.input("Port: ", tostring(config.address.port))
     if (string.len(p) <= 0) then
       ui["err-msg"]("Canceled.")
       or_21_ = nil
@@ -242,7 +241,7 @@ plugin["connect-repl"] = function(host, port, remote_prefix, timeout, name)
       on_swank_require_complete(false, c, r)
       return cont()
     end
-    return conn["swank-require"](conn, vim.g.nvlime_options.contribs, _31_)
+    return conn["swank-require"](conn, config.contribs, _31_)
   end
   local function _32_(cont)
     local function _33_(c)
@@ -329,7 +328,7 @@ plugin.compile = function(content, policy, edit)
   local function _48_(str)
     conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
     local win = vim.fn.win_getid()
-    local policy0 = (policy or vim.g.nvlime_options.compiler_policy)
+    local policy0 = (policy or config.compiler_policy)
     local function _49_(c, r)
       return on_compilation_complete(win, c, r)
     end
@@ -400,7 +399,7 @@ plugin["compile-file"] = function(file_name, policy, load, edit)
   local function _63_(fname)
     conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
     local win = vim.fn.win_getid()
-    local policy0 = (policy or vim.g.nvlime_options.compiler_policy)
+    local policy0 = (policy or config.compiler_policy)
     local load0 = (load or true)
     local function _64_(c, r)
       return on_compilation_complete(win, c, r)
@@ -789,7 +788,7 @@ plugin["calc-cur-indent"] = function(shift_width)
   return vim.fn.lispindent(line_no)
 end
 local function space_enter_cb()
-  if vim.g.nvlime_options.autodoc.enabled then
+  if config.autodoc.enabled then
     return plugin["cur-autodoc"]()
   else
     return plugin["show-operator-arglist"]()

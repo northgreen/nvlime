@@ -13,6 +13,7 @@ Provides buffer-based and inline input dialogs for nvlime."
         vim.fn)
 
 (local ui (require "nvlime.core.ui"))
+(local config (require "nvlime.config"))
 
 (local input {})
 
@@ -109,7 +110,7 @@ Provides buffer-based and inline input dialogs for nvlime."
 
 (fn input.save-history [text]
   "Add text to input history, removing duplicates and respecting limit."
-  (let [max-items (or vim.g.nvlime_options.input_history_limit 100)]
+  (let [max-items (or config.input_history_limit 100)]
     (var history vim.g.nvlime_input_history)
     ;; Skip if same as last entry
     (when (and (> (length history) 0)

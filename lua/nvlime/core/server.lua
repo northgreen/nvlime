@@ -14,6 +14,7 @@ local setpos = vim.fn.setpos
 local exists = vim.fn.exists
 local async = require("nvlime.core.async")
 local ui = require("nvlime.core.ui")
+local config = require("nvlime.config")
 local server = {}
 local function _1_()
   return vim.g.nvlime_cl_wait_interval
@@ -54,7 +55,7 @@ server["build-server-command-for-ccl"] = function(loader, eval_str)
   return {"ccl", "--load", loader, "--eval", eval_str}
 end
 server["build-server-command"] = function(cl_impl)
-  local cl_impl0 = (cl_impl or vim.g.nvlime_options.implementation)
+  local cl_impl0 = (cl_impl or config.implementation)
   local nvlime_loader = (nvlime_home .. path_sep .. "lisp" .. path_sep .. "load-nvlime.lisp")
   local function _8_()
     local user_func_name = ("NvlimeBuildServerCommandFor_" .. cl_impl0)

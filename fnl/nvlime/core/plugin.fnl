@@ -17,9 +17,6 @@
 ;; Load contrib module (registers call-initializers on connection table)
 (local contrib (require "nvlime.core.contrib"))
 
-;;; Initialize global options
-(tset vim.g :nvlime-options config)
-
 (local plugin {})
 
 ;;; ============================================================================
@@ -207,17 +204,17 @@
   "Connect to a SWANK server.
   Prompts for host/port if not provided.
   Returns connection object or nil on failure."
-  (let [def-timeout (if (not= vim.g.nvlime_options.connect_timeout -1)
-                      vim.g.nvlime_options.connect_timeout
+  (let [def-timeout (if (not= config.connect_timeout -1)
+                      config.connect_timeout
                       nil)
         host (or host
-                 (let [h (vim.fn.input "Host: " vim.g.nvlime_options.address.host)]
+                 (let [h (vim.fn.input "Host: " config.address.host)]
                    (if (<= (string.len h) 0)
                        (do (ui.err-msg "Canceled.") (values nil))
                        h)))
         port (or port
                  (let [p (vim.fn.input "Port: "
-                                       (tostring vim.g.nvlime_options.address.port))]
+                                       (tostring config.address.port))]
                    (if (<= (string.len p) 0)
                        (do (ui.err-msg "Canceled.") (values nil))
                        (tonumber p))))
@@ -241,7 +238,7 @@
     (conn:chain-callbacks
       (fn [cont] (conn:connection-info true (fn [c r] (do (on-connection-info-complete c r) (cont)))))
       (fn [cont] (on-connection-info-complete conn nil) (cont))
-      (fn [cont] (conn:swank-require vim.g.nvlime_options.contribs
+      (fn [cont] (conn:swank-require config.contribs
                                      (fn [c r] (do (on-swank-require-complete false c r) (cont)))))
       (fn [cont] (connection.call-initializers conn nil
                                               (fn [c] (on-call-initializers-complete c) (cont))))
@@ -320,7 +317,7 @@
           ((. conn.ui :on-write-string) conn "--\n"
            {:name "REPL-SEP" :package "KEYWORD"})
           (let [win (vim.fn.win_getid)
-                policy (or policy vim.g.nvlime_options.compiler_policy)]
+                policy (or policy config.compiler_policy)]
             (conn:compile-string-for-emacs
               str nil 1 nil policy
               (fn [c r] (on-compilation-complete win c r)))))
@@ -394,7 +391,7 @@
           ((. conn.ui :on-write-string) conn "--\n"
            {:name "REPL-SEP" :package "KEYWORD"})
           (let [win (vim.fn.win_getid)
-                policy (or policy vim.g.nvlime_options.compiler_policy)
+                policy (or policy config.compiler_policy)
                 load (or load true)]
             (conn:compile-file-for-emacs
               fname load policy
@@ -802,7 +799,7 @@
 
 (fn space-enter-cb []
   "Timer callback for SpaceEnter key - shows arglist."
-  (if vim.g.nvlime_options.autodoc.enabled
+  (if config.autodoc.enabled
       (plugin.cur-autodoc)
       (plugin.show-operator-arglist)))
 

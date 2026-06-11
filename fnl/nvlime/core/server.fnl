@@ -21,6 +21,7 @@
 
 (local async (require "nvlime.core.async"))
 (local ui (require "nvlime.core.ui"))
+(local config (require "nvlime.config"))
 
 (local server {})
 
@@ -71,7 +72,7 @@
   then falls back to default builder.
   Throws if implementation is not supported."
   (let [cl-impl (or cl-impl
-                    (. vim.g :nvlime_options :implementation))
+                    config.implementation)
         nvlime-loader (.. nvlime-home path-sep "lisp" path-sep "load-nvlime.lisp")]
 
     (cond

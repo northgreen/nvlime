@@ -6,6 +6,7 @@ local getline = vim.fn.getline
 local cursor = vim.fn.cursor
 local mode = vim.fn.mode
 local ui = require("nvlime.core.ui")
+local config = require("nvlime.config")
 local input = {}
 vim.g["nvlime_input_history"] = {}
 input["check-input-validity"] = function(str_val, cb, cancellable)
@@ -93,7 +94,7 @@ input["from-buffer-complete"] = function()
   end
 end
 input["save-history"] = function(text)
-  local max_items = (vim.g.nvlime_options.input_history_limit or 100)
+  local max_items = (config.input_history_limit or 100)
   local history = vim.g.nvlime_input_history
   if ((#history > 0) and (history[#history] == text)) then
   else
