@@ -53,7 +53,12 @@ connection["connection-info"] = function(self, return_dict, callback)
   local callback0 = (callback or nil)
   local cb_wrapper
   local function _7_(chan, msg)
-    check_return_status(msg, "nvlime#ConnectionInfo")
+    local ok, err = pcall(check_return_status, msg, "nvlime#ConnectionInfo")
+    if not ok then
+      vim.notify(("nvlime msg: " .. tostring(err)), vim.log.levels.WARN)
+      __fnl_global__return()
+    else
+    end
     if return_dict0 then
       return try_to_call(callback0, {self, self["plist-to-dict"](self, msg[2][2])})
     else
@@ -66,23 +71,32 @@ end
 connection["swank-require"] = function(self, contrib, callback)
   local required
   if (type(contrib) == "table") then
-    local function _9_(name)
+    local function _10_(name)
       return connection.kw(name)
     end
-    required = {connection.cl("QUOTE"), vim.tbl_map(_9_, contrib)}
+    required = {connection.cl("QUOTE"), vim.tbl_map(_10_, contrib)}
   else
     required = connection.kw(contrib)
   end
-  local function _11_(chan, msg)
+  local function _12_(chan, msg)
     return self["simple-send-cb"](self, callback, "nvlime#SwankRequire", chan, msg)
   end
-  return self:send(self["emacs-rex"](self, {connection.sym("SWANK", "SWANK-REQUIRE"), required}), _11_)
+  return self:send(self["emacs-rex"](self, {connection.sym("SWANK", "SWANK-REQUIRE"), required}), _12_)
 end
 connection.interrupt = function(self, thread)
   return self:send({connection.kw("EMACS-INTERRUPT"), thread}, nil)
 end
 connection["simple-send-cb"] = function(self, callback, caller, chan, msg)
-  check_return_status(msg, caller)
+  local status = msg[2][1]
+  do
+    local ok, err = pcall(check_return_status, msg, caller)
+    if not ok then
+      vim.notify(("nvlime msg: " .. tostring(err)), vim.log.levels.WARN)
+      try_to_call(callback, {self, {}})
+      __fnl_global__return()
+    else
+    end
+  end
   return try_to_call(callback, {self, msg[2][2]})
 end
 connection["sldb-send-cb"] = function(self, callback, caller, chan, msg)
@@ -118,23 +132,23 @@ connection["chain-callbacks"] = function(self, ...)
     end
     local cb = remaining[1]
     if cb then
-      local function _16_(...)
+      local function _18_(...)
         if (#remaining >= 2) then
           return chain_cb(vim.list_slice(remaining, 2), ...)
         else
           return nil
         end
       end
-      return cb(_16_)
+      return cb(_18_)
     else
       return nil
     end
   end
   local first_fn = cbs[1]
-  local function _19_(...)
+  local function _21_(...)
     return chain_cb(vim.list_slice(cbs, 2), ...)
   end
-  return first_fn(_19_)
+  return first_fn(_21_)
 end
 connection["check-return-status"] = check_return_status
 connection["try-to-call"] = try_to_call

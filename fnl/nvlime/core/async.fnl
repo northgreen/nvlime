@@ -43,6 +43,7 @@
         (when CB
           (let [(ok err) (pcall CB chan payload)]
             (when (not ok)
+              (vim.notify (.. "nvlime: callback failed: " (tostring err)) vim.log.levels.WARN)
               (nvim_err_writeln
                 (.. "nvlime: callback failed: "
                     (tostring err))))))))))

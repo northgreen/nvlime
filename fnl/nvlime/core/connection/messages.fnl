@@ -53,12 +53,15 @@
   (let [return-dict (or return-dict true)
         callback (or callback nil)
         cb-wrapper (fn [chan msg]
-                     (check-return-status msg "nvlime#ConnectionInfo")
-                     (if return-dict
+                     (let [(ok err) (pcall check-return-status msg "nvlime#ConnectionInfo")]
+                       (when (not ok)
+                         (vim.notify (.. "nvlime msg: " (tostring err)) vim.log.levels.WARN)
+                         (return))
+                       (if return-dict
                          (try-to-call callback
                            [self (self:plist-to-dict (. msg 2 2))])
                          (try-to-call callback
-                           [self (. msg 2 2)])))]
+                            [self (. msg 2 2)]))))]
     (self:send (self:emacs-rex
                  [(connection.sym "SWANK" "CONNECTION-INFO")])
                cb-wrapper)))
@@ -83,8 +86,14 @@
 
 (fn connection.simple-send-cb [self callback caller chan msg]
   "Generic callback wrapper. Checks return status, calls callback with result."
-  (check-return-status msg caller)
-  (try-to-call callback [self (. msg 2 2)]))
+  (let [status (. msg 2 1)]
+    (let [(ok err) (pcall check-return-status msg caller)]
+      (when (not ok)
+        (vim.notify (.. "nvlime msg: " (tostring err)) vim.log.levels.WARN)
+        ;; 错误情况下传空列表给回调，让补全显示为空而非完全无响应
+        (try-to-call callback [self []])
+        (return)))
+    (try-to-call callback [self (. msg 2 2)])))
 
 (fn connection.sldb-send-cb [self callback caller chan msg]
   "SLDB-specific callback wrapper.

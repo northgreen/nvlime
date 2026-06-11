@@ -12,12 +12,13 @@
   (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
 (local +fuzzy?+ has-fuzzy?)
 
+(var fuzzy-disabled? false)
+(local FUZZY-TIMEOUT 5000)
+
 (fn server-has-fuzzy? [conn]
   "Check if SWANK-FUZZY is actually loaded on the server."
   (let [contribs (. conn.cb_data :contribs)]
     (and contribs (>= (vim.fn.index contribs "SWANK-FUZZY") 0))))
-
-(vim.notify (.. "nvlime blink: MODULE LOADED, fuzzy=" (if +fuzzy?+ "yes" "no")) vim.log.levels.DEBUG)
 
 (local flag-kind
        {:b blink-types.CompletionItemKind.Variable
@@ -88,34 +89,45 @@
 
 (fn Source.get_completions [self ctx callback]
   (var called false)
+  (var handling-complete false)
   (let [cursor-line (. ctx.cursor 1)
         cursor-col (. ctx.cursor 2)
         keyword (or (ctx:get_keyword) "")
         start-col (- cursor-col (# keyword))
         conn (buffer.get-conn-var! 0)]
     (when conn
-       (local use-fuzzy? (and +fuzzy?+ (server-has-fuzzy? conn)))
-       (local completion-fn (if use-fuzzy?
-                                connection.fuzzy-completions
-                                connection.simple-completions))
-       (local on-done (fn [_self candidates]
-         (when (not called)
-           (set called true)
-           (let [raw-items (or (if use-fuzzy? (vim.list_slice candidates 2) candidates) [])]
-             (let [items (icollect [_ c (ipairs raw-items)]
-                          (let [item (get-lsp-kind use-fuzzy? c)]
-                             (when item
-                               (tset item :textEdit
-                                     {:newText item.label
-                                      :range {:start {:line (- cursor-line 1)
-                                                      :character start-col}
-                                              :end {:line (- cursor-line 1)
-                                                    :character cursor-col}}})
-                               item)))]
-               (callback {:items items
+      (local use-fuzzy? (and +fuzzy?+ (server-has-fuzzy? conn) (not fuzzy-disabled?)))
+      (local process-candidates (fn [candidates is-fuzzy]
+        (when (not handling-complete)
+          (set handling-complete true)
+          (set called true)
+          (let [raw-items (or (if is-fuzzy (vim.list_slice candidates 2) candidates) [])]
+            (let [items (icollect [_ c (ipairs raw-items)]
+                        (let [item (get-lsp-kind is-fuzzy c)]
+                          (when item
+                            (tset item :textEdit
+                                  {:newText item.label
+                                   :range {:start {:line (- cursor-line 1)
+                                                   :character start-col}
+                                           :end {:line (- cursor-line 1)
+                                                 :character cursor-col}}})
+                            item)))]
+              (callback {:items items
                          :is_incomplete_backward false
                          :is_incomplete_forward false}))))))
-      (completion-fn conn keyword on-done)))
+      (if use-fuzzy?
+          (do
+            (connection.fuzzy-completions conn keyword (fn [_self candidates]
+              (process-candidates candidates true)))
+            (vim.defer_fn (fn []
+              (when (not handling-complete)
+                (set fuzzy-disabled? true)
+                (vim.notify "nvlime: fuzzy-completions timed out after 5s, falling back to simple-completions" vim.log.levels.WARN)
+                (connection.simple-completions conn keyword (fn [_self candidates]
+                  (process-candidates candidates false)))))
+              FUZZY-TIMEOUT))
+          (connection.simple-completions conn keyword (fn [_self candidates]
+            (process-candidates candidates false))))))
   nil)
 
 (fn Source.resolve [self item callback]

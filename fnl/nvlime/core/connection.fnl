@@ -137,8 +137,12 @@
 ;;; Context methods - delegate to UI
 
 (fn connection.get-current-package [self]
-  "Returns the current Common Lisp package bound to the buffer."
-  (if self.ui (self.ui:get-current-package) nil))
+  "Returns the current Common Lisp package bound to the buffer.
+   Falls back to CL-USER when no UI is attached."
+  (if self.ui
+      (self.ui:get-current-package)
+      ;; Default package when no UI context - matches SWANK's default behavior
+      ["CL-USER" "CL-USER"]))
 
 (fn connection.set-current-package [self package]
   "Binds a Common Lisp package to the current buffer."

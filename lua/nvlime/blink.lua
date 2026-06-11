@@ -12,17 +12,12 @@ for _, v in ipairs(opts.contribs) do
   end
 end
 local _2bfuzzy_3f_2b = has_fuzzy_3f
+local fuzzy_disabled_3f = false
+local FUZZY_TIMEOUT = 5000
 local function server_has_fuzzy_3f(conn)
   local contribs = conn.cb_data.contribs
   return (contribs and (vim.fn.index(contribs, "SWANK-FUZZY") >= 0))
 end
-local _2_
-if _2bfuzzy_3f_2b then
-  _2_ = "yes"
-else
-  _2_ = "no"
-end
-vim.notify(("nvlime blink: MODULE LOADED, fuzzy=" .. _2_), vim.log.levels.DEBUG)
 local flag_kind = {b = blink_types.CompletionItemKind.Variable, f = blink_types.CompletionItemKind.Function, g = blink_types.CompletionItemKind.Method, c = blink_types.CompletionItemKind.Class, t = blink_types.CompletionItemKind.Class, m = blink_types.CompletionItemKind.Operator, s = blink_types.CompletionItemKind.Operator, p = blink_types.CompletionItemKind.Module}
 local kind_precedence = {blink_types.CompletionItemKind.Module, blink_types.CompletionItemKind.Class, blink_types.CompletionItemKind.Operator, blink_types.CompletionItemKind.Method, blink_types.CompletionItemKind.Function, blink_types.CompletionItemKind.Variable}
 local function flags__3ekind(flags)
@@ -50,11 +45,11 @@ local function flags__3ekind(flags)
   end
 end
 local function set_documentation(conn, item, callback)
-  local function _7_(_self, doc_string)
+  local function _5_(_self, doc_string)
     item["documentation"] = {kind = "markdown", value = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)}
     return callback(item)
   end
-  return conn["documentation-symbol"](conn, item.label, _7_)
+  return conn["documentation-symbol"](conn, item.label, _5_)
 end
 local function get_lsp_kind(use_fuzzy_3f, item)
   if use_fuzzy_3f then
@@ -80,6 +75,7 @@ Source.get_trigger_characters = function(self)
 end
 Source.get_completions = function(self, ctx, callback)
   local called = false
+  local handling_complete = false
   do
     local cursor_line = ctx.cursor[1]
     local cursor_col = ctx.cursor[2]
@@ -87,25 +83,20 @@ Source.get_completions = function(self, ctx, callback)
     local start_col = (cursor_col - #keyword)
     local conn = buffer["get-conn-var!"](0)
     if conn then
-      local use_fuzzy_3f = (_2bfuzzy_3f_2b and server_has_fuzzy_3f(conn))
-      local completion_fn
-      if use_fuzzy_3f then
-        completion_fn = connection["fuzzy-completions"]
-      else
-        completion_fn = connection["simple-completions"]
-      end
-      local on_done
-      local function _10_(_self, candidates)
-        if not called then
+      local use_fuzzy_3f = (_2bfuzzy_3f_2b and server_has_fuzzy_3f(conn) and not fuzzy_disabled_3f)
+      local process_candidates
+      local function _7_(candidates, is_fuzzy)
+        if not handling_complete then
+          handling_complete = true
           called = true
           local raw_items
-          local _11_
-          if use_fuzzy_3f then
-            _11_ = vim.list_slice(candidates, 2)
+          local _8_
+          if is_fuzzy then
+            _8_ = vim.list_slice(candidates, 2)
           else
-            _11_ = candidates
+            _8_ = candidates
           end
-          raw_items = (_11_ or {})
+          raw_items = (_8_ or {})
           local items
           do
             local tbl_26_ = {}
@@ -113,7 +104,7 @@ Source.get_completions = function(self, ctx, callback)
             for _, c in ipairs(raw_items) do
               local val_28_
               do
-                local item = get_lsp_kind(use_fuzzy_3f, c)
+                local item = get_lsp_kind(is_fuzzy, c)
                 if item then
                   item["textEdit"] = {newText = item.label, range = {start = {line = (cursor_line - 1), character = start_col}, ["end"] = {line = (cursor_line - 1), character = cursor_col}}}
                   val_28_ = item
@@ -134,8 +125,31 @@ Source.get_completions = function(self, ctx, callback)
           return nil
         end
       end
-      on_done = _10_
-      completion_fn(conn, keyword, on_done)
+      process_candidates = _7_
+      if use_fuzzy_3f then
+        local function _13_(_self, candidates)
+          return process_candidates(candidates, true)
+        end
+        connection["fuzzy-completions"](conn, keyword, _13_)
+        local function _14_()
+          if not handling_complete then
+            fuzzy_disabled_3f = true
+            vim.notify("nvlime: fuzzy-completions timed out after 5s, falling back to simple-completions", vim.log.levels.WARN)
+            local function _15_(_self, candidates)
+              return process_candidates(candidates, false)
+            end
+            return connection["simple-completions"](conn, keyword, _15_)
+          else
+            return nil
+          end
+        end
+        vim.defer_fn(_14_, FUZZY_TIMEOUT)
+      else
+        local function _17_(_self, candidates)
+          return process_candidates(candidates, false)
+        end
+        connection["simple-completions"](conn, keyword, _17_)
+      end
     else
     end
   end

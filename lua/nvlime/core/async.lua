@@ -36,6 +36,7 @@ local function dispatch_msg(chan, json_obj)
     if CB then
       local ok, err = pcall(CB, chan, payload)
       if not ok then
+        vim.notify(("nvlime: callback failed: " .. tostring(err)), vim.log.levels.WARN)
         return nvim_err_writeln(("nvlime: callback failed: " .. tostring(err)))
       else
         return nil
