@@ -14,6 +14,9 @@ and interactive source location jumping."
        vim.api)
 
 (local ui (require "nvlime.core.ui"))
+(local messages (require "nvlime.core.connection.messages"))
+(local events (require "nvlime.core.connection.events"))
+(local conn (require "nvlime.core.connection"))
 
 (local compiler-notes {})
 
@@ -53,7 +56,7 @@ and interactive source location jumping."
   (var note-count (length note-list))
 
   (for [_ note (ipairs note-list)]
-    (let [note-dict ((. vim.fn "nvlime#PListToDict") note)]
+    (let [note-dict (messages.plist-to-dict nil note)]
       (table.insert nlist note-dict)
 
       (let [begin-pos (getcurpos)]
@@ -92,14 +95,14 @@ and interactive source location jumping."
     (when (not note-coord)
       (values))
 
-    (let [raw-note-loc ((. vim.fn "nvlime#Get")
+    (let [raw-note-loc (conn.get
                         (. vim.b.nvlime_compiler_note_list (. note-coord :id))
                         "LOCATION"
                         nil)
           pcall-result (pcall (fn []
-                                (let [note-loc ((. vim.fn "nvlime#ParseSourceLocation")
-                                                raw-note-loc)]
-                                  ((. vim.fn "nvlime#GetValidSourceLocation") note-loc))))
+                                (let [note-loc (events.parse-source-location nil
+                                                       raw-note-loc)]
+                                  (events.get-valid-source-location nil note-loc))))
           valid-loc (if (. pcall-result 1)
                       (. pcall-result 2)
                       [])]

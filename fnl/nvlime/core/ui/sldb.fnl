@@ -22,6 +22,9 @@ lookup, eval, inspect, disassemble, return."
 (local ui (require "nvlime.core.ui"))
 (local buffer (require "nvlime.buffer"))
 (local input (require "nvlime.core.ui.input"))
+(local messages (require "nvlime.core.connection.messages"))
+(local events (require "nvlime.core.connection.events"))
+(local conn (require "nvlime.core.connection"))
 
 (local sldb {})
 
@@ -129,8 +132,8 @@ lookup, eval, inspect, disassemble, return."
   frame: [index name flags?] tuple.
   Returns true if restartable, false otherwise."
   (if (> (length frame) 2)
-      (let [flags ((. vim.fn "nvlime#PListToDict") (. frame 3))]
-        ((. vim.fn "nvlime#Get") flags "RESTARTABLE" false))
+      (let [flags (messages.plist-to-dict nil (. frame 3))]
+        (conn.get flags "RESTARTABLE" false))
       false))
 
 ;;; ============================================================================
@@ -151,9 +154,9 @@ lookup, eval, inspect, disassemble, return."
       (var rlocals [])
       (var max-name-len 0)
       (each [_ lc (ipairs locals)]
-        (let [rlc ((. vim.fn "nvlime#PListToDict") lc)]
+        (let [rlc (messages.plist-to-dict nil lc)]
           (table.insert rlocals rlc)
-          (let [rlc-l (length ((. vim.fn "nvlime#Get") rlc "NAME"))]
+          (let [rlc-l (length (conn.get rlc "NAME"))]
             (when (> rlc-l max-name-len)
               (set max-name-len rlc-l)))))
       (each [_ rlc (ipairs rlocals)]
@@ -161,10 +164,10 @@ lookup, eval, inspect, disassemble, return."
              (.. content
                  "\t  "
                  ((. vim.fn "nvlime#ui#Pad")
-                  ((. vim.fn "nvlime#Get") rlc "NAME")
+                  (conn.get rlc "NAME")
                   ":"
                   max-name-len)
-                 ((. vim.fn "nvlime#Get") rlc "VALUE")
+                 (conn.get rlc "VALUE")
                  "\n"))))
     (let [catch-tags (. result 2)]
       (when catch-tags
@@ -192,27 +195,27 @@ lookup, eval, inspect, disassemble, return."
   (var snippet "")
   (var content "")
 
-  (if (= (type (. result 2)) "table")
-      ;; List result — parse as keyword list
-      (let [r ((. vim.fn "nvlime#KeywordList2Dict")
-               (vim.fn.slice result 1))]
-        (when ((. vim.fn "nvlime#HasKey") r "SNIPPET")
-          (set snippet ((. vim.fn "nvlime#Get") r "SNIPPET")))
-        (when ((. vim.fn "nvlime#HasKey") r "SOURCE-FORM")
-          (set snippet ((. vim.fn "nvlime#Get") r "SOURCE-FORM")))
-        (when (and ((. vim.fn "nvlime#HasKey") r "FILE")
-                   ((. vim.fn "nvlime#HasKey") r "POSITION"))
-          (set content
-               (.. content
-                   "\n\tFile: "
-                   ((. vim.fn "nvlime#Get") r "FILE")
-                   " "
-                   ((. vim.fn "nvlime#Get") r "POSITION")
-                   "\n"))))
-      ;; Simple position result
-      (do
-        (set content (.. content "\n\tPosition: " (. result 2) "\n"))
-        (set snippet nil)))
+   (if (= (type (. result 2)) "table")
+       ;; List result — parse as keyword list
+       (let [r (events.keyword-list-2-dict nil
+                       (vim.fn.slice result 1))]
+         (when (conn.has-key r "SNIPPET")
+           (set snippet (conn.get r "SNIPPET")))
+         (when (conn.has-key r "SOURCE-FORM")
+           (set snippet (conn.get r "SOURCE-FORM")))
+         (when (and (conn.has-key r "FILE")
+                    (conn.has-key r "POSITION"))
+           (set content
+                (.. content
+                    "\n\tFile: "
+                    (conn.get r "FILE")
+                    " "
+                    (conn.get r "POSITION")
+                    "\n"))))
+       ;; Simple position result
+       (do
+         (set content (.. content "\n\tPosition: " (. result 2) "\n"))
+         (set snippet nil)))
 
   (when snippet
     (let [snippet-lines (vim.split snippet "\n" {:trimempty false})
@@ -241,8 +244,8 @@ lookup, eval, inspect, disassemble, return."
   conn: connection object
   result: source location data"
   (let [pcall-result (pcall (fn []
-                              (let [src-loc ((. vim.fn "nvlime#ParseSourceLocation") result)]
-                                ((. vim.fn "nvlime#GetValidSourceLocation") src-loc))))
+                              (let [src-loc (events.parse-source-location nil result)]
+                                (events.get-valid-source-location nil src-loc))))
         valid-loc (if (. pcall-result 1)
                     (. pcall-result 2)
                     [])]
@@ -276,8 +279,8 @@ lookup, eval, inspect, disassemble, return."
 
     (var options [])
     (each [idx lc (ipairs locals)]
-      (let [lc-dict ((. vim.fn "nvlime#PListToDict") lc)
-            var-name ((. vim.fn "nvlime#Get") lc-dict "NAME")]
+      (let [lc-dict (messages.plist-to-dict nil lc)
+            var-name (conn.get lc-dict "NAME")]
         (table.insert options
                       (.. (tostring idx) ". " var-name))))
 
@@ -455,15 +458,15 @@ lookup, eval, inspect, disassemble, return."
           ;; Frame has content below — show locals
           (let [frame (. vim.b.nvlime_sldb_frames (+ nth 1))
                 restartable (sldb.frame-restartable frame)]
-            ((. vim.fn "nvlime#ChainCallbacks")
-             (fn [continuation]
-               (vim.b.nvlime_conn
-                :FrameLocalsAndCatchTags
-                nth
-                (fn [c r]
-                  (continuation nth restartable cur-line c r))))
-             (fn [& args]
-               (apply sldb.show-frame-locals-cb args))))
+            (messages.chain-callbacks nil
+              (fn [continuation]
+                (vim.b.nvlime_conn
+                 :FrameLocalsAndCatchTags
+                 nth
+                 (fn [c r]
+                   (continuation nth restartable cur-line c r))))
+              (fn [& args]
+                (apply sldb.show-frame-locals-cb args))))
           ;; Frame is already expanded — collapse it
           (let [next-frame-line (search frame-line-pattern "nW")]
             (when (> next-frame-line 0)

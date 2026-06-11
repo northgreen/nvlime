@@ -4,6 +4,7 @@ local setbufvar = vim.fn.setbufvar
 local float2nr = vim.fn.float2nr
 local line = vim.fn.line
 local ui = require("nvlime.core.ui")
+local events = require("nvlime.core.connection.events")
 local xref = {}
 xref["open-xref-buf"] = function(conn, xref_list)
   local _let_1_ = luaeval("require(\"nvlime.window.xref\").open(_A[1], _A[2])", {xref_list, {["conn-name"] = conn.cb_data.name}})
@@ -18,8 +19,8 @@ xref["open-cur-xref"] = function(edit_cmd)
   local raw_xref_loc = vim.b.xref_list[idx][2]
   nvim_win_close(0, true)
   local function _2_()
-    local xref_loc = vim.fn["nvlime#ParseSourceLocation"](raw_xref_loc)
-    local valid_loc = vim.fn["nvlime#GetValidSourceLocation"](xref_loc)
+    local xref_loc = events["parse-source-location"](nil, raw_xref_loc)
+    local valid_loc = events["get-valid-source-location"](nil, xref_loc)
     if ((#valid_loc > 0) and __fnl_global___21_3d(valid_loc[2], nil)) then
       local path = valid_loc[1]
       if ((type(path) == "string") and not string.find(path, "^sftp://") and not vim.fn.filereadable(path)) then

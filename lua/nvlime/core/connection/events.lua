@@ -40,20 +40,20 @@ connection["parse-source-location"] = function(self, loc)
   return loc_obj
 end
 connection["get-valid-source-location"] = function(self, loc)
-  local loc_file = connection.get(self, loc, "FILE", nil)
-  local loc_buffer = connection.get(self, loc, "BUFFER", nil)
-  local loc_buf_and_file = connection.get(self, loc, "BUFFER-AND-FILE", nil)
-  local loc_src_form = connection.get(self, loc, "SOURCE-FORM", nil)
+  local loc_file = connection.get(loc, "FILE", nil)
+  local loc_buffer = connection.get(loc, "BUFFER", nil)
+  local loc_buf_and_file = connection.get(loc, "BUFFER-AND-FILE", nil)
+  local loc_src_form = connection.get(loc, "SOURCE-FORM", nil)
   local _7_
   do
-    local loc_pos = connection.get(self, loc, "POSITION", nil)
-    local loc_snippet = connection.get(self, loc, "SNIPPET", nil)
+    local loc_pos = connection.get(loc, "POSITION", nil)
+    local loc_snippet = connection.get(loc, "SNIPPET", nil)
     _7_ = {loc_file, loc_pos, loc_snippet}
   end
   local _8_
   do
-    local loc_offset = connection.get(self, loc, "OFFSET", nil)
-    local loc_snippet = connection.get(self, loc, "SNIPPET", nil)
+    local loc_offset = connection.get(loc, "OFFSET", nil)
+    local loc_snippet = connection.get(loc, "SNIPPET", nil)
     local loc_offset0
     if loc_offset then
       local a = loc_offset[1]
@@ -70,8 +70,8 @@ connection["get-valid-source-location"] = function(self, loc)
   end
   local _11_
   do
-    local loc_offset = connection.get(self, loc, "OFFSET", nil)
-    local loc_snippet = connection.get(self, loc, "SNIPPET", nil)
+    local loc_offset = connection.get(loc, "OFFSET", nil)
+    local loc_snippet = connection.get(loc, "SNIPPET", nil)
     local loc_offset0
     if loc_offset then
       local a = loc_offset[1]

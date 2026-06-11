@@ -6,12 +6,15 @@ local setpos = vim.fn.setpos
 local win_gotoid = vim.fn.win_gotoid
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local ui = require("nvlime.core.ui")
+local messages = require("nvlime.core.connection.messages")
+local events = require("nvlime.core.connection.events")
+local conn = require("nvlime.core.connection")
 local compiler_notes = {}
-compiler_notes["init-buffer"] = function(conn, orig_win)
-  local buf_name = ui["compiler-notes-buf-name"](conn)
+compiler_notes["init-buffer"] = function(conn0, orig_win)
+  local buf_name = ui["compiler-notes-buf-name"](conn0)
   local buf = bufnr(buf_name, true)
   if not ui["nvlime-buffer-initialized"](buf) then
-    ui["set-nvlime-buffer-opts"](buf, conn)
+    ui["set-nvlime-buffer-opts"](buf, conn0)
     setbufvar(buf, "filetype", "nvlime_notes")
   else
   end
@@ -32,7 +35,7 @@ compiler_notes["fill-buffer"] = function(note_list)
   local idx = 0
   local note_count = #note_list
   for _ = note, ipairs(note_list) do
-    local note_dict = vim.fn["nvlime#PListToDict"](note)
+    local note_dict = messages["plist-to-dict"](nil, note)
     table.insert(nlist, note_dict)
     do
       local begin_pos = getcurpos()
@@ -65,11 +68,11 @@ compiler_notes["open-cur-note"] = function(edit_cmd)
   if not note_coord then
   else
   end
-  local raw_note_loc = vim.fn["nvlime#Get"](vim.b.nvlime_compiler_note_list[note_coord.id], "LOCATION", nil)
+  local raw_note_loc = conn.get(vim.b.nvlime_compiler_note_list[note_coord.id], "LOCATION", nil)
   local pcall_result
   local function _6_()
-    local note_loc = vim.fn["nvlime#ParseSourceLocation"](raw_note_loc)
-    return vim.fn["nvlime#GetValidSourceLocation"](note_loc)
+    local note_loc = events["parse-source-location"](nil, raw_note_loc)
+    return events["get-valid-source-location"](nil, note_loc)
   end
   pcall_result = pcall(_6_)
   local valid_loc

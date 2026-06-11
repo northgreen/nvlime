@@ -9,6 +9,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
        vim.fn)
 
 (local ui (require "nvlime.core.ui"))
+(local events (require "nvlime.core.connection.events"))
 
 (local inspector {})
 
@@ -76,8 +77,8 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
   conn: connection object
   msg: source location result or error."
   (let [pcall-result (pcall (fn []
-                              (let [loc ((. vim.fn "nvlime#ParseSourceLocation") msg)]
-                                ((. vim.fn "nvlime#GetValidSourceLocation") loc))))
+                              (let [loc (events.parse-source-location nil msg)]
+                                (events.get-valid-source-location nil loc))))
         valid-loc (if (. pcall-result 1)
                     (. pcall-result 2)
                     [])]

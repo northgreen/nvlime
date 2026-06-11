@@ -2,6 +2,7 @@ local nvim_win_close = vim.api.nvim_win_close
 local getcurpos = vim.fn.getcurpos
 local setpos = vim.fn.setpos
 local ui = require("nvlime.core.ui")
+local events = require("nvlime.core.connection.events")
 local inspector = {}
 inspector["get-cur-coord"] = function()
   local cur_pos = getcurpos()
@@ -54,8 +55,8 @@ end
 inspector["find-source-cb"] = function(edit_cmd, conn, msg)
   local pcall_result
   local function _6_()
-    local loc = vim.fn["nvlime#ParseSourceLocation"](msg)
-    return vim.fn["nvlime#GetValidSourceLocation"](loc)
+    local loc = events["parse-source-location"](nil, msg)
+    return events["get-valid-source-location"](nil, loc)
   end
   pcall_result = pcall(_6_)
   local valid_loc

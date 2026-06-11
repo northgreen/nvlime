@@ -11,6 +11,7 @@ Provides cross-reference buffer display and source location navigation."
        vim.fn)
 
 (local ui (require "nvlime.core.ui"))
+(local events (require "nvlime.core.connection.events"))
 
 (local xref {})
 
@@ -40,8 +41,8 @@ Provides cross-reference buffer display and source location navigation."
     (nvim_win_close 0 true)
     (pcall
       (fn []
-        (let [xref-loc ((. vim.fn "nvlime#ParseSourceLocation") raw-xref-loc)
-              valid-loc ((. vim.fn "nvlime#GetValidSourceLocation") xref-loc)]
+        (let [xref-loc (events.parse-source-location nil raw-xref-loc)
+              valid-loc (events.get-valid-source-location nil xref-loc)]
           (if (and (> (length valid-loc) 0)
                    (!= (. valid-loc 2) nil))
               ;; Valid location found

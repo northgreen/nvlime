@@ -14,6 +14,9 @@ local matchlist = vim.fn.matchlist
 local ui = require("nvlime.core.ui")
 local buffer = require("nvlime.buffer")
 local input = require("nvlime.core.ui.input")
+local messages = require("nvlime.core.connection.messages")
+local events = require("nvlime.core.connection.events")
+local conn = require("nvlime.core.connection")
 local sldb = {}
 sldb["find-max-restart-name-len"] = function(restarts)
   local max_name_len = 0
@@ -108,13 +111,13 @@ sldb["match-frame"] = function(...)
 end
 sldb["frame-restartable"] = function(frame)
   if (#frame > 2) then
-    local flags = vim.fn["nvlime#PListToDict"](frame[3])
-    return vim.fn["nvlime#Get"](flags, "RESTARTABLE", false)
+    local flags = messages["plist-to-dict"](nil, frame[3])
+    return conn.get(flags, "RESTARTABLE", false)
   else
     return false
   end
 end
-sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn, result)
+sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn0, result)
   local content = "\n"
   local locals = result[1]
   if locals then
@@ -122,16 +125,16 @@ sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn, result)
     local rlocals = {}
     local max_name_len = 0
     for _, lc in ipairs(locals) do
-      local rlc = vim.fn["nvlime#PListToDict"](lc)
+      local rlc = messages["plist-to-dict"](nil, lc)
       table.insert(rlocals, rlc)
-      local rlc_l = #vim.fn["nvlime#Get"](rlc, "NAME")
+      local rlc_l = #conn0.get(rlc, "NAME")
       if (rlc_l > max_name_len) then
         max_name_len = rlc_l
       else
       end
     end
     for _, rlc in ipairs(rlocals) do
-      content = (content .. "\t  " .. vim.fn["nvlime#ui#Pad"](vim.fn["nvlime#Get"](rlc, "NAME"), ":", max_name_len) .. vim.fn["nvlime#Get"](rlc, "VALUE") .. "\n")
+      content = (content .. "\t  " .. vim.fn["nvlime#ui#Pad"](conn0.get(rlc, "NAME"), ":", max_name_len) .. conn0.get(rlc, "VALUE") .. "\n")
     end
   else
   end
@@ -145,8 +148,8 @@ sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn, result)
     else
     end
   end
-  local thread = conn("GetCurrentThread")
-  local buf = bufnr(ui["sldb-buf-name"](conn, thread), false)
+  local thread = conn0("GetCurrentThread")
+  local buf = bufnr(ui["sldb-buf-name"](conn0, thread), false)
   local function _16_()
     vim.cmd("setlocal modifiable")
     ui["append-string"](content, line0)
@@ -154,7 +157,7 @@ sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn, result)
   end
   return ui["with-buffer"](buf, _16_)
 end
-sldb["show-frame-source-location-cb"] = function(frame, line0, conn, result)
+sldb["show-frame-source-location-cb"] = function(frame, line0, conn0, result)
   if not (result[1].name == "LOCATION") then
     ui["err-msg"](result[2])
   else
@@ -162,17 +165,17 @@ sldb["show-frame-source-location-cb"] = function(frame, line0, conn, result)
   local snippet = ""
   local content = ""
   if (type(result[2]) == "table") then
-    local r = vim.fn["nvlime#KeywordList2Dict"](vim.fn.slice(result, 1))
-    if vim.fn["nvlime#HasKey"](r, "SNIPPET") then
-      snippet = vim.fn["nvlime#Get"](r, "SNIPPET")
+    local r = events["keyword-list-2-dict"](nil, vim.fn.slice(result, 1))
+    if conn0["has-key"](r, "SNIPPET") then
+      snippet = conn0.get(r, "SNIPPET")
     else
     end
-    if vim.fn["nvlime#HasKey"](r, "SOURCE-FORM") then
-      snippet = vim.fn["nvlime#Get"](r, "SOURCE-FORM")
+    if conn0["has-key"](r, "SOURCE-FORM") then
+      snippet = conn0.get(r, "SOURCE-FORM")
     else
     end
-    if (vim.fn["nvlime#HasKey"](r, "FILE") and vim.fn["nvlime#HasKey"](r, "POSITION")) then
-      content = (content .. "\n\tFile: " .. vim.fn["nvlime#Get"](r, "FILE") .. " " .. vim.fn["nvlime#Get"](r, "POSITION") .. "\n")
+    if (conn0["has-key"](r, "FILE") and conn0["has-key"](r, "POSITION")) then
+      content = (content .. "\n\tFile: " .. conn0.get(r, "FILE") .. " " .. conn0.get(r, "POSITION") .. "\n")
     else
     end
   else
@@ -188,8 +191,8 @@ sldb["show-frame-source-location-cb"] = function(frame, line0, conn, result)
     content = (content .. "\n\tSnippet:\n" .. table.concat(indented_lines, "\n") .. "\n")
   else
   end
-  local thread = conn("GetCurrentThread")
-  local buf = bufnr(ui["sldb-buf-name"](conn, thread), false)
+  local thread = conn0("GetCurrentThread")
+  local buf = bufnr(ui["sldb-buf-name"](conn0, thread), false)
   local function _23_()
     vim.cmd("setlocal modifiable")
     ui["append-string"](content, line0)
@@ -197,11 +200,11 @@ sldb["show-frame-source-location-cb"] = function(frame, line0, conn, result)
   end
   return ui["with-buffer"](buf, _23_)
 end
-sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn, result)
+sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn0, result)
   local pcall_result
   local function _24_()
-    local src_loc = vim.fn["nvlime#ParseSourceLocation"](result)
-    return vim.fn["nvlime#GetValidSourceLocation"](src_loc)
+    local src_loc = events["parse-source-location"](nil, result)
+    return events["get-valid-source-location"](nil, src_loc)
   end
   pcall_result = pcall(_24_)
   local valid_loc
@@ -218,7 +221,7 @@ sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn, r
       win_gotoid(win_to_go)
     else
     end
-    return vim.fn["nvlime#ui#ShowSource"](conn, valid_loc, edit_cmd, force_open)
+    return vim.fn["nvlime#ui#ShowSource"](conn0, valid_loc, edit_cmd, force_open)
   else
     if (result and (result[1].name == "ERROR")) then
       return ui["err-msg"](result[2])
@@ -227,7 +230,7 @@ sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn, r
     end
   end
 end
-sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn, msg)
+sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn0, msg)
   local locals = msg[1]
   if not locals then
     ui["err-msg"]("No local variable.")
@@ -235,8 +238,8 @@ sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn, 
   end
   local options = {}
   for idx, lc in ipairs(locals) do
-    local lc_dict = vim.fn["nvlime#PListToDict"](lc)
-    local var_name = vim.fn["nvlime#Get"](lc_dict, "NAME")
+    local lc_dict = messages["plist-to-dict"](nil, lc)
+    local var_name = conn0.get(lc_dict, "NAME")
     table.insert(options, (tostring(idx) .. ". " .. var_name))
   end
   vim.cmd("echohl Question")
@@ -248,7 +251,7 @@ sldb["find-source-cb"] = function(edit_cmd, win_to_go, force_open, frame, conn, 
       local function _31_(c, r)
         return sldb["open-frame-source-cb"](edit_cmd, win_to_go, force_open, c, r)
       end
-      conn("FindSourceLocationForEmacs", {"SLDB", frame, (nth_var - 1)}, _31_)
+      conn0("FindSourceLocationForEmacs", {"SLDB", frame, (nth_var - 1)}, _31_)
     else
     end
   end
@@ -393,7 +396,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
           local args = {...}
           return apply(sldb["show-frame-locals-cb"], args)
         end
-        vim.fn["nvlime#ChainCallbacks"](_52_, _54_)
+        messages["chain-callbacks"](nil, _52_, _54_)
       else
         local next_frame_line = search(frame_line_pattern, "nW")
         if (next_frame_line > 0) then

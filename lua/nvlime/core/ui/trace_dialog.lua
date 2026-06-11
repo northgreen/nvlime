@@ -10,6 +10,7 @@ local setbufvar = vim.fn.setbufvar
 local index = vim.fn.index
 local copy = vim.fn.copy
 local ui = require("nvlime.core.ui")
+local conn = require("nvlime.core.connection")
 local trace_dialog = {}
 local indent_level_width = 2
 local trace_entry_fold_pattern = "^\\(\\s*\\d*[[:space:]|]\\+\\)\\(`-\\)\\|\\( >\\)\\|\\( <\\)"
@@ -355,7 +356,7 @@ trace_dialog["reset-trace-entries"] = function()
     return nil
   end
 end
-trace_dialog["report-specs-complete"] = function(trace_buf, conn, result)
+trace_dialog["report-specs-complete"] = function(trace_buf, conn0, result)
   local coords = {}
   setbufvar(trace_buf, "modifiable", 1)
   local function _37_()
@@ -365,7 +366,7 @@ trace_dialog["report-specs-complete"] = function(trace_buf, conn, result)
   setbufvar(trace_buf, "modifiable", 0)
   return setbufvar(trace_buf, "nvlime_trace_specs_coords", coords)
 end
-trace_dialog["report-total-complete"] = function(trace_buf, conn, result)
+trace_dialog["report-total-complete"] = function(trace_buf, conn0, result)
   local cached_entries = getbufvar(trace_buf, "nvlime_trace_cached_entries", {})
   local coords = {}
   setbufvar(trace_buf, "modifiable", 1)
@@ -376,7 +377,7 @@ trace_dialog["report-total-complete"] = function(trace_buf, conn, result)
   setbufvar(trace_buf, "modifiable", 0)
   return setbufvar(trace_buf, "nvlime_trace_entries_header_coords", coords)
 end
-trace_dialog["dialog-untrace-all-complete"] = function(trace_buf, conn, result)
+trace_dialog["dialog-untrace-all-complete"] = function(trace_buf, conn0, result)
   if result then
     for _, r in ipairs(result) do
       print(r)
@@ -384,18 +385,18 @@ trace_dialog["dialog-untrace-all-complete"] = function(trace_buf, conn, result)
   else
   end
   local function _40_(_241)
-    return trace_dialog["report-specs-complete"](trace_buf, conn, _241)
+    return trace_dialog["report-specs-complete"](trace_buf, conn0, _241)
   end
-  return conn:ReportSpecs(_40_)
+  return conn0:ReportSpecs(_40_)
 end
-trace_dialog["dialog-untrace-complete"] = function(trace_buf, conn, result)
+trace_dialog["dialog-untrace-complete"] = function(trace_buf, conn0, result)
   print(result)
   local function _41_(_241)
-    return trace_dialog["report-specs-complete"](trace_buf, conn, _241)
+    return trace_dialog["report-specs-complete"](trace_buf, conn0, _241)
   end
-  return conn:ReportSpecs(_41_)
+  return conn0:ReportSpecs(_41_)
 end
-trace_dialog["report-partial-tree-complete"] = function(trace_buf, fetch_all, conn, result)
+trace_dialog["report-partial-tree-complete"] = function(trace_buf, fetch_all, conn0, result)
   local entry_list = result[1]
   local remaining = result[2]
   local fetch_key = result[3]
@@ -445,9 +446,9 @@ trace_dialog["report-partial-tree-complete"] = function(trace_buf, fetch_all, co
   setbufvar(trace_buf, "nvlime_trace_max_id", max_id)
   if (fetch_all and (remaining > 0)) then
     local function _47_(_241)
-      return trace_dialog["report-partial-tree-complete"](trace_buf, fetch_all, conn, _241)
+      return trace_dialog["report-partial-tree-complete"](trace_buf, fetch_all, conn0, _241)
     end
-    return conn:ReportPartialTree(fetch_key, _47_)
+    return conn0:ReportPartialTree(fetch_key, _47_)
   else
     vim.cmd("setlocal modifiable")
     do
@@ -467,20 +468,20 @@ trace_dialog["report-partial-tree-complete"] = function(trace_buf, fetch_all, co
     return setbufvar(trace_buf, "nvlime_trace_entries_coords", entry_coords)
   end
 end
-trace_dialog["clear-trace-tree-complete"] = function(trace_buf, conn, result)
+trace_dialog["clear-trace-tree-complete"] = function(trace_buf, conn0, result)
   ui["with-buffer"](trace_buf, trace_dialog["reset-trace-entries"])
   local function _51_(_241)
-    return trace_dialog["report-total-complete"](trace_buf, conn, _241)
+    return trace_dialog["report-total-complete"](trace_buf, conn0, _241)
   end
-  return conn:ReportTotal(_51_)
+  return conn0:ReportTotal(_51_)
 end
-trace_dialog["init-trace-dialog-buf"] = function(conn)
-  local _let_52_ = vim.fn.luaeval("require\"nvlime.window.trace\".open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name}})
+trace_dialog["init-trace-dialog-buf"] = function(conn0)
+  local _let_52_ = vim.fn.luaeval("require\"nvlime.window.trace\".open(_A[1], _A[2])", {{}, {["conn-name"] = conn0.cb_data.name}})
   local _win = _let_52_[1]
   local bufnr0 = _let_52_[2]
   local bufnr1 = tonumber(bufnr0)
   if not ui["nvlime-buffer-initialized"](bufnr1) then
-    setbufvar(bufnr1, "nvlime_conn", conn)
+    setbufvar(bufnr1, "nvlime_conn", conn0)
     ui["with-buffer"](bufnr1, trace_dialog["init-trace-dialog-buffer"])
   else
   end
@@ -529,7 +530,7 @@ trace_dialog.select = function(...)
     local function _61_(_241)
       return trace_dialog["clear-trace-tree-complete"](bufnr("%"), vim.b.nvlime_conn, _241)
     end
-    return cond((coord.type == "REFRESH-SPECS"), trace_dialog["refresh-specs"](), (coord.type == "UNTRACE-ALL-SPECS"), vim.b.nvlime_conn:DialogUntraceAll(_56_), (coord.type == "UNTRACE-SPEC"), vim.b.nvlime_conn:DialogUntrace({vim.fn["nvlime#CL"]("QUOTE"), coord.id}, _57_), (coord.type == "REFRESH-TRACE-ENTRY-HEADER"), vim.b.nvlime_conn:ReportTotal(_58_), (coord.type == "FETCH-NEXT-TRACE-ENTRIES-BATCH"), vim.b.nvlime_conn:ReportPartialTree(trace_dialog["get-fetch-key"](), _59_), (coord.type == "FETCH-ALL-TRACE-ENTRIES"), vim.b.nvlime_conn:ReportPartialTree(trace_dialog["get-fetch-key"](), _60_), (coord.type == "CLEAR-TRACE-ENTRIES"), vim.b.nvlime_conn:ClearTraceTree(_61_))
+    return cond((coord.type == "REFRESH-SPECS"), trace_dialog["refresh-specs"](), (coord.type == "UNTRACE-ALL-SPECS"), vim.b.nvlime_conn:DialogUntraceAll(_56_), (coord.type == "UNTRACE-SPEC"), vim.b.nvlime_conn:DialogUntrace({conn.cl("QUOTE"), coord.id}, _57_), (coord.type == "REFRESH-TRACE-ENTRY-HEADER"), vim.b.nvlime_conn:ReportTotal(_58_), (coord.type == "FETCH-NEXT-TRACE-ENTRIES-BATCH"), vim.b.nvlime_conn:ReportPartialTree(trace_dialog["get-fetch-key"](), _59_), (coord.type == "FETCH-ALL-TRACE-ENTRIES"), vim.b.nvlime_conn:ReportPartialTree(trace_dialog["get-fetch-key"](), _60_), (coord.type == "CLEAR-TRACE-ENTRIES"), vim.b.nvlime_conn:ClearTraceTree(_61_))
   elseif ((coord.type == "TRACE-ENTRY-ARG") or (coord.type == "TRACE-ENTRY-RETVAL")) then
     local _62_
     do

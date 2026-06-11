@@ -17,6 +17,7 @@
        vim.fn)
 
 (local ui (require "nvlime.core.ui"))
+(local conn (require "nvlime.core.connection"))
 
 (local trace-dialog {})
 
@@ -588,7 +589,7 @@
 
           (= (. coord :type) "UNTRACE-SPEC")
           (: vim.b.nvlime_conn :DialogUntrace
-             [((. vim.fn "nvlime#CL") "QUOTE") (. coord :id)]
+              [(conn.cl "QUOTE") (. coord :id)]
              #(trace-dialog.dialog-untrace-complete
                 (bufnr "%") vim.b.nvlime_conn $1))
 

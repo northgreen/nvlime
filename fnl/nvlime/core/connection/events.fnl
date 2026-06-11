@@ -34,39 +34,39 @@
 (fn connection.get-valid-source-location [self loc]
   "Normalizes a parsed location to [file-or-buffer, offset-or-position, snippet].
   Handles FILE, BUFFER-AND-FILE, BUFFER, SOURCE-FORM types."
-  (let [loc-file (connection.get self loc "FILE" nil)
-        loc-buffer (connection.get self loc "BUFFER" nil)
-        loc-buf-and-file (connection.get self loc "BUFFER-AND-FILE" nil)
-        loc-src-form (connection.get self loc "SOURCE-FORM" nil)]
+  (let [loc-file (connection.get loc "FILE" nil)
+        loc-buffer (connection.get loc "BUFFER" nil)
+        loc-buf-and-file (connection.get loc "BUFFER-AND-FILE" nil)
+        loc-src-form (connection.get loc "SOURCE-FORM" nil)]
     (cond
       loc-file
-      (let [loc-pos (connection.get self loc "POSITION" nil)
-            loc-snippet (connection.get self loc "SNIPPET" nil)]
+      (let [loc-pos (connection.get loc "POSITION" nil)
+            loc-snippet (connection.get loc "SNIPPET" nil)]
         [loc-file loc-pos loc-snippet])
 
       loc-buffer
-      (let [loc-offset (connection.get self loc "OFFSET" nil)
-            loc-snippet (connection.get self loc "SNIPPET" nil)
+      (let [loc-offset (connection.get loc "OFFSET" nil)
+            loc-snippet (connection.get loc "SNIPPET" nil)
             loc-offset (if loc-offset
-                         (let [a (. loc-offset 1)
-                               b (. loc-offset 2)]
-                           (if (or (< a 0) (< b 0))
-                               nil
-                               (+ a b)))
-                         nil)]
-        [loc-buffer loc-offset loc-snippet])
+                          (let [a (. loc-offset 1)
+                                b (. loc-offset 2)]
+                            (if (or (< a 0) (< b 0))
+                                nil
+                                (+ a b)))
+                          nil)]
+         [loc-buffer loc-offset loc-snippet])
 
       loc-buf-and-file
-      (let [loc-offset (connection.get self loc "OFFSET" nil)
-            loc-snippet (connection.get self loc "SNIPPET" nil)
+      (let [loc-offset (connection.get loc "OFFSET" nil)
+            loc-snippet (connection.get loc "SNIPPET" nil)
             loc-offset (if loc-offset
-                         (let [a (. loc-offset 1)
-                               b (. loc-offset 2)]
-                           (if (or (< a 0) (< b 0))
-                               nil
-                               (+ a b)))
-                         nil)]
-        [(or (. loc-buf-and-file 1) nil) loc-offset loc-snippet])
+                          (let [a (. loc-offset 1)
+                                b (. loc-offset 2)]
+                            (if (or (< a 0) (< b 0))
+                                nil
+                                (+ a b)))
+                          nil)]
+         [(or (. loc-buf-and-file 1) nil) loc-offset loc-snippet])
 
       loc-src-form [nil 1 loc-src-form]
       :else [])))
