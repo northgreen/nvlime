@@ -95,4 +95,5 @@
               (string.gsub doc-string "^Documentation for the symbol.-\n\n" "" 1))
         (callback item)))))
 
+(tset source "flags->kind" flags->kind)
 source

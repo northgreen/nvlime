@@ -114,4 +114,5 @@ source.resolve = function(self, item, callback)
   end
   return doc_fn(conn, item.label, _15_)
 end
+source["flags->kind"] = flags__3ekind
 return source
