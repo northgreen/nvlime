@@ -1,1 +1,1 @@
-call nvlime#plugin#Setup()
+lua require('nvlime.core.plugin').setup()

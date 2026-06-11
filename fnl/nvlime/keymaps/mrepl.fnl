@@ -11,13 +11,13 @@
                     "<Cmd>lua require('nvlime.core.ui.mrepl').disconnect()<CR>"
                     "nvlime: Disconnect from this REPL")
   (km.buffer.insert mm.insert.space_arglist
-                    "<Space><Cmd>call nvlime#plugin#SpaceEnterKey()<CR>"
+                    "<Space><Cmd>lua require('nvlime.core.plugin')['space-enter-key']()<CR>"
                     "nvlime: Trigger the arglist hint")
   (km.buffer.insert mm.insert.submit
                     "<C-r>=require('nvlime.core.ui.mrepl').submit()<CR>"
                     "nvlime: Submit the last input to the REPL")
   (km.buffer.insert mm.insert.cr_arglist
-                    "<CR><Cmd>call nvlime#plugin#SpaceEnterKey<CR>"
+                    "<CR><Cmd>lua require('nvlime.core.plugin')['space-enter-key']()<CR>"
                     "nvlime: Insert a newline and trigger the arglist hint")
   (km.buffer.insert mm.insert.interrupt
                     "<C-r>=require('nvlime.core.ui.mrepl').interrupt()<CR>"

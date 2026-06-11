@@ -100,7 +100,7 @@ local function server_output_cb(server_obj, auto_connect, data)
       server_obj["port"] = port
       vim.cmd(("echom 'Nvlime server listening on port " .. port .. "'"))
       if auto_connect then
-        local auto_conn = vim.fn["nvlime#plugin#ConnectREPL"]("127.0.0.1", port)
+        local auto_conn = require("nvlime.core.plugin").connect_repl("127.0.0.1", port)
         if auto_conn then
           auto_conn.cb_data["server"] = server_obj
           server_obj["connections"] = {[{auto_conn.cb_data.id}] = auto_conn}
@@ -219,7 +219,7 @@ local function server_output_cb(server_obj, auto_connect, data)
     if not port then
     else
     end
-    local conn = vim.fn["nvlime#plugin#ConnectREPL"]("127.0.0.1", port)
+    local conn = require("nvlime.core.plugin").connect_repl("127.0.0.1", port)
     if conn then
       conn.cb_data["server"] = vim.b.nvlime_server
       local conn_list = (vim.b.nvlime_server.connections or {})

@@ -139,7 +139,7 @@
 
           ;; Auto-connect if requested
           (when auto-connect
-            (let [auto-conn ((. vim.fn "nvlime#plugin#ConnectREPL") "127.0.0.1" port)]
+            (let [auto-conn ((. (require "nvlime.core.plugin") :connect_repl) "127.0.0.1" port)]
               (when auto-conn
                 (tset (. auto-conn :cb_data) :server server-obj)
                 (tset server-obj :connections
@@ -285,7 +285,7 @@
   (when (not port)
     (values))
 
-  (let [conn ((. vim.fn "nvlime#plugin#ConnectREPL") "127.0.0.1" port)]
+  (let [conn ((. (require "nvlime.core.plugin") :connect_repl) "127.0.0.1" port)]
     (when conn
       (tset (. conn :cb_data) :server (. vim.b :nvlime_server))
       (let [conn-list (or (. vim.b :nvlime_server :connections) {})]

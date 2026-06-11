@@ -43,8 +43,8 @@ mrepl["init-mrepl-buf-internal"] = function(conn, chan_obj)
   vim.bo.cindent = false
   vim.bo.smartindent = false
   vim.bo.iskeyword = "@,48-57,_,192-255,+,-,*,/,%,<,=,>,:,$,?,!,@-@,94"
-  vim.bo.omnifunc = "nvlime#plugin#CompleteFunc"
-  vim.bo.indentexpr = "nvlime#plugin#CalcCurIndent()"
+  vim.bo.omnifunc = "v:lua.require('nvlime.core.plugin').completefunc"
+  vim.bo.indentexpr = "v:lua.require('nvlime.core.plugin').calc_cur_indent(vim.fn.shiftwidth())"
   return mrepl["show-banner"](conn, chan_obj)
 end
 mrepl["kill-thread-complete"] = function(mrepl_buf, conn, _result)

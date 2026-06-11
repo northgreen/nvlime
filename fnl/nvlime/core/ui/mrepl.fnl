@@ -49,8 +49,8 @@ Provides MREPL buffer management: init, submit, clear, disconnect, interrupt."
   (set vim.bo.cindent false)
   (set vim.bo.smartindent false)
   (set vim.bo.iskeyword "@,48-57,_,192-255,+,-,*,/,%,<,=,>,:,$,?,!,@-@,94")
-  (set vim.bo.omnifunc "nvlime#plugin#CompleteFunc")
-  (set vim.bo.indentexpr "nvlime#plugin#CalcCurIndent()")
+  (set vim.bo.omnifunc "v:lua.require('nvlime.core.plugin').completefunc")
+  (set vim.bo.indentexpr "v:lua.require('nvlime.core.plugin').calc_cur_indent(vim.fn.shiftwidth())")
   (mrepl.show-banner conn chan-obj))
 
 (fn mrepl.kill-thread-complete [mrepl-buf conn _result]
