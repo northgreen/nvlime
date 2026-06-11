@@ -73,7 +73,7 @@ Source.get_completions = function(self, ctx, callback)
   do
     local cursor_line = ctx.cursor[1]
     local cursor_col = ctx.cursor[2]
-    local keyword = (ctx.keyword or "")
+    local keyword = (ctx:get_keyword() or "")
     local start_col = (cursor_col - #keyword)
     local conn = buffer["get-conn-var!"](0)
     if conn then
@@ -91,7 +91,13 @@ Source.get_completions = function(self, ctx, callback)
           do
             local tbl_26_ = {}
             local i_27_ = 0
-            for _, c in ipairs((vim.list_slice(candidates, 2) or {})) do
+            local _11_
+            if _2bfuzzy_3f_2b then
+              _11_ = vim.list_slice(candidates, 2)
+            else
+              _11_ = candidates
+            end
+            for _, c in ipairs((_11_ or {})) do
               local val_28_
               do
                 local item = get_lsp_kind(c)

@@ -83,7 +83,13 @@ source.complete = function(self, params, callback)
         local function _11_()
           local tbl_26_ = {}
           local i_27_ = 0
-          for _, c in ipairs((vim.list_slice(candidates, 2) or {})) do
+          local _12_
+          if _2bfuzzy_3f_2b then
+            _12_ = vim.list_slice(candidates, 2)
+          else
+            _12_ = candidates
+          end
+          for _, c in ipairs((_12_ or {})) do
             local val_28_ = get_lsp_kind(c)
             if (nil ~= val_28_) then
               i_27_ = (i_27_ + 1)
@@ -108,11 +114,11 @@ end
 source.resolve = function(self, item, callback)
   local conn = buffer["get-conn-var!"](0)
   local doc_fn = conn["documentation-symbol"]
-  local function _15_(_self, doc_string)
+  local function _17_(_self, doc_string)
     item["documentation"] = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)
     return callback(item)
   end
-  return doc_fn(conn, item.label, _15_)
+  return doc_fn(conn, item.label, _17_)
 end
 source["flags->kind"] = flags__3ekind
 return source

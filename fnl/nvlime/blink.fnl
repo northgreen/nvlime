@@ -79,7 +79,7 @@
   (var called false)
   (let [cursor-line (. ctx.cursor 1)
         cursor-col (. ctx.cursor 2)
-        keyword (or ctx.keyword "")
+         keyword (or (ctx:get_keyword) "")
         start-col (- cursor-col (# keyword))
         conn (buffer.get-conn-var! 0)]
     (when conn
@@ -89,7 +89,7 @@
       (local on-done (fn [_self candidates]
         (when (not called)
           (set called true)
-          (let [items (icollect [_ c (ipairs (or (vim.list_slice candidates 2) []))]
+          (let [items (icollect [_ c (ipairs (or (if +fuzzy?+ (vim.list_slice candidates 2) candidates) []))]
                         (let [item (get-lsp-kind c)]
                           (when item
                             (tset item :textEdit

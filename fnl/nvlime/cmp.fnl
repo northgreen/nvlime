@@ -78,9 +78,9 @@
       (local on-done (fn [_self candidates]
                        (when (not called)
                          (set called true)
-                         (callback
-                           (icollect [_ c (ipairs (or (vim.list_slice candidates 2) []))]
-                             (get-lsp-kind c))))))
+                          (callback
+                            (icollect [_ c (ipairs (or (if +fuzzy?+ (vim.list_slice candidates 2) candidates) []))]
+                              (get-lsp-kind c))))))
       (let [input (string.sub params.context.cursor_before_line
                               params.offset)]
         (completion-fn conn input on-done)))))
