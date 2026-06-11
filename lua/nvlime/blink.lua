@@ -9,6 +9,13 @@ for _, v in ipairs(opts.contribs) do
   end
 end
 local _2bfuzzy_3f_2b = has_fuzzy_3f
+local _2_
+if _2bfuzzy_3f_2b then
+  _2_ = "yes"
+else
+  _2_ = "no"
+end
+vim.notify(("nvlime blink: MODULE LOADED, fuzzy=" .. _2_), vim.log.levels.WARN)
 local flag_kind = {b = blink_types.CompletionItemKind.Variable, f = blink_types.CompletionItemKind.Function, g = blink_types.CompletionItemKind.Method, c = blink_types.CompletionItemKind.Class, t = blink_types.CompletionItemKind.Class, m = blink_types.CompletionItemKind.Operator, s = blink_types.CompletionItemKind.Operator, p = blink_types.CompletionItemKind.Module}
 local kind_precedence = {blink_types.CompletionItemKind.Module, blink_types.CompletionItemKind.Class, blink_types.CompletionItemKind.Operator, blink_types.CompletionItemKind.Method, blink_types.CompletionItemKind.Function, blink_types.CompletionItemKind.Variable}
 local function flags__3ekind(flags)
@@ -36,39 +43,49 @@ local function flags__3ekind(flags)
   end
 end
 local function set_documentation(conn, item, callback)
-  local function _5_(_self, doc_string)
+  local function _7_(_self, doc_string)
     item["documentation"] = {kind = "markdown", value = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)}
     return callback(item)
   end
-  return conn["documentation-symbol"](conn, item.label, _5_)
+  return conn["documentation-symbol"](conn, item.label, _7_)
 end
 local get_lsp_kind
 if _2bfuzzy_3f_2b then
-  local function _6_(item)
+  local function _8_(item)
     local flags = item[4]
     return {label = item[1], labelDetails = {detail = flags}, kind = (flags__3ekind(flags) or blink_types.CompletionItemKind.Keyword)}
   end
-  get_lsp_kind = _6_
+  get_lsp_kind = _8_
 else
-  local function _7_(item)
+  local function _9_(item)
     return {label = item}
   end
-  get_lsp_kind = _7_
+  get_lsp_kind = _9_
 end
-local Source = {__index = Source}
+local Source = {}
+Source["__index"] = Source
 Source.new = function(_, opts0)
+  vim.notify("nvlime blink: Source.new() called", vim.log.levels.WARN)
   local self = setmetatable({}, Source)
   self["opts"] = (opts0 or {})
   return self
 end
 Source.enabled = function(self)
   local conn = buffer["get-conn-var!"](0)
+  local _11_
+  if not (conn == nil) then
+    _11_ = "yes"
+  else
+    _11_ = "no"
+  end
+  vim.notify(("nvlime blink: enabled() - conn_type=" .. type(conn) .. " has_conn=" .. _11_), vim.log.levels.WARN)
   return not (conn == nil)
 end
 Source.get_trigger_characters = function(self)
-  return {":"}
+  return {}
 end
 Source.get_completions = function(self, ctx, callback)
+  vim.notify("nvlime blink: get_completions() ENTERED", vim.log.levels.WARN)
   local called = false
   do
     local cursor_line = ctx.cursor[1]
@@ -76,28 +93,46 @@ Source.get_completions = function(self, ctx, callback)
     local keyword = (ctx:get_keyword() or "")
     local start_col = (cursor_col - #keyword)
     local conn = buffer["get-conn-var!"](0)
+    vim.notify(("nvlime blink: conn_type=" .. type(conn) .. " keyword=\"" .. keyword .. "\" start_col=" .. start_col), vim.log.levels.WARN)
     if conn then
       local completion_fn
       if _2bfuzzy_3f_2b then
-        completion_fn = conn["fuzzy-completions"]
+        completion_fn = conn.FuzzyCompletions
       else
         completion_fn = conn["simple-completions"]
       end
+      local _14_
+      if _2bfuzzy_3f_2b then
+        _14_ = "yes"
+      else
+        _14_ = "no"
+      end
+      vim.notify(("nvlime blink: completion_fn_type=" .. type(completion_fn) .. " fuzzy=" .. _14_), vim.log.levels.WARN)
       local on_done
-      local function _10_(_self, candidates)
+      local function _16_(_self, candidates)
+        local _17_
+        if called then
+          _17_ = "yes"
+        else
+          _17_ = "no"
+        end
+        vim.notify(("nvlime blink: on-done CALLED! type=" .. type(candidates) .. " len=" .. (#candidates or "nil") .. " called=" .. _17_), vim.log.levels.WARN)
         if not called then
           called = true
+          local raw_items
+          local _19_
+          if _2bfuzzy_3f_2b then
+            _19_ = vim.list_slice(candidates, 2)
+          else
+            _19_ = candidates
+          end
+          raw_items = (_19_ or {})
+          vim.notify(("nvlime blink: raw_items_len=" .. #raw_items), vim.log.levels.WARN)
           local items
           do
             local tbl_26_ = {}
             local i_27_ = 0
-            local _11_
-            if _2bfuzzy_3f_2b then
-              _11_ = vim.list_slice(candidates, 2)
-            else
-              _11_ = candidates
-            end
-            for _, c in ipairs((_11_ or {})) do
+            for _, c in ipairs(raw_items) do
               local val_28_
               do
                 local item = get_lsp_kind(c)
@@ -116,12 +151,13 @@ Source.get_completions = function(self, ctx, callback)
             end
             items = tbl_26_
           end
+          vim.notify(("nvlime blink: CALLBACK with " .. #items .. " items"), vim.log.levels.WARN)
           return callback({items = items, is_incomplete_backward = false, is_incomplete_forward = false})
         else
           return nil
         end
       end
-      on_done = _10_
+      on_done = _16_
       completion_fn(conn, keyword, on_done)
     else
     end

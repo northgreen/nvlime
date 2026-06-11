@@ -72,7 +72,7 @@ source.complete = function(self, params, callback)
   if conn then
     local completion_fn
     if _2bfuzzy_3f_2b then
-      completion_fn = conn["fuzzy-completions"]
+      completion_fn = conn.FuzzyCompletions
     else
       completion_fn = conn["simple-completions"]
     end

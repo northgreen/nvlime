@@ -7,6 +7,8 @@
   (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
 (local +fuzzy?+ has-fuzzy?)
 
+(vim.notify (.. "nvlime blink: MODULE LOADED, fuzzy=" (if +fuzzy?+ "yes" "no")) vim.log.levels.WARN)
+
 (local flag-kind
        {:b blink-types.CompletionItemKind.Variable
         :f blink-types.CompletionItemKind.Function
@@ -61,47 +63,57 @@
 
 
 ;; blink.cmp Source class
-(local Source {:__index Source})
+(local Source {})
+(tset Source :__index Source)
 
 (fn Source.new [_ opts]
+  (vim.notify "nvlime blink: Source.new() called" vim.log.levels.WARN)
   (local self (setmetatable {} Source))
   (tset self :opts (or opts {}))
   self)
 
 (fn Source.enabled [self]
   (let [conn (buffer.get-conn-var! 0)]
+    (vim.notify (.. "nvlime blink: enabled() - conn_type=" (type conn) " has_conn=" (if (not (= conn nil)) "yes" "no")) vim.log.levels.WARN)
     (not (= conn nil))))
 
 (fn Source.get_trigger_characters [self]
-  [":"])
+  [])
 
 (fn Source.get_completions [self ctx callback]
+  (vim.notify "nvlime blink: get_completions() ENTERED" vim.log.levels.WARN)
   (var called false)
   (let [cursor-line (. ctx.cursor 1)
         cursor-col (. ctx.cursor 2)
-         keyword (or (ctx:get_keyword) "")
+        keyword (or (ctx:get_keyword) "")
         start-col (- cursor-col (# keyword))
         conn (buffer.get-conn-var! 0)]
+    (vim.notify (.. "nvlime blink: conn_type=" (type conn) " keyword=\"" keyword "\" start_col=" start-col) vim.log.levels.WARN)
     (when conn
       (local completion-fn (if +fuzzy?+
-                               (. conn "fuzzy-completions")
-                               (. conn "simple-completions")))
+                                  (. conn "FuzzyCompletions")
+                                  (. conn "simple-completions")))
+      (vim.notify (.. "nvlime blink: completion_fn_type=" (type completion-fn) " fuzzy=" (if +fuzzy?+ "yes" "no")) vim.log.levels.WARN)
       (local on-done (fn [_self candidates]
+        (vim.notify (.. "nvlime blink: on-done CALLED! type=" (type candidates) " len=" (or (length candidates) "nil") " called=" (if called "yes" "no")) vim.log.levels.WARN)
         (when (not called)
           (set called true)
-          (let [items (icollect [_ c (ipairs (or (if +fuzzy?+ (vim.list_slice candidates 2) candidates) []))]
-                        (let [item (get-lsp-kind c)]
-                          (when item
-                            (tset item :textEdit
-                                  {:newText item.label
-                                   :range {:start {:line (- cursor-line 1)
-                                                   :character start-col}
-                                           :end {:line (- cursor-line 1)
-                                                 :character cursor-col}}})
-                            item)))]
-            (callback {:items items
-                       :is_incomplete_backward false
-                       :is_incomplete_forward false})))))
+          (let [raw-items (or (if +fuzzy?+ (vim.list_slice candidates 2) candidates) [])]
+            (vim.notify (.. "nvlime blink: raw_items_len=" (length raw-items)) vim.log.levels.WARN)
+            (let [items (icollect [_ c (ipairs raw-items)]
+                          (let [item (get-lsp-kind c)]
+                            (when item
+                              (tset item :textEdit
+                                    {:newText item.label
+                                     :range {:start {:line (- cursor-line 1)
+                                                     :character start-col}
+                                             :end {:line (- cursor-line 1)
+                                                   :character cursor-col}}})
+                              item)))]
+              (vim.notify (.. "nvlime blink: CALLBACK with " (length items) " items") vim.log.levels.WARN)
+              (callback {:items items
+                         :is_incomplete_backward false
+                         :is_incomplete_forward false}))))))
       (completion-fn conn keyword on-done)))
   nil)
 
