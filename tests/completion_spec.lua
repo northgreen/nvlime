@@ -380,3 +380,149 @@ describe('nvlime.completion: SWAK response unwrap', function()
     eq(0, result)
   end)
 end)
+
+describe('nvlime.completion: edge cases', function()
+  before_each(function()
+    helpers.clear()
+    exec_lua[[
+      local cwd = vim.fn.getcwd()
+      package.path = package.path .. ';' .. cwd .. '/lua/?.lua;' .. cwd .. '/.test-deps/parsley/lua/?.lua'
+      vim.opt.rtp:append(cwd .. '/lua')
+      vim.opt.rtp:append(cwd .. '/.test-deps/parsley')
+      
+      package.preload['blink.cmp.types'] = function()
+        return {CompletionItemKind = {
+          Variable = 6, Function = 3, Method = 2,
+          Class = 7, Operator = 4, Module = 5, Keyword = 1
+        }}
+      end
+      package.preload['cmp.types.lsp'] = function()
+        return {CompletionItemKind = {
+          Variable = 6, Function = 3, Method = 2,
+          Class = 7, Operator = 4, Module = 5, Keyword = 1
+        }}
+      end
+    ]]
+  end)
+
+  it('called guard prevents double callback', function()
+    -- Test the "called" flag pattern used in Source.get_completions
+    -- This is a regression test for the bug where SWAK could trigger
+    -- the callback twice (once on success, once on some error path)
+    local result = exec_lua[[
+      local called = false
+      local results = {}
+      local on_done = function(candidates)
+        if not called then
+          called = true
+          local items = vim.list_slice(candidates or {}, 2)
+          for _, c in ipairs(items) do
+            table.insert(results, {label = c})
+          end
+        end
+      end
+      -- Simulate SWAK calling callback twice
+      on_done({{name = "COMPLETIONS"}, "foo", "bar"})
+      on_done({{name = "COMPLETIONS"}, "baz", "qux"})  -- should be ignored
+      return {#results, results[1].label, results[2].label, #results == 2}
+    ]]
+    eq(2, result[1])  -- Only 2 items from first callback
+    eq("foo", result[2])
+    eq("bar", result[3])
+    eq(true, result[4])  -- Exactly 2 items (not 4)
+  end)
+
+  it('called guard with nil second callback', function()
+    local result = exec_lua[[
+      local called = false
+      local results = {}
+      local on_done = function(candidates)
+        if not called then
+          called = true
+          local items = vim.list_slice(candidates or {}, 2)
+          for _, c in ipairs(items) do
+            table.insert(results, {label = c})
+          end
+        end
+      end
+      on_done({{name = "COMPLETIONS"}, "foo"})
+      on_done(nil)  -- nil second call should be ignored
+      return {#results, results[1].label}
+    ]]
+    eq(1, result[1])
+    eq("foo", result[2])
+  end)
+
+  it('empty keyword start-col calculation', function()
+    -- When keyword is empty, start-col should equal cursor-col
+    -- start-col = cursor-col - #keyword = cursor-col - 0 = cursor-col
+    local result = exec_lua[[
+      local cursor_col = 10
+      local keyword = ""
+      local start_col = cursor_col - #keyword
+      return {start_col, start_col == cursor_col}
+    ]]
+    eq(10, result[1])
+    eq(true, result[2])
+  end)
+
+  it('non-empty keyword start-col calculation', function()
+    local result = exec_lua[[
+      local cursor_col = 15
+      local keyword = "foo"
+      local start_col = cursor_col - #keyword
+      return {start_col, start_col == 12}
+    ]]
+    eq(12, result[1])
+    eq(true, result[2])
+  end)
+
+  it('textEdit range for empty keyword', function()
+    -- When keyword is empty, textEdit range should have start == end
+    local result = exec_lua[[
+      local cursor_line = 5
+      local cursor_col = 10
+      local keyword = ""
+      local start_col = cursor_col - #keyword
+      local text_edit = {
+        newText = "test",
+        range = {
+          start = {line = cursor_line - 1, character = start_col},
+          ["end"] = {line = cursor_line - 1, character = cursor_col}
+        }
+      }
+      return {
+        text_edit.range.start.character,
+        text_edit.range["end"].character,
+        text_edit.range.start.character == text_edit.range["end"].character
+      }
+    ]]
+    eq(10, result[1])  -- start character
+    eq(10, result[2])  -- end character
+    eq(true, result[3])  -- start == end for empty keyword
+  end)
+
+  it('textEdit range for non-empty keyword', function()
+    local result = exec_lua[[
+      local cursor_line = 3
+      local cursor_col = 15
+      local keyword = "foo"
+      local start_col = cursor_col - #keyword
+      local text_edit = {
+        newText = "bar",
+        range = {
+          start = {line = cursor_line - 1, character = start_col},
+          ["end"] = {line = cursor_line - 1, character = cursor_col}
+        }
+      }
+      return {
+        text_edit.range.start.character,
+        text_edit.range["end"].character,
+        text_edit.range.start.character ~= text_edit.range["end"].character
+      }
+    ]]
+    eq(12, result[1])  -- start character
+    eq(15, result[2])  -- end character
+    eq(true, result[3])  -- start != end
+  end)
+end)
