@@ -48,8 +48,20 @@
               :remote_channels {}
               :ui ui
               :server_event_handlers {}}]
-     ;; Server event handlers will be populated when ui is available (Phase 4)
-    ;; Make conn objects inherit methods from the connection module
+    ;; Load all mixin modules to register their methods on the connection module.
+    ;; require is idempotent - safe to call on every new() after first load.
+    (require "nvlime.core.connection.channels")
+    (require "nvlime.core.connection.messages")
+    (require "nvlime.core.connection.sldb")
+    (require "nvlime.core.connection.inspector")
+    (require "nvlime.core.connection.swank")
+    (require "nvlime.core.connection.events")
+    ;; Copy all methods from the connection MODULE directly onto the instance.
+    ;; This ensures methods survive when metatable is lost via vim.b.* storage.
+    (each [k v (pairs connection)]
+      (when (= (type v) "function")
+        (tset self k v)))
+    ;; Still set metatable as fallback for dynamically added methods
     (setmetatable self {:__index connection})
     self))
 

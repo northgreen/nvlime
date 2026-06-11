@@ -26,16 +26,28 @@ connection.get = function(dict, key, default)
 end
 connection.new = function(cb_data, ui)
   local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui, server_event_handlers = {}}
+  require("nvlime.core.connection.channels")
+  require("nvlime.core.connection.messages")
+  require("nvlime.core.connection.sldb")
+  require("nvlime.core.connection.inspector")
+  require("nvlime.core.connection.swank")
+  require("nvlime.core.connection.events")
+  for k, v in pairs(connection) do
+    if (type(v) == "function") then
+      self[k] = v
+    else
+    end
+  end
   setmetatable(self, {__index = connection})
   return self
 end
 connection.connect = function(self, host, port, prefix, timeout)
   do
     local callback
-    local function _3_(chan, msg)
+    local function _4_(chan, msg)
       return self["on-server-event"](self, chan, msg)
     end
-    callback = _3_
+    callback = _4_
     self.channel = async["ch-open"](host, port, callback, timeout)
   end
   if not self.channel.is_connected then
@@ -74,10 +86,10 @@ connection["fix-remote-path"] = function(self, path)
   if (string.len(prefix) == 0) then
     return path
   else
-    local case_7_ = type(path)
-    if (case_7_ == "string") then
+    local case_8_ = type(path)
+    if (case_8_ == "string") then
       return (prefix .. path)
-    elseif (case_7_ == "table") then
+    elseif (case_8_ == "table") then
       local loc_data = path[2]
       if loc_data then
         local loc_type = loc_data[1]
@@ -94,7 +106,7 @@ connection["fix-remote-path"] = function(self, path)
         return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
       end
     else
-      local _ = case_7_
+      local _ = case_8_
       return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
     end
   end
