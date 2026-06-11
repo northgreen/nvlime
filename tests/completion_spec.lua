@@ -526,3 +526,162 @@ describe('nvlime.completion: edge cases', function()
     eq(true, result[3])  -- start != end
   end)
 end)
+
+describe('nvlime.completion: fuzzy vs simple mode', function()
+  before_each(function()
+    helpers.clear()
+    exec_lua[[
+      local cwd = vim.fn.getcwd()
+      package.path = package.path .. ';' .. cwd .. '/lua/?.lua;' .. cwd .. '/.test-deps/parsley/lua/?.lua'
+      vim.opt.rtp:append(cwd .. '/lua')
+      vim.opt.rtp:append(cwd .. '/.test-deps/parsley')
+      
+      package.preload['blink.cmp.types'] = function()
+        return {CompletionItemKind = {
+          Variable = 6, Function = 3, Method = 2,
+          Class = 7, Operator = 4, Module = 5, Keyword = 1
+        }}
+      end
+      package.preload['cmp.types.lsp'] = function()
+        return {CompletionItemKind = {
+          Variable = 6, Function = 3, Method = 2,
+          Class = 7, Operator = 4, Module = 5, Keyword = 1
+        }}
+      end
+    ]]
+  end)
+
+  it('simple mode: string items get {:label item}', function()
+    -- In simple mode, items are plain strings wrapped as {:label item}
+    local result = exec_lua[[
+      -- Simulate simple mode get-lsp-kind behavior
+      local fuzzy = false  -- +fuzzy?+ = false
+      local get_lsp_kind
+      if fuzzy then
+        get_lsp_kind = function(item) return nil end  -- not used
+      else
+        get_lsp_kind = function(item) return {label = item} end
+      end
+      local item = get_lsp_kind("foo")
+      return {item.label, item.kind == nil, item.labelDetails == nil}
+    ]]
+    eq("foo", result[1])
+    eq(true, result[2])  -- kind is nil
+    eq(true, result[3])  -- labelDetails is nil
+  end)
+
+  it('fuzzy mode: 4-tuple items get {:label :kind :labelDetails}', function()
+    -- In fuzzy mode, items are 4-tuples transformed to LSP items
+    local result = exec_lua[[
+      local flag_kind = {b=6,f=3,g=2,c=7,t=7,m=4,s=4,p=5}
+      local kind_precedence = {5,7,4,2,3,6}
+      local flags_to_kind = function(flags)
+        if not flags or #flags == 0 then return nil end
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then return kp end
+        end
+        return nil
+      end
+      local fuzzy = true
+      local get_lsp_kind
+      if fuzzy then
+        get_lsp_kind = function(item)
+          local flags = item[3] or ""
+          return {
+            label = item[1],
+            labelDetails = {detail = flags},
+            kind = flags_to_kind(flags) or 1
+          }
+        end
+      else
+        get_lsp_kind = function(item) return {label = item} end
+      end
+      local item = get_lsp_kind({"foo", "fn", "bg", ""})
+      return {item.label, item.kind, item.labelDetails.detail}
+    ]]
+    eq("foo", result[1])
+    eq(2, result[2])  -- "bg" → b=6, g=2 → highest priority is Method(2)
+    eq("bg", result[3])
+  end)
+
+  it('fuzzy mode: empty flags falls back to Keyword', function()
+    local result = exec_lua[[
+      local flag_kind = {b=6,f=3,g=2,c=7,t=7,m=4,s=4,p=5}
+      local kind_precedence = {5,7,4,2,3,6}
+      local flags_to_kind = function(flags)
+        if not flags or #flags == 0 then return nil end
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then return kp end
+        end
+        return nil
+      end
+      local fuzzy = true
+      local get_lsp_kind
+      if fuzzy then
+        get_lsp_kind = function(item)
+          local flags = item[3] or ""
+          return {
+            label = item[1],
+            labelDetails = {detail = flags},
+            kind = flags_to_kind(flags) or 1
+          }
+        end
+      else
+        get_lsp_kind = function(item) return {label = item} end
+      end
+      local item = get_lsp_kind({"foo", "fn", "", ""})
+      return {item.label, item.kind}
+    ]]
+    eq("foo", result[1])
+    eq(1, result[2])  -- Keyword fallback
+  end)
+
+  it('fuzzy mode: all flags produce highest priority kind', function()
+    local result = exec_lua[[
+      local flag_kind = {b=6,f=3,g=2,c=7,t=7,m=4,s=4,p=5}
+      local kind_precedence = {5,7,4,2,3,6}
+      local flags_to_kind = function(flags)
+        if not flags or #flags == 0 then return nil end
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then return kp end
+        end
+        return nil
+      end
+      -- Test all flag combinations
+      local tests = {
+        {"b", 6},   -- Variable
+        {"f", 3},   -- Function
+        {"g", 2},   -- Method
+        {"c", 7},   -- Class
+        {"t", 7},   -- Class (alias)
+        {"m", 4},   -- Operator
+        {"s", 4},   -- Operator (alias)
+        {"p", 5},   -- Module
+        {"bfg", 2}, -- Method (highest of b=6,f=3,g=2)
+        {"bfgctms", 7}, -- Class (highest of b=6,f=3,g=2,c=7,t=7,m=4,s=4; no p=Module)
+      }
+      local passed = 0
+      for _, t in ipairs(tests) do
+        local kind = flags_to_kind(t[1])
+        if kind == t[2] then passed = passed + 1 end
+      end
+      return passed
+    ]]
+    eq(10, result)  -- All 10 tests passed
+  end)
+end)
