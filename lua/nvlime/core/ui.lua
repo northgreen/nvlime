@@ -2,6 +2,9 @@ local nvim_set_current_win = vim.api.nvim_set_current_win
 local nvim_buf_set_option = vim.api.nvim_buf_set_option
 local nvim_buf_set_var = vim.api.nvim_buf_set_var
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
+local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
+local nvim_tabpage_get_win = vim.api.nvim_tabpage_get_win
+local nvim_list_tabpages = vim.api.nvim_list_tabpages
 local bufnr = vim.fn.bufnr
 local bufwinid = vim.fn.bufwinid
 local win_getid = vim.fn.win_getid
@@ -12,6 +15,22 @@ local setline = vim.fn.setline
 local cursor = vim.fn.cursor
 local line = vim.fn.line
 local strdisplaywidth = vim.fn.strdisplaywidth
+local byte2line = vim.fn.byte2line
+local line2byte = vim.fn.line2byte
+local matchaddpos = vim.fn.matchaddpos
+local matchdelete = vim.fn.matchdelete
+local filereadable = vim.fn.filereadable
+local search = vim.fn.search
+local searchpos = vim.fn.searchpos
+local searchpair = vim.fn.searchpair
+local getcurpos = vim.fn.getcurpos
+local setpos = vim.fn.setpos
+local synID = vim.fn.synID
+local synIDattr = vim.fn.synIDattr
+local synstack = vim.fn.synstack
+local matchlist = vim.fn.matchlist
+local escape = vim.fn.escape
+local copy = vim.fn.copy
 local ui = {}
 vim.g["nvlime_horiz_sep"] = "\226\148\128"
 vim.g["nvlime_vert_sep"] = "\226\148\130"
@@ -493,8 +512,322 @@ end
 ui.pad = function(prefix, sep, max_len)
   return (prefix .. sep .. string.rep(" ", ((max_len - strdisplaywidth(prefix)) + 1)))
 end
-local function _51_(self, key)
+ui["match-coord"] = function(coord, cur_line, cur_col)
+  local c_begin = coord.begin
+  local c_end = coord["end"]
+  local _51_
+  if (not c_begin or not c_end) then
+    local function _52_()
+      return f
+    end
+    _51_ = _52_
+  else
+    _51_ = nil
+  end
+  local or_54_ = _51_
+  if not or_54_ then
+    if ((c_begin[1] == c_end[1]) and (cur_line == c_begin[1]) and (cur_col >= c_begin[2]) and (cur_col <= c_end[2])) then
+      or_54_ = true
+    else
+      or_54_ = nil
+    end
+  end
+  if not or_54_ then
+    if (c_begin[1] < c_end[1]) then
+      local _56_
+      if ((cur_line == c_begin[1]) and (cur_col >= c_begin[2])) then
+        _56_ = true
+      else
+        _56_ = nil
+      end
+      local or_58_ = _56_
+      if not or_58_ then
+        if ((cur_line == c_end[1]) and (cur_col <= c_end[2])) then
+          or_58_ = true
+        else
+          or_58_ = nil
+        end
+      end
+      if not or_58_ then
+        if ((cur_line > c_begin[1]) and (cur_line < c_end[1])) then
+          or_58_ = true
+        else
+          or_58_ = nil
+        end
+      end
+      or_54_ = or_58_
+    else
+      or_54_ = nil
+    end
+  end
+  if not or_54_ then
+    local function _62_()
+      return f
+    end
+    or_54_ = _62_
+  end
+  return or_54_
+end
+ui["compare-coords-forward"] = function(c1, c2)
+  if (c1.begin[1] > c2.begin[1]) then
+    return false
+  elseif (c1.begin[1] < c2.begin[1]) then
+    return true
+  elseif (c1.begin[2] > c2.begin[2]) then
+    return false
+  elseif (c1.begin[2] < c2.begin[2]) then
+    return true
+  else
+    return false
+  end
+end
+ui["compare-coords-backward"] = function(c1, c2)
+  if (c1.begin[1] > c2.begin[1]) then
+    return true
+  elseif (c1.begin[1] < c2.begin[1]) then
+    return false
+  elseif (c1.begin[2] > c2.begin[2]) then
+    return true
+  elseif (c1.begin[2] < c2.begin[2]) then
+    return false
+  else
+    return false
+  end
+end
+ui["sort-coords"] = function(coords, forward)
+  local sorted = copy(coords)
+  local function _65_()
+    if forward then
+      return ui["compare-coords-forward"]
+    else
+      return ui["compare-coords-backward"]
+    end
+  end
+  table.sort(sorted, _65_())
+  return sorted
+end
+ui["find-next-coord"] = function(cur_pos, sorted_coords, forward)
+  local found = nil
+  for i = 1, #sorted_coords do
+    if not found then
+      local c = sorted_coords[i]
+      local c_begin = c.begin
+      local matches
+      if forward then
+        matches = ((c_begin[1] > cur_pos[1]) or ((c_begin[1] == cur_pos[1]) and (c_begin[2] > cur_pos[2])))
+      else
+        matches = ((c_begin[1] < cur_pos[1]) or ((c_begin[1] == cur_pos[1]) and (c_begin[2] < cur_pos[2])))
+      end
+      if matches then
+        found = c
+      else
+      end
+    else
+    end
+  end
+  return found
+end
+ui["coords-to-match-pos"] = function(coords)
+  local pos_list = {}
+  for _, co in ipairs(coords) do
+    local cb = co.begin
+    local ce = co["end"]
+    if (cb[1] == ce[1]) then
+      local cline = cb[1]
+      local col = cb[2]
+      local len = ((ce[2] - cb[2]) + 1)
+      table.insert(pos_list, {cline, col, len})
+    else
+      for ln = cb[1], (ce[1] + 1) do
+        if (ln == cb[1]) then
+          local col = cb[2]
+          local len = ((#getline(ln) - cb[2]) + 1)
+          table.insert(pos_list, {ln, col, len})
+        elseif (ln == ce[1]) then
+          local col = 1
+          local len = ce[2]
+          table.insert(pos_list, {ln, col, len})
+        else
+          table.insert(pos_list, ln)
+        end
+      end
+    end
+  end
+  return pos_list
+end
+ui["match-add-coords"] = function(group, coords)
+  local pos_list = ui["coords-to-match-pos"](coords)
+  local match_list = {}
+  local stride = 8
+  local total_len = #pos_list
+  for i = 0, (total_len - 1), stride do
+    local slice = {}
+    local _end = min((i + stride), total_len)
+    for j = (i + 1), _end do
+      table.insert(slice, pos_list[j])
+    end
+    if (group == "nvlime_replCoord") then
+      table.insert(match_list, matchaddpos(group, slice, -1))
+    else
+      table.insert(match_list, matchaddpos(group, slice))
+    end
+  end
+  return match_list
+end
+ui["match-delete-list"] = function(match_list)
+  for _, m in ipairs(match_list) do
+    pcall(matchdelete, m)
+  end
+  return nil
+end
+ui["in-comment"] = function(cur_pos)
+  local has_syntax = (synstack(cur_pos[2], cur_pos[3]) > 0)
+  local syn_name
+  if has_syntax then
+    syn_name = synIDattr(synstack(cur_pos[2], cur_pos[3])[1], "name")
+  else
+    syn_name = nil
+  end
+  if (has_syntax and syn_name) then
+    return not not string.find(syn_name, "[Cc]omment")
+  else
+    if (searchpair("#|", "", "|#", "bnW") > 0) then
+      return true
+    else
+      return nil
+    end
+  end
+end
+ui["in-string"] = function(cur_pos)
+  local has_syntax = (synstack(cur_pos[2], cur_pos[3]) > 0)
+  local syn_name
+  if has_syntax then
+    syn_name = synIDattr(synstack(cur_pos[2], cur_pos[3])[1], "name")
+  else
+    syn_name = nil
+  end
+  if (has_syntax and syn_name) then
+    return not not string.find(syn_name, "[Ss]tring")
+  else
+    local pattern = "\\v((^|[^\\\\])@<=\")|(((^|[^\\\\])((\\\\\\\\)+))@<=\")"
+    local old_pos = getcurpos()
+    local quote_count = 0
+    local quote_pos = searchpos(pattern, "bW")
+    while ((quote_pos[1] > 0) and (quote_pos[2] > 0)) do
+      quote_count = (quote_count + 1)
+      quote_pos = searchpos(pattern, "bW")
+    end
+    setpos(".", old_pos)
+    return (math.fmod(quote_count, 2) > 0)
+  end
+end
+ui["normalize-package-name"] = function(name)
+  local matches = matchlist(name, "^%(#[%:]?%:%)%(%.%+%)")
+  if (#matches > 3) then
+    return string.upper(matches[3])
+  else
+    local matches2 = matchlist(name, "^\"%(%.%+%)\"")
+    if (#matches2 > 1) then
+      return string.upper(matches2[1])
+    else
+      return ""
+    end
+  end
+end
+ui["jump-to-or-open-file"] = function(file_path, byte_pos, snippet, edit_cmd, force_open)
+  local buf_exists = false
+  if not force_open then
+    local file_buf = bufnr(file_path)
+    if (file_buf > 0) then
+      local buf_win = bufwinid(file_buf)
+      if (buf_win > 0) then
+        nvim_set_current_win(buf_win)
+        buf_exists = true
+      else
+        local win_list = win_findbuf(file_buf)
+        if (#win_list > 0) then
+          nvim_set_current_win(win_list[1])
+          buf_exists = true
+        else
+        end
+      end
+    else
+    end
+  else
+  end
+  if buf_exists then
+    return vim.cmd("normal! m'")
+  else
+    vim.cmd("normal! m'")
+    if (type(file_path) == "number") then
+      local existing_buf = bufnr(file_path, true)
+      if (existing_buf > 0) then
+        local pcall_result = pcall(vim.cmd, (edit_cmd .. " #" .. file_path))
+        if not pcall_result[1] then
+          local cur_buf = bufnr("%")
+          if (cur_buf ~= file_path) then
+            return error(pcall_result[2])
+          else
+            return nil
+          end
+        else
+          return nil
+        end
+      else
+        ui["err-msg"](("Buffer " .. file_path .. " does not exist."))
+        return 
+      end
+    else
+      if (string.sub(file_path, 1, 7) == "sftp://") then
+        local esc_path = escape(file_path, " \\")
+        return vim.cmd((edit_cmd .. " " .. esc_path))
+      else
+        if filereadable(file_path) then
+          local esc_path = escape(file_path, " \\")
+          return vim.cmd((edit_cmd .. " " .. esc_path))
+        else
+          ui["err-msg"](("Not readable: " .. file_path))
+          return 
+        end
+      end
+    end
+  end
+end
+if __fnl_global__byte_2dpos then
+  local src_line = byte2line(__fnl_global__byte_2dpos)
+  setpos(".", {0, src_line, 1, 0, 1})
+  do
+    local cur_byte = (line2byte(".") + vim.fn.col(".") + -1)
+    if ((__fnl_global__byte_2dpos - cur_byte) > 0) then
+      setpos(".", {0, src_line, ((__fnl_global__byte_2dpos - cur_byte) + 1), 0})
+    else
+    end
+  end
+  if snippet then
+    local first_line = string.match(snippet, "[^\n]*")
+    local escaped = string.gsub(first_line, "\\", "\\\\")
+    local to_search = ("\\V" .. escaped)
+    setpos(".", {src_line, 1, 0, 1})
+    search(to_search, "cW")
+  else
+  end
+  vim.cmd("redraw")
+else
+end
+ui["show-source"] = function(conn, loc, edit_cmd, force_open)
+  local edit_cmd0 = (edit_cmd or "hide edit")
+  local force_open0 = (force_open or false)
+  local file_name = loc[1]
+  local byte_pos = loc[2]
+  local snippet = loc[3]
+  if not file_name then
+    return vim.fn.luaeval("require\"nvlime.window.documentation\".open(_A)", ("Source form:\n\n" .. snippet))
+  else
+    return ui["jump-to-or-open-file"](file_name, byte_pos, snippet, edit_cmd0, force_open0)
+  end
+end
+local function _94_(self, key)
   return self[string.gsub(key, "_", "-")]
 end
-setmetatable(ui, {__index = _51_})
+setmetatable(ui, {__index = _94_})
 return ui

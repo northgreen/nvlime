@@ -51,7 +51,7 @@ trace_dialog["get-cur-coord"] = function()
     local line_delta = (vim.b.nvlime_trace_specs_line_range[1] - 1)
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_specs_coords) do
-      if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
+      if ui["match-coord"](c, shifted_line, cur_col) then
       else
       end
     end
@@ -62,7 +62,7 @@ trace_dialog["get-cur-coord"] = function()
     local line_delta = (vim.b.nvlime_trace_entries_header_line_range[1] - 1)
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_entries_header_coords) do
-      if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
+      if ui["match-coord"](c, shifted_line, cur_col) then
       else
       end
     end
@@ -73,7 +73,7 @@ trace_dialog["get-cur-coord"] = function()
     local line_delta = (vim.b.nvlime_trace_entries_line_range[1] - 1)
     local shifted_line = (cur_line - line_delta)
     for _, c in ipairs(vim.b.nvlime_trace_entries_coords) do
-      if vim.fn["nvlime#ui#MatchCoord"](c, shifted_line, cur_col) then
+      if ui["match-coord"](c, shifted_line, cur_col) then
       else
       end
     end
@@ -566,30 +566,33 @@ trace_dialog.select = function(...)
 end
 trace_dialog["next-field"] = function(forward)
   local cur_pos = getcurpos()
-  local dir_int
-  if forward then
-    dir_int = 1
-  else
-    dir_int = 0
-  end
   local coord_specs
-  local function _70_()
-    vim.b._nvlime_tmp_coords = copy(vim.b.nvlime_trace_specs_coords)
-    return vim.fn.eval(("sort(b:_nvlime_tmp_coords, " .. "function('nvlime#ui#CoordSorter', [" .. dir_int .. "]))"))
+  local function _69_()
+    if vim.b.nvlime_trace_specs_line_range then
+      return ui["sort-coords"](vim.b.nvlime_trace_specs_coords, forward)
+    else
+      return {}
+    end
   end
-  coord_specs = {vim.b.nvlime_trace_specs_line_range, _70_()}
+  coord_specs = {vim.b.nvlime_trace_specs_line_range, _69_()}
   local coord_header
-  local function _71_()
-    vim.b._nvlime_tmp_coords = copy(vim.b.nvlime_trace_entries_header_coords)
-    return vim.fn.eval(("sort(b:_nvlime_tmp_coords, " .. "function('nvlime#ui#CoordSorter', [" .. dir_int .. "]))"))
+  local function _70_()
+    if vim.b.nvlime_trace_entries_header_line_range then
+      return ui["sort-coords"](vim.b.nvlime_trace_entries_header_coords, forward)
+    else
+      return {}
+    end
   end
-  coord_header = {vim.b.nvlime_trace_entries_header_line_range, _71_()}
+  coord_header = {vim.b.nvlime_trace_entries_header_line_range, _70_()}
   local coord_entries
-  local function _72_()
-    vim.b._nvlime_tmp_coords = copy(vim.b.nvlime_trace_entries_coords)
-    return vim.fn.eval(("sort(b:_nvlime_tmp_coords, " .. "function('nvlime#ui#CoordSorter', [" .. dir_int .. "]))"))
+  local function _71_()
+    if vim.b.nvlime_trace_entries_line_range then
+      return ui["sort-coords"](vim.b.nvlime_trace_entries_coords, forward)
+    else
+      return {}
+    end
   end
-  coord_entries = {vim.b.nvlime_trace_entries_line_range, _72_()}
+  coord_entries = {vim.b.nvlime_trace_entries_line_range, _71_()}
   local coord_groups = {coord_specs, coord_header, coord_entries}
   local coord_groups0 = coord_groups
   if not forward then
@@ -607,7 +610,7 @@ trace_dialog["next-field"] = function(forward)
     local sorted_coords = group[2]
     if line_range then
       local shifted_line = (cur_pos[1] - line_range[1] - -1)
-      local found = vim.fn["nvlime#ui#FindNextCoord"]({shifted_line, cur_pos[2]}, sorted_coords, forward)
+      local found = ui["find-next-coord"]({shifted_line, cur_pos[2]}, sorted_coords, forward)
       if found then
         next_coord = found
         next_line_range = line_range
@@ -663,8 +666,8 @@ trace_dialog["build-fold-text"] = function(...)
     return "..."
   end
 end
-local function _82_(self, key)
+local function _81_(self, key)
   return self[string.gsub(key, "_", "-")]
 end
-setmetatable(trace_dialog, {__index = _82_})
+setmetatable(trace_dialog, {__index = _81_})
 return trace_dialog

@@ -8,7 +8,10 @@ Functions deferred to later files:
 (local {: nvim_set_current_win
         : nvim_buf_set_option
         : nvim_buf_set_var
-        : nvim_buf_get_var}
+        : nvim_buf_get_var
+        : nvim_win_set_cursor
+        : nvim_tabpage_get_win
+        : nvim_list_tabpages}
        vim.api)
 
 (local {: bufnr
@@ -20,7 +23,23 @@ Functions deferred to later files:
         : setline
         : cursor
         : line
-        : strdisplaywidth}
+        : strdisplaywidth
+        : byte2line
+        : line2byte
+        : matchaddpos
+        : matchdelete
+        : filereadable
+        : search
+        : searchpos
+        : searchpair
+        : getcurpos
+        : setpos
+        : synID
+        : synIDattr
+        : synstack
+        : matchlist
+        : escape
+        : copy}
        vim.fn)
 
 (local ui {})
@@ -516,6 +535,291 @@ Functions deferred to later files:
   "Pad prefix with sep and spaces up to max-len display width."
   (.. prefix sep (string.rep " "
                              (+ (- max-len (strdisplaywidth prefix)) 1))))
+
+;;; ============================================================================
+;;; Coordinate matching / navigation
+;;; ============================================================================
+
+(fn ui.match-coord [coord cur-line cur-col]
+  "Check if point (cur-line, cur-col) falls within coord range."
+  (let [c-begin (. coord :begin)
+        c-end (. coord :end)]
+    (or
+      ;; Null guard
+      (when (or (not c-begin) (not c-end)) #f)
+
+      ;; Single-line span
+      (when (and (= (. c-begin 1) (. c-end 1))
+                 (= cur-line (. c-begin 1))
+                 (>= cur-col (. c-begin 2))
+                 (<= cur-col (. c-end 2)))
+        true)
+
+      ;; Multi-line span
+      (when (< (. c-begin 1) (. c-end 1))
+        (or
+          ;; On begin line
+          (when (and (= cur-line (. c-begin 1))
+                     (>= cur-col (. c-begin 2)))
+            true)
+          ;; On end line
+          (when (and (= cur-line (. c-end 1))
+                     (<= cur-col (. c-end 2)))
+            true)
+          ;; Between lines
+          (when (and (> cur-line (. c-begin 1))
+                     (< cur-line (. c-end 1)))
+            true)))
+      #f)))
+
+(fn ui.compare-coords-forward [c1 c2]
+  "Compare two coordinates for forward sorting. Returns true if c1 < c2."
+  (if (> (. c1.begin 1) (. c2.begin 1))
+      false
+      (< (. c1.begin 1) (. c2.begin 1))
+      true
+      ;; Same line, compare column
+      (> (. c1.begin 2) (. c2.begin 2))
+      false
+      (< (. c1.begin 2) (. c2.begin 2))
+      true
+      ;; Equal
+      false))
+
+(fn ui.compare-coords-backward [c1 c2]
+  "Compare two coordinates for backward sorting. Returns true if c1 > c2."
+  (if (> (. c1.begin 1) (. c2.begin 1))
+      true
+      (< (. c1.begin 1) (. c2.begin 1))
+      false
+      ;; Same line, compare column
+      (> (. c1.begin 2) (. c2.begin 2))
+      true
+      (< (. c1.begin 2) (. c2.begin 2))
+      false
+      ;; Equal
+      false))
+
+(fn ui.sort-coords [coords forward]
+  "Sort coordinates by begin position. Returns new sorted table.
+  forward: true for ascending, false for descending."
+  (let [sorted (copy coords)]
+    (table.sort sorted
+      (if forward
+          ui.compare-coords-forward
+          ui.compare-coords-backward))
+    sorted))
+
+(fn ui.find-next-coord [cur-pos sorted-coords forward]
+  "Find the next/previous coordinate from a sorted list.
+  cur-pos: [line col] tuple (1-indexed)
+  sorted-coords: sorted array of coordinate tables
+  forward: true for forward search, false for backward
+  Returns coordinate table or nil."
+  (var found nil)
+  (for [i 1 (length sorted-coords)]
+    (when (not found)
+      (let [c (. sorted-coords i)
+            c-begin (. c :begin)
+            matches (if forward
+                        (or (> (. c-begin 1) (. cur-pos 1))
+                            (and (= (. c-begin 1) (. cur-pos 1))
+                                 (> (. c-begin 2) (. cur-pos 2))))
+                        (or (< (. c-begin 1) (. cur-pos 1))
+                            (and (= (. c-begin 1) (. cur-pos 1))
+                                 (< (. c-begin 2) (. cur-pos 2)))))]
+        (when matches
+          (set found c)))))
+  found)
+
+(fn ui.coords-to-match-pos [coords]
+  "Convert coordinate list to matchaddpos format.
+  coords: array of {:begin [line col] :end [line col]}
+  Returns array of matchaddpos position specs."
+  (let [pos-list []]
+    (each [_ co (ipairs coords)]
+      (let [cb (. co :begin)
+            ce (. co :end)]
+        (if (= (. cb 1) (. ce 1))
+            ;; Single-line highlight
+            (let [cline (. cb 1)
+                  col (. cb 2)
+                  len (+ (- (. ce 2) (. cb 2)) 1)]
+              (table.insert pos-list [cline col len]))
+            ;; Multi-line highlight
+            (for [ln (. cb 1) (+ (. ce 1) 1)]
+              (if (= ln (. cb 1))
+                  ;; First line: from begin col to end of line
+                  (let [col (. cb 2)
+                        len (+ (- (length (getline ln)) (. cb 2)) 1)]
+                    (table.insert pos-list [ln col len]))
+                  (= ln (. ce 1))
+                  ;; Last line: from start to end col
+                  (let [col 1
+                        len (. ce 2)]
+                    (table.insert pos-list [ln col len]))
+                  ;; Middle lines: entire line
+                  (table.insert pos-list ln))))))
+    pos-list))
+
+(fn ui.match-add-coords [group coords]
+  "Add highlight matches using matchaddpos.
+  group: highlight group name
+  coords: array of coordinate tables
+  Returns array of match IDs."
+  (let [pos-list (ui.coords-to-match-pos coords)
+        match-list []
+        stride 8
+        total-len (length pos-list)]
+    (for [i 0 (- total-len 1) stride]
+      (let [slice []
+            end (min (+ i stride) total-len)]
+        (for [j (+ i 1) end]
+          (table.insert slice (. pos-list j)))
+        (if (= group "nvlime_replCoord")
+            (table.insert match-list (matchaddpos group slice -1))
+            (table.insert match-list (matchaddpos group slice)))))
+    match-list))
+
+(fn ui.match-delete-list [match-list]
+  "Delete highlight matches. Ignores E803 (no such match ID).
+  match-list: array of match IDs."
+  (each [_ m (ipairs match-list)]
+    (pcall matchdelete m)))
+
+;;; ============================================================================
+;;; File navigation
+;;; ============================================================================
+
+(fn ui.in-comment [cur-pos]
+  "Check if cursor position is inside a comment.
+  cur-pos: [bufnum lnum col off curswant] (from getcurpos)."
+  (let [has-syntax (> (synstack (. cur-pos 2) (. cur-pos 3)) 0)
+        syn-name (when has-syntax
+                   (synIDattr (. (synstack (. cur-pos 2) (. cur-pos 3)) 1) :name))]
+    (if (and has-syntax syn-name)
+        (not (not (string.find syn-name "[Cc]omment")))
+        ;; No syntax info — use searchpair
+        (when (> (searchpair "#|" "" "|#" "bnW") 0)
+          (values true)))))
+
+(fn ui.in-string [cur-pos]
+  "Check if cursor position is inside a string literal.
+  cur-pos: [bufnum lnum col off curswant] (from getcurpos)."
+  (let [has-syntax (> (synstack (. cur-pos 2) (. cur-pos 3)) 0)
+        syn-name (when has-syntax
+                   (synIDattr (. (synstack (. cur-pos 2) (. cur-pos 3)) 1) :name))]
+    (if (and has-syntax syn-name)
+        (not (not (string.find syn-name "[Ss]tring")))
+        ;; Fallback: count unescaped quotes backwards
+        (let [pattern "\\v((^|[^\\\\])@<=\")|(((^|[^\\\\])((\\\\\\\\)+))@<=\")"
+              old-pos (getcurpos)]
+          (var quote-count 0)
+          (var quote-pos (searchpos pattern "bW"))
+          (while (and (> (. quote-pos 1) 0) (> (. quote-pos 2) 0))
+            (set quote-count (+ quote-count 1))
+            (set quote-pos (searchpos pattern "bW")))
+          (setpos "." old-pos)
+          (> (math.fmod quote-count 2) 0)))))
+
+(fn ui.normalize-package-name [name]
+  "Normalize a Common Lisp package name string.
+  Handles prefixes like #:, :, ' and double-quote wrappers.
+  Returns uppercase package name."
+  ;; Pattern 1: #?:... or ':... or '...
+  (let [matches (matchlist name "^%(#[%:]?%:%)%(%.%+%)")]
+    (if (> (length matches) 3)
+        (string.upper (. matches 3))
+        (let [matches2 (matchlist name "^\"%(%.%+%)\"")]
+          (if (> (length matches2) 1)
+              (string.upper (. matches2 1))
+              "")))))
+
+(fn ui.jump-to-or-open-file [file-path byte-pos snippet edit-cmd force-open]
+  "Navigate to a file/buffer at a specific byte position.
+  file-path: file path string or buffer number
+  byte-pos: byte position within file (or nil)
+  snippet: source snippet to search for (or nil)
+  edit-cmd: Vim edit command (e.g., 'hide edit')
+  force-open: if true, always open a new window."
+  ;; Determine if buffer already exists and is visible
+  (var buf-exists false)
+  (when (not force-open)
+    (let [file-buf (bufnr file-path)]
+      (when (> file-buf 0)
+        (let [buf-win (bufwinid file-buf)]
+          (if (> buf-win 0)
+              ;; Buffer visible
+              (do
+                (nvim_set_current_win buf-win)
+                (set buf-exists true))
+              (let [win-list (win_findbuf file-buf)]
+                (when (> (length win-list) 0)
+                  (nvim_set_current_win (. win-list 1))
+                  (set buf-exists true))))))))
+
+  (if buf-exists
+      (vim.cmd "normal! m'")
+      ;; Open the file
+      (do
+        (vim.cmd "normal! m'")
+        (if (= (type file-path) "number")
+            ;; Numeric buffer reference
+            (let [existing-buf (bufnr file-path true)]
+              (if (> existing-buf 0)
+                  (let [pcall-result (pcall vim.cmd (.. edit-cmd " #" file-path))]
+                    (when (not (. pcall-result 1))
+                      ;; Check if we ended up in the right buffer
+                      (let [cur-buf (bufnr "%")]
+                        (when (not= cur-buf file-path)
+                          (error (. pcall-result 2))))))
+                  (do
+                    (ui.err-msg (.. "Buffer " file-path " does not exist."))
+                    (values))))
+            ;; String path
+            (if (= (string.sub file-path 1 7) "sftp://")
+                (let [esc-path (escape file-path " \\")]
+                  (vim.cmd (.. edit-cmd " " esc-path)))
+                (if (filereadable file-path)
+                    (let [esc-path (escape file-path " \\")]
+                      (vim.cmd (.. edit-cmd " " esc-path)))
+                    (do
+                      (ui.err-msg (.. "Not readable: " file-path))
+                      (values))))))))
+
+  ;; Navigate to byte position
+  (when byte-pos
+    (let [src-line (byte2line byte-pos)]
+      (setpos "." [0 src-line 1 0 1])
+      (let [cur-byte (+ (line2byte ".") (vim.fn.col ".") -1)]
+        (when (> (- byte-pos cur-byte) 0)
+          (setpos "." [0 src-line (+ (- byte-pos cur-byte) 1) 0])))
+      ;; Search for snippet
+      (when snippet
+        (let [first-line (string.match snippet "[^\n]*")
+              escaped (string.gsub first-line "\\" "\\\\")
+              to-search (.. "\\V" escaped)]
+          (setpos "." [src-line 1 0 1])
+          (search to-search "cW")))
+      (vim.cmd "redraw")))
+
+(fn ui.show-source [conn loc edit-cmd force-open]
+  "Show source code at a location.
+  conn: connection object
+  loc: [file-name byte-pos snippet] tuple
+  edit-cmd: Vim edit command (default: 'hide edit')
+  force-open: if true, force open new window (default: false)."
+  (let [edit-cmd (or edit-cmd "hide edit")
+        force-open (or force-open false)
+        file-name (. loc 1)
+        byte-pos (. loc 2)
+        snippet (. loc 3)]
+    (if (not file-name)
+        ;; No file — show in documentation window
+        (vim.fn.luaeval "require\"nvlime.window.documentation\".open(_A)"
+                        (.. "Source form:\n\n" snippet))
+        ;; Navigate to file
+        (ui.jump-to-or-open-file file-name byte-pos snippet edit-cmd force-open))))
 
 ;;; ============================================================================
 ;;; Module export

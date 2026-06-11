@@ -10,7 +10,7 @@ inspector["get-cur-coord"] = function()
   local col = cur_pos[3]
   local coord = nil
   for _, c in ipairs(vim.b.nvlime_inspector_coords) do
-    if vim.fn["nvlime#ui#MatchCoord"](c, line, col) then
+    if ui["match-coord"](c, line, col) then
       coord = c
     else
     end
@@ -67,7 +67,7 @@ inspector["find-source-cb"] = function(edit_cmd, conn, msg)
   end
   if valid_loc[2] then
     nvim_win_close(0, true)
-    return ui["show-source"](conn, valid_loc, edit_cmd)
+    return ui["show-source"](conn, valid_loc, edit_cmd, false)
   else
     if (msg and (msg[1].name == "ERROR")) then
       return ui["err-msg"](msg[2])
@@ -172,8 +172,8 @@ inspector["next-field"] = function(forward)
   else
   end
   local cur_pos = getcurpos()
-  local sorted_coords = vim.fn["nvlime#ui#CoordSorter"](vim.fn.copy(vim.b.nvlime_inspector_coords), forward)
-  local next_coord = vim.fn["nvlime#ui#FindNextCoord"]({cur_pos[2], cur_pos[3]}, sorted_coords, forward)
+  local sorted_coords = ui["sort-coords"](vim.b.nvlime_inspector_coords, forward)
+  local next_coord = ui["find-next-coord"]({cur_pos[2], cur_pos[3]}, sorted_coords, forward)
   next_coord = (next_coord or sorted_coords[1])
   local begin = next_coord.begin
   return setpos(".", {0, begin[1], begin[2], 0, begin[2]})

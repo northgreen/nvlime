@@ -51,9 +51,9 @@ Provides cross-reference buffer display and source location navigation."
                          (not (string.find path "^sftp://"))
                          (not (vim.fn.filereadable path)))
                     (ui.err-msg (.. "Not readable: " path))
-                    (do
-                      ((. vim.fn "nvlime#ui#ShowSource")
-                       vim.b.nvlime_conn valid-loc edit-cmd))))
+                     (do
+                      (ui.show-source
+                       vim.b.nvlime_conn valid-loc edit-cmd false))))
               ;; Check for ERROR xref entry
               (if (and (!= raw-xref-loc nil)
                        (= (. (. raw-xref-loc 1) "name") "ERROR"))

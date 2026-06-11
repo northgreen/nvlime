@@ -75,7 +75,7 @@
       (let [line-delta (- (. vim.b.nvlime_trace_specs_line_range 1) 1)
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_specs_coords)]
-          (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
+          (when (ui.match-coord c shifted-line cur-col)
             (values c)))
         nil)
 
@@ -86,7 +86,7 @@
       (let [line-delta (- (. vim.b.nvlime_trace_entries_header_line_range 1) 1)
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_entries_header_coords)]
-          (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
+          (when (ui.match-coord c shifted-line cur-col)
             (values c)))
         nil)
 
@@ -97,7 +97,7 @@
       (let [line-delta (- (. vim.b.nvlime_trace_entries_line_range 1) 1)
             shifted-line (- cur-line line-delta)]
         (each [_ c (ipairs vim.b.nvlime_trace_entries_coords)]
-          (when ((. vim.fn "nvlime#ui#MatchCoord") c shifted-line cur-col)
+          (when (ui.match-coord c shifted-line cur-col)
             (values c)))
         nil)
 
@@ -651,33 +651,20 @@
   "Navigate to the next interactive field.
   forward: true for forward, false for backward."
   (let [cur-pos (getcurpos)
-        dir-int (if forward 1 0)
 
-        ;; Build coord groups using vim.b temp var + vim.fn.eval for sort
+        ;; Build coord groups using ui.sort-coords
         coord-specs [vim.b.nvlime_trace_specs_line_range
-                     (do
-                       (set vim.b._nvlime_tmp_coords
-                            (copy vim.b.nvlime_trace_specs_coords))
-                       (vim.fn.eval
-                         (.. "sort(b:_nvlime_tmp_coords, "
-                             "function('nvlime#ui#CoordSorter', ["
-                             dir-int "]))")))]
+                     (if vim.b.nvlime_trace_specs_line_range
+                       (ui.sort-coords vim.b.nvlime_trace_specs_coords forward)
+                       [])]
         coord-header [vim.b.nvlime_trace_entries_header_line_range
-                      (do
-                        (set vim.b._nvlime_tmp_coords
-                             (copy vim.b.nvlime_trace_entries_header_coords))
-                        (vim.fn.eval
-                          (.. "sort(b:_nvlime_tmp_coords, "
-                              "function('nvlime#ui#CoordSorter', ["
-                              dir-int "]))")))]
+                      (if vim.b.nvlime_trace_entries_header_line_range
+                        (ui.sort-coords vim.b.nvlime_trace_entries_header_coords forward)
+                        [])]
         coord-entries [vim.b.nvlime_trace_entries_line_range
-                       (do
-                         (set vim.b._nvlime_tmp_coords
-                              (copy vim.b.nvlime_trace_entries_coords))
-                         (vim.fn.eval
-                           (.. "sort(b:_nvlime_tmp_coords, "
-                               "function('nvlime#ui#CoordSorter', ["
-                               dir-int "]))")))]
+                       (if vim.b.nvlime_trace_entries_line_range
+                         (ui.sort-coords vim.b.nvlime_trace_entries_coords forward)
+                         [])]
 
         coord-groups [coord-specs coord-header coord-entries]]
     (var coord-groups coord-groups)
@@ -697,7 +684,7 @@
             sorted-coords (. group 2)]
         (when line-range
           (let [shifted-line (- (. cur-pos 1) (. line-range 1) -1)
-                found ((. vim.fn "nvlime#ui#FindNextCoord")
+                found (ui.find-next-coord
                         [shifted-line (. cur-pos 2)]
                         sorted-coords forward)]
             (when found

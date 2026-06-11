@@ -134,7 +134,7 @@ sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn0, result
       end
     end
     for _, rlc in ipairs(rlocals) do
-      content = (content .. "\t  " .. ui.pad(nil, conn0.get(rlc, "NAME"), ":", max_name_len) .. conn0.get(rlc, "VALUE") .. "\n")
+      content = (content .. "\t  " .. ui.pad(conn0.get(rlc, "NAME"), ":", max_name_len) .. conn0.get(rlc, "VALUE") .. "\n")
     end
   else
   end
@@ -221,7 +221,7 @@ sldb["open-frame-source-cb"] = function(edit_cmd, win_to_go, force_open, conn0, 
       win_gotoid(win_to_go)
     else
     end
-    return vim.fn["nvlime#ui#ShowSource"](conn0, valid_loc, edit_cmd, force_open)
+    return ui["show-source"](conn0, valid_loc, edit_cmd, force_open)
   else
     if (result and (result[1].name == "ERROR")) then
       return ui["err-msg"](result[2])
@@ -337,7 +337,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
       local max_digits = string.len(tostring((#restarts - 1)))
       for ri = 0, (#restarts - 1) do
         local r = restarts[(ri + 1)]
-        local idx_str = ui.pad(nil, tostring(ri), ".", max_digits)
+        local idx_str = ui.pad(tostring(ri), ".", max_digits)
         local restart_line = sldb["format-restart-line"](r, max_name_len, has_star)
         restarts_str = (restarts_str .. "  R " .. idx_str .. restart_line .. "\n")
       end
@@ -348,7 +348,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
     do
       local max_digits = string.len(tostring((#frames - 1)))
       for _, f in ipairs(frames) do
-        local idx_str = ui.pad(nil, tostring(f[1]), ".", max_digits)
+        local idx_str = ui.pad(tostring(f[1]), ".", max_digits)
         frames_str = (frames_str .. "  F " .. idx_str .. f[2] .. "\n")
       end
     end

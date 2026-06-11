@@ -60,7 +60,7 @@ compiler_notes["open-cur-note"] = function(edit_cmd)
   local edit_cmd0 = (edit_cmd or "hide edit")
   local cur_pos = getcurpos()
   for _, c in ipairs(vim.b.nvlime_compiler_note_coords) do
-    if vim.fn["nvlime#ui#MatchCoord"](c, cur_pos[1], cur_pos[2]) then
+    if ui["match-coord"](c, cur_pos[1], cur_pos[2]) then
       note_coord = c
     else
     end

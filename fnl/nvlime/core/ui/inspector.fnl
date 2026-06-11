@@ -25,7 +25,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
         col (. cur-pos 3)]
     (var coord nil)
     (each [_ c (ipairs vim.b.nvlime_inspector_coords)]
-      (when ((. vim.fn "nvlime#ui#MatchCoord") c line col)
+      (when (ui.match-coord c line col)
         (set coord c)
         (values)))
     coord))
@@ -86,7 +86,7 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
         ;; Valid location found — navigate to source
         (do
           (nvim_win_close 0 true)
-          (ui.show-source conn valid-loc edit-cmd))
+          (ui.show-source conn valid-loc edit-cmd false))
         ;; Check for error or no source
         (if (and msg
                  (= (. msg 1 "name") "ERROR"))
@@ -231,13 +231,11 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
     (values))
 
   (let [cur-pos (getcurpos)
-        sorted-coords ((. vim.fn "nvlime#ui#CoordSorter")
-                        (vim.fn.copy vim.b.nvlime_inspector_coords)
-                        forward)]
-    (var next-coord ((. vim.fn "nvlime#ui#FindNextCoord")
-                     [(. cur-pos 2) (. cur-pos 3)]
-                     sorted-coords
-                     forward))
+        sorted-coords (ui.sort-coords vim.b.nvlime_inspector_coords forward)]
+    (var next-coord (ui.find-next-coord
+                      [(. cur-pos 2) (. cur-pos 3)]
+                      sorted-coords
+                      forward))
     (set next-coord (or next-coord (. sorted-coords 1)))
     (let [begin (. next-coord :begin)]
       (setpos "." [0 (. begin 1) (. begin 2) 0 (. begin 2)]))))

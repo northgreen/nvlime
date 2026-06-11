@@ -26,7 +26,7 @@ xref["open-cur-xref"] = function(edit_cmd)
       if ((type(path) == "string") and not string.find(path, "^sftp://") and not vim.fn.filereadable(path)) then
         return ui["err-msg"](("Not readable: " .. path))
       else
-        return vim.fn["nvlime#ui#ShowSource"](vim.b.nvlime_conn, valid_loc, edit_cmd0)
+        return ui["show-source"](vim.b.nvlime_conn, valid_loc, edit_cmd0, false)
       end
     else
       if (__fnl_global___21_3d(raw_xref_loc, nil) and (raw_xref_loc[1].name == "ERROR")) then

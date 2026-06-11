@@ -162,11 +162,8 @@ lookup, eval, inspect, disassemble, return."
       (each [_ rlc (ipairs rlocals)]
         (set content
              (.. content
-                 "\t  "
-                  (ui.pad nil
-                   (conn.get rlc "NAME")
-                   ":"
-                   max-name-len)
+                  "\t  "
+                   (ui.pad (conn.get rlc "NAME") ":" max-name-len)
                  (conn.get rlc "VALUE")
                  "\n"))))
     (let [catch-tags (. result 2)]
@@ -257,7 +254,7 @@ lookup, eval, inspect, disassemble, return."
             (when (<= (win_id2win win-to-go) 0)
               (values))
             (win_gotoid win-to-go))
-          ((. vim.fn "nvlime#ui#ShowSource") conn valid-loc edit-cmd force-open))
+          (ui.show-source conn valid-loc edit-cmd force-open))
         ;; Check for error or no source
         (if (and result
                  (= (. result 1 "name") "ERROR"))
@@ -411,7 +408,7 @@ lookup, eval, inspect, disassemble, return."
         max-digits (string.len (tostring (- (length restarts) 1)))]
     (for [ri 0 (- (length restarts) 1)]
       (let [r (. restarts (+ ri 1))
-            idx-str (ui.pad nil (tostring ri) "." max-digits)
+             idx-str (ui.pad (tostring ri) "." max-digits)
             restart-line (sldb.format-restart-line r max-name-len has-star)]
         (set restarts-str
              (.. restarts-str "  R " idx-str restart-line "\n")))))
@@ -422,7 +419,7 @@ lookup, eval, inspect, disassemble, return."
   (var frames-str "Frames:\n")
   (let [max-digits (string.len (tostring (- (length frames) 1)))]
     (each [_ f (ipairs frames)]
-      (let [idx-str (ui.pad nil (tostring (. f 1)) "." max-digits)]
+       (let [idx-str (ui.pad (tostring (. f 1)) "." max-digits)]
         (set frames-str (.. frames-str "  F " idx-str (. f 2) "\n")))))
   (ui.append-string frames-str)
 

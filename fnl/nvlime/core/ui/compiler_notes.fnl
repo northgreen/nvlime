@@ -88,7 +88,7 @@ and interactive source location jumping."
 
     ;; Find the coordinate region under cursor
     (each [_ c (ipairs vim.b.nvlime_compiler_note_coords)]
-      (when ((. vim.fn "nvlime#ui#MatchCoord") c (. cur-pos 1) (. cur-pos 2))
+      (when (ui.match-coord c (. cur-pos 1) (. cur-pos 2))
         (set note-coord c)
         (values)))
 
