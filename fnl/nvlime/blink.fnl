@@ -40,7 +40,7 @@
 
 ;;; string -> ?number
 (fn flags->kind [flags]
-  (when (and flags (> (length flags) 0))
+  (when (and (= (type flags) "string") (> (length flags) 0))
     (local kinds {})
     (for [i 1 (length flags)]
       (let [kind (. flag-kind (flags:sub i i))]
@@ -63,7 +63,7 @@
 
 (fn get-lsp-kind [use-fuzzy? item]
   (if use-fuzzy?
-       (let [flags (. item 4)]
+       (let [flags (. item 3)]
         {:label (. item 1)
          :labelDetails {:detail flags}
          :kind (or (flags->kind flags)

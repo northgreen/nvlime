@@ -126,7 +126,7 @@ buffer["fill!"] = function(bufnr, ...)
   local lines = args[1]
   table.remove(args, 1)
   local old_mod_2_auto = nvim_buf_get_option(bufnr, "modifiable")
-  __fnl_global__nvim_5fbuf_5fset_2doption(bufnr, "modifiable", true)
+  nvim_buf_set_option(bufnr, "modifiable", true)
   local ok_3_auto, err_4_auto
   local function _15_()
     nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -146,7 +146,7 @@ end
 buffer["append!"] = function(bufnr, ...)
   local args = {...}
   local old_mod_2_auto = nvim_buf_get_option(bufnr, "modifiable")
-  __fnl_global__nvim_5fbuf_5fset_2doption(bufnr, "modifiable", true)
+  nvim_buf_set_option(bufnr, "modifiable", true)
   local ok_3_auto, err_4_auto
   local function _17_()
     if (#args > 0) then

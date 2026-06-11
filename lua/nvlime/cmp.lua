@@ -20,7 +20,7 @@ end
 local flag_kind = {b = lsp_types.CompletionItemKind.Variable, f = lsp_types.CompletionItemKind.Function, g = lsp_types.CompletionItemKind.Method, c = lsp_types.CompletionItemKind.Class, t = lsp_types.CompletionItemKind.Class, m = lsp_types.CompletionItemKind.Operator, s = lsp_types.CompletionItemKind.Operator, p = lsp_types.CompletionItemKind.Module}
 local kind_precedence = {lsp_types.CompletionItemKind.Module, lsp_types.CompletionItemKind.Class, lsp_types.CompletionItemKind.Operator, lsp_types.CompletionItemKind.Method, lsp_types.CompletionItemKind.Function, lsp_types.CompletionItemKind.Variable}
 local function flags__3ekind(flags)
-  if (flags and (#flags > 0)) then
+  if ((type(flags) == "string") and (#flags > 0)) then
     local kinds = {}
     for i = 1, #flags do
       local kind = flag_kind[flags:sub(i, i)]
@@ -52,7 +52,7 @@ local function set_documentation(conn, item)
 end
 local function get_lsp_kind(use_fuzzy_3f, item)
   if use_fuzzy_3f then
-    local flags = item[4]
+    local flags = item[3]
     return {label = item[1], labelDetails = {detail = flags}, kind = (flags__3ekind(flags) or lsp_types.CompletionItemKind.Keyword)}
   else
     return {label = item}

@@ -36,7 +36,7 @@
   "Allows making changes to the text in the buffer
 even if its 'nomodifiable' option is set."
   `(let [old-mod# (nvim_buf_get_option ,bufnr :modifiable)]
-     (nvim_buf_set-option ,bufnr :modifiable true)
+     (nvim_buf_set_option ,bufnr :modifiable true)
      (let [(ok# err#) (pcall (fn [] (do ,(unpack [...]))))]
        (nvim_buf_set_option ,bufnr :modifiable old-mod#)
        (when (not ok#)
