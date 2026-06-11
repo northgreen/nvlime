@@ -36,17 +36,18 @@
         payload (. json-obj 2)]
     (when msg-id
       (let [CB (if (= msg-id 0)
-                     chan.chan_callback
-                     (let [cb (. chan.msg_callbacks msg-id)]
-                       (tset chan.msg_callbacks msg-id nil)
-                       cb))]
-        (when CB
-          (let [(ok err) (pcall CB chan payload)]
-            (when (not ok)
-              (vim.notify (.. "nvlime: callback failed: " (tostring err)) vim.log.levels.WARN)
-              (nvim_err_writeln
-                (.. "nvlime: callback failed: "
-                    (tostring err))))))))))
+                      chan.chan_callback
+                      (let [cb (. chan.msg_callbacks msg-id)]
+                        (tset chan.msg_callbacks msg-id nil)
+                        cb))]
+        (if CB
+            (let [(ok err) (pcall CB chan payload)]
+              (when (not ok)
+                (vim.notify (.. "nvlime: callback failed: " (tostring err)) vim.log.levels.WARN)
+                (nvim_err_writeln
+                  (.. "nvlime: callback failed: "
+                      (tostring err)))))
+            (vim.notify (.. "nvlime dispatch: NO CALLBACK for msg-id=" (tostring msg-id)) vim.log.levels.WARN))))))
 
 ;;; Internal: JSON buffer parser (replaces s:ChanInputCB)
 ;;; Accumulates data fragments, parses complete JSON messages, dispatches
@@ -96,19 +97,22 @@ Returns channel object. On failure ch_id is nil and is_connected is false."
 ;;; {ch_id ...} any fn -> any
 (fn async.ch-sendexpr [chan expr callback]
   "Send expression via channel. Registers callback for response.
-Throws on channel send failure."
-  (let [msg [chan.next_msg_id expr]
-        ret (chansend chan.ch_id
-                      (.. (vim.json.encode msg) "\n"))]
-    (if (= ret 0)
-        (do
-          (set chan.is_connected false)
+Throws on channel send failure. Always uses the authoritative
+channel object from chan-registry to avoid callback mismatch
+when chan is a deserialized copy from nvim_buf_get_var."
+  (let [real-chan (. chan-registry chan.ch_id)]
+    (when (not real-chan)
+      (error (.. "async.ch-sendexpr: channel " chan.ch_id " not in registry, connection may be closed")))
+      (let [msg [real-chan.next_msg_id expr]]
+        (when callback
+          (tset real-chan.msg_callbacks real-chan.next_msg_id callback))
+      (inc-msg-id real-chan)
+      (let [ret (chansend real-chan.ch_id
+                        (.. (vim.json.encode msg) "\n"))]
+        (when (= ret 0)
+          (set real-chan.is_connected false)
           (error "async.ch-sendexpr: chansend() failed"))
-        (do
-          (when callback
-            (tset chan.msg_callbacks chan.next_msg_id callback))
-          (inc-msg-id chan)))
-    ret))
+        ret))))
 
 ;;; [string] {buf_name callback exit_cb use_terminal} -> {job_id ...}
 (fn async.job-start [cmd opts]

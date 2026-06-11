@@ -12,8 +12,8 @@
                           nil))]
     (connection.send self (connection.emacs-rex self
                  [(connection.sym "SWANK" "FUZZY-COMPLETIONS") symbol cur-package])
-                (fn [chan msg]
-                  (connection.simple-send-cb self callback "nvlime#contrib#fuzzy#FuzzyCompletions" chan msg)))))
+                 (fn [chan msg]
+                   (connection.simple-send-cb self callback "nvlime#contrib#fuzzy#FuzzyCompletions" chan msg)))))
 
 
 (fn connection.init-fuzzy [self]

@@ -63,7 +63,7 @@
 
 (fn get-lsp-kind [use-fuzzy? item]
   (if use-fuzzy?
-      (let [flags (. item 4)]
+       (let [flags (. item 4)]
         {:label (. item 1)
          :labelDetails {:detail flags}
          :kind (or (flags->kind flags)
@@ -101,7 +101,7 @@
         (when (not handling-complete)
           (set handling-complete true)
           (set called true)
-          (let [raw-items (or (if is-fuzzy (vim.list_slice candidates 2) candidates) [])]
+          (let [raw-items (or (if is-fuzzy (. candidates 1) (vim.list_slice candidates 2)) [])]
             (let [items (icollect [_ c (ipairs raw-items)]
                         (let [item (get-lsp-kind is-fuzzy c)]
                           (when item

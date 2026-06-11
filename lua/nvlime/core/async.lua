@@ -42,7 +42,7 @@ local function dispatch_msg(chan, json_obj)
         return nil
       end
     else
-      return nil
+      return vim.notify(("nvlime dispatch: NO CALLBACK for msg-id=" .. tostring(msg_id)), vim.log.levels.WARN)
     end
   else
     return nil
@@ -100,17 +100,22 @@ async["ch-open"] = function(host, port, callback, timeout)
   return chan_obj
 end
 async["ch-sendexpr"] = function(chan, expr, callback)
-  local msg = {chan.next_msg_id, expr}
-  local ret = chansend(chan.ch_id, (vim.json.encode(msg) .. "\n"))
+  local real_chan = chan_registry[chan.ch_id]
+  if not real_chan then
+    error(("async.ch-sendexpr: channel " .. chan.ch_id .. " not in registry, connection may be closed"))
+  else
+  end
+  local msg = {real_chan.next_msg_id, expr}
+  if callback then
+    real_chan.msg_callbacks[real_chan.next_msg_id] = callback
+  else
+  end
+  inc_msg_id(real_chan)
+  local ret = chansend(real_chan.ch_id, (vim.json.encode(msg) .. "\n"))
   if (ret == 0) then
-    chan.is_connected = false
+    real_chan.is_connected = false
     error("async.ch-sendexpr: chansend() failed")
   else
-    if callback then
-      chan.msg_callbacks[chan.next_msg_id] = callback
-    else
-    end
-    inc_msg_id(chan)
   end
   return ret
 end
@@ -120,22 +125,22 @@ async["job-start"] = function(cmd, opts)
   local exit_cb = opts.exit_cb
   if opts.use_terminal then
     local job_obj = {use_terminal = true}
-    local function _13_(job_id, data, event_name)
+    local function _14_(job_id, data, event_name)
       if callback then
         return callback(data)
       else
         return nil
       end
     end
-    job_obj["on_stdout"] = _13_
-    local function _15_(job_id, exit_code, event_name)
+    job_obj["on_stdout"] = _14_
+    local function _16_(job_id, exit_code, event_name)
       if exit_cb then
         return exit_cb(exit_code)
       else
         return nil
       end
     end
-    job_obj["on_exit"] = _15_
+    job_obj["on_exit"] = _16_
     job_obj.job_id = termopen(cmd, job_obj)
     job_obj.out_buf = bufnr("$")
     return job_obj
@@ -147,30 +152,30 @@ async["job-start"] = function(cmd, opts)
     nvim_buf_set_option(buf, "buflisted", 1)
     nvim_buf_set_option(buf, "modifiable", 0)
     local job_obj = {out_name = buf_name, err_name = buf_name, out_buf = buf, err_buf = buf, use_terminal = false}
-    local function _17_(job_id, data, event_name)
+    local function _18_(job_id, data, event_name)
       if callback then
         callback(data)
       else
       end
       return buffer["with-modifiable"](buf, nvim_buf_set_lines(buf, -1, -1, false, data))
     end
-    job_obj["on_stdout"] = _17_
-    local function _19_(job_id, data, event_name)
+    job_obj["on_stdout"] = _18_
+    local function _20_(job_id, data, event_name)
       if callback then
         callback(data)
       else
       end
       return buffer["with-modifiable"](buf, nvim_buf_set_lines(buf, -1, -1, false, data))
     end
-    job_obj["on_stderr"] = _19_
-    local function _21_(job_id, exit_code, event_name)
+    job_obj["on_stderr"] = _20_
+    local function _22_(job_id, exit_code, event_name)
       if exit_cb then
         return exit_cb(exit_code)
       else
         return nil
       end
     end
-    job_obj["on_exit"] = _21_
+    job_obj["on_exit"] = _22_
     job_obj.job_id = jobstart(cmd, job_obj)
     return job_obj
   end
@@ -182,8 +187,8 @@ end
 async["job-getbufnr"] = function(job)
   return (job.out_buf or 0)
 end
-local function _24_(self, key)
+local function _25_(self, key)
   return self[string.gsub(key, "_", "-")]
 end
-setmetatable(async, {__index = _24_})
+setmetatable(async, {__index = _25_})
 return async

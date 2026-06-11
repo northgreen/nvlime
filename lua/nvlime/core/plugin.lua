@@ -738,7 +738,7 @@ plugin["rename-selected-server"] = function()
 end
 local function on_fuzzy_completions_complete(start_col, cur_pos, conn, result)
   local cur_pos0 = vim.list_slice(vim.fn.getcurpos(), 2, 3)
-  local comps = (vim.list_slice(result, 2) or {})
+  local comps = (result[1] or {})
   local r_comps = {}
   if (cur_pos0 ~= vim.list_slice(vim.fn.getcurpos(), 2, 3)) then
   else

@@ -36,11 +36,11 @@
   "Allows making changes to the text in the buffer
 even if its 'nomodifiable' option is set."
   `(let [old-mod# (nvim_buf_get_option ,bufnr :modifiable)]
-     (nvim_buf_set_option ,bufnr :modifiable true)
-     (let [result# (pcall (fn [] (do ,(unpack [...]))))]
+     (nvim_buf_set-option ,bufnr :modifiable true)
+     (let [(ok# err#) (pcall (fn [] (do ,(unpack [...]))))]
        (nvim_buf_set_option ,bufnr :modifiable old-mod#)
-       (when (not (. result# 1))
-         (error (. result# 2))))))
+       (when (not ok#)
+         (error err#)))))
 
 ;;; ...string -> BufName
 (fn buffer.gen-name [...]
@@ -176,7 +176,7 @@ And also would be wiped out after becomeing hidden."
   "Changes all lines of the buffer with `bufnr` to `lines` and
 any other variable number of [string] appended right after the `lines`."
   (let [args [...]
-        lines (args 1)]
+         lines (. args 1)]
     (table.remove args 1)
     (with-modifiable bufnr
       (nvim_buf_set_lines bufnr 0 -1 false lines)

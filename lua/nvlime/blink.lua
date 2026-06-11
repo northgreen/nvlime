@@ -92,9 +92,9 @@ Source.get_completions = function(self, ctx, callback)
           local raw_items
           local _8_
           if is_fuzzy then
-            _8_ = vim.list_slice(candidates, 2)
+            _8_ = candidates[1]
           else
-            _8_ = candidates
+            _8_ = vim.list_slice(candidates, 2)
           end
           raw_items = (_8_ or {})
           local items

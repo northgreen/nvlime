@@ -88,9 +88,9 @@ source.complete = function(self, params, callback)
           local i_27_ = 0
           local _10_
           if use_fuzzy_3f then
-            _10_ = vim.list_slice(candidates, 2)
+            _10_ = candidates[1]
           else
-            _10_ = candidates
+            _10_ = vim.list_slice(candidates, 2)
           end
           for _, c in ipairs((_10_ or {})) do
             local val_28_ = get_lsp_kind(use_fuzzy_3f, c)
