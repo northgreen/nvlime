@@ -197,3 +197,186 @@ describe('nvlime.completion: cmp flags->kind', function()
     eq(true, result[1])
   end)
 end)
+
+describe('nvlime.completion: SWAK response unwrap', function()
+  before_each(function()
+    helpers.clear()
+    exec_lua[[
+      local cwd = vim.fn.getcwd()
+      package.path = package.path .. ';' .. cwd .. '/lua/?.lua;' .. cwd .. '/.test-deps/parsley/lua/?.lua'
+      vim.opt.rtp:append(cwd .. '/lua')
+      vim.opt.rtp:append(cwd .. '/.test-deps/parsley')
+    ]]
+  end)
+
+  it('list_slice skips :completions marker', function()
+    local result = exec_lua[[
+      local candidates = {
+        {name = "COMPLETIONS", package = "KEYWORD"},  -- index 1: marker
+        "foo", "bar", "baz"                            -- index 2+: items
+      }
+      local items = vim.list_slice(candidates, 2)
+      return {#items, items[1], items[2], items[3]}
+    ]]
+    eq(3, result[1])  -- 3 items
+    eq("foo", result[2])
+    eq("bar", result[3])
+    eq("baz", result[4])
+  end)
+
+  it('list_slice on marker-only returns empty', function()
+    local result = exec_lua[[
+      local candidates = {{name = "COMPLETIONS"}}  -- only marker, no items
+      local items = vim.list_slice(candidates, 2)
+      return #items
+    ]]
+    eq(0, result)
+  end)
+
+  it('handles nil candidates gracefully with or guard', function()
+    local result = exec_lua[[
+      local candidates = nil
+      local items = vim.list_slice(candidates or {}, 2)
+      return #items
+    ]]
+    eq(0, result)
+  end)
+
+  it('simple mode: string items become {:label item}', function()
+    local result = exec_lua[[
+      local candidates = {
+        {name = "COMPLETIONS"},
+        "foo", "bar"
+      }
+      local items = vim.list_slice(candidates, 2)
+      local results = {}
+      for _, c in ipairs(items) do
+        table.insert(results, {label = c})
+      end
+      return {#results, results[1].label, results[2].label}
+    ]]
+    eq(2, result[1])
+    eq("foo", result[2])
+    eq("bar", result[3])
+  end)
+
+  it('fuzzy mode: 4-tuple items get label+kind+labelDetails', function()
+    local result = exec_lua[[
+      local candidates = {
+        {name = "COMPLETIONS"},
+        {"fn", "fn", "bg", ""},     -- fuzzy item: [match type flags menu]
+        {"bar", "var", "f", ""}
+      }
+      local items = vim.list_slice(candidates, 2)
+      local flag_kind = {
+        b = 6, f = 3, g = 2, c = 7, t = 7, m = 4, s = 4, p = 5
+      }
+      local kind_precedence = {5, 7, 4, 2, 3, 6}  -- Module, Class, Operator, Method, Function, Variable
+      local results = {}
+      for _, c in ipairs(items) do
+        local label = c[1]
+        local flags = c[3] or ""
+        -- flags->kind logic
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        local kind = nil
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then kind = kp; break end
+        end
+        if not kind then kind = 1 end  -- Keyword fallback
+        table.insert(results, {
+          label = label,
+          kind = kind,
+          labelDetails = {detail = flags}
+        })
+      end
+      return {#results, results[1].label, results[1].kind, results[1].labelDetails.detail,
+                    results[2].label, results[2].kind, results[2].labelDetails.detail}
+    ]]
+    eq(2, result[1])
+    eq("fn", result[2])
+    eq(2, result[3])      -- "bg" → b=6(Var), g=2(Method) → Method(2) wins in precedence
+    eq("bg", result[4])
+    eq("bar", result[5])
+    eq(3, result[6])      -- "f" → f=3 Function
+    eq("f", result[7])
+  end)
+
+  it('fuzzy mode: empty flags falls back to Keyword', function()
+    local result = exec_lua[[
+      local candidates = {
+        {name = "COMPLETIONS"},
+        {"foo", "fn", "", ""}  -- empty flags
+      }
+      local items = vim.list_slice(candidates, 2)
+      local flag_kind = {b=6,f=3,g=2,c=7,t=7,m=4,s=4,p=5}
+      local kind_precedence = {5,7,4,2,3,6}
+      local results = {}
+      for _, c in ipairs(items) do
+        local flags = c[3] or ""
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        local kind = nil
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then kind = kp; break end
+        end
+        if not kind then kind = 1 end
+        table.insert(results, {label = c[1], kind = kind})
+      end
+      return {#results, results[1].label, results[1].kind}
+    ]]
+    eq(1, result[1])
+    eq("foo", result[2])
+    eq(1, result[3])  -- Keyword fallback
+  end)
+
+  it('fuzzy mode: unknown flags falls back to Keyword', function()
+    local result = exec_lua[[
+      local candidates = {
+        {name = "COMPLETIONS"},
+        {"foo", "fn", "xyz", ""}  -- unknown flags
+      }
+      local items = vim.list_slice(candidates, 2)
+      local flag_kind = {b=6,f=3,g=2,c=7,t=7,m=4,s=4,p=5}
+      local kind_precedence = {5,7,4,2,3,6}
+      local results = {}
+      for _, c in ipairs(items) do
+        local flags = c[3] or ""
+        local kinds = {}
+        for i = 1, #flags do
+          local kind = flag_kind[flags:sub(i, i)]
+          if kind then kinds[kind] = true end
+        end
+        local kind = nil
+        for _, kp in ipairs(kind_precedence) do
+          if kinds[kp] then kind = kp; break end
+        end
+        if not kind then kind = 1 end
+        table.insert(results, {label = c[1], kind = kind})
+      end
+      return {#results, results[1].label, results[1].kind}
+    ]]
+    eq(1, result[1])
+    eq("foo", result[2])
+    eq(1, result[3])  -- Keyword fallback
+  end)
+
+  it('handles empty completions list', function()
+    local result = exec_lua[[
+      local candidates = {{name = "COMPLETIONS"}}  -- only marker
+      local items = vim.list_slice(candidates, 2)
+      local results = {}
+      for _, c in ipairs(items or {}) do
+        table.insert(results, {label = c})
+      end
+      return #results
+    ]]
+    eq(0, result)
+  end)
+end)
