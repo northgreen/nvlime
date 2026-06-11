@@ -81,7 +81,7 @@
   self)
 
 (fn Source.enabled [self]
-  (and (= (vim.bo.filetype) "lisp")
+  (and (= vim.bo.filetype "lisp")
        (buffer.get-conn-var! 0)))
 
 (fn Source.get_trigger_characters [self]

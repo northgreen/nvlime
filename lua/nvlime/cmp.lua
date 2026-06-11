@@ -60,7 +60,7 @@ local function get_lsp_kind(use_fuzzy_3f, item)
 end
 local source = {}
 source.is_available = function(self)
-  return ((vim.bo.filetype() == "lisp") and buffer["get-conn-var!"](0))
+  return ((vim.bo.filetype == "lisp") and buffer["get-conn-var!"](0))
 end
 source.get_debug_name = function(self)
   return "CMP Nvlime"
