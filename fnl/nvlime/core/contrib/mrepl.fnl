@@ -8,15 +8,13 @@
 
 (fn append-output [repl-buf str]
   (setbufvar repl-buf :modifiable 1)
-  ((. vim.fn "nvlime#ui#WithBuffer") repl-buf
-         (fn [] ((. vim.fn "nvlime#ui#AppendString") str)))
+  (ui.with-buffer repl-buf #(ui.append-string str))
   (setbufvar repl-buf :modifiable 0))
 
 (fn ensure-buffer-open [buf win-type]
   (when (<= (length (vim.fn.win_findbuf buf)) 0)
-    ((. vim.fn "nvlime#ui#KeepCurWindow")
-          (fn []
-            ((. vim.fn "nvlime#ui#OpenBufferWithWinSettings") buf false win-type)))))
+    (ui.keep-cur-window
+          #(ui.open-buffer-with-win-settings buf false win-type))))
 
 (fn build-prompt [chan-obj]
   (.. (. (. chan-obj :mrepl) :prompt 1) "> "))

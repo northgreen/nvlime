@@ -4,17 +4,17 @@ local mrepl_ui = require("nvlime.core.ui.mrepl")
 local function append_output(repl_buf, str)
   setbufvar(repl_buf, "modifiable", 1)
   local function _1_()
-    return vim.fn["nvlime#ui#AppendString"](str)
+    return ui["append-string"](str)
   end
-  vim.fn["nvlime#ui#WithBuffer"](repl_buf, _1_)
+  ui["with-buffer"](repl_buf, _1_)
   return setbufvar(repl_buf, "modifiable", 0)
 end
 local function ensure_buffer_open(buf, win_type)
   if (#vim.fn.win_findbuf(buf) <= 0) then
     local function _2_()
-      return vim.fn["nvlime#ui#OpenBufferWithWinSettings"](buf, false, win_type)
+      return ui["open-buffer-with-win-settings"](buf, false, win_type)
     end
-    return vim.fn["nvlime#ui#KeepCurWindow"](_2_)
+    return ui["keep-cur-window"](_2_)
   else
     return nil
   end

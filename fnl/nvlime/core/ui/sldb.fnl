@@ -163,10 +163,10 @@ lookup, eval, inspect, disassemble, return."
         (set content
              (.. content
                  "\t  "
-                 ((. vim.fn "nvlime#ui#Pad")
-                  (conn.get rlc "NAME")
-                  ":"
-                  max-name-len)
+                  (ui.pad nil
+                   (conn.get rlc "NAME")
+                   ":"
+                   max-name-len)
                  (conn.get rlc "VALUE")
                  "\n"))))
     (let [catch-tags (. result 2)]
@@ -394,7 +394,7 @@ lookup, eval, inspect, disassemble, return."
   (nvim_buf_set_lines 0 0 -1 false [])
 
   ;; Thread and level header
-  ((. vim.fn "nvlime#ui#AppendString")
+  (ui.append-string
    (.. "Thread: " thread "; Level: " (tostring level) "\n\n"))
 
   ;; Condition description
@@ -403,7 +403,7 @@ lookup, eval, inspect, disassemble, return."
     (when (= (type c) "string")
       (set condition-str (.. condition-str c "\n"))))
   (set condition-str (.. condition-str "\n"))
-  ((. vim.fn "nvlime#ui#AppendString") condition-str)
+  (ui.append-string condition-str)
 
   ;; Restarts section
   (var restarts-str "Restarts:\n")
@@ -411,20 +411,20 @@ lookup, eval, inspect, disassemble, return."
         max-digits (string.len (tostring (- (length restarts) 1)))]
     (for [ri 0 (- (length restarts) 1)]
       (let [r (. restarts (+ ri 1))
-            idx-str ((. vim.fn "nvlime#ui#Pad") (tostring ri) "." max-digits)
+            idx-str (ui.pad nil (tostring ri) "." max-digits)
             restart-line (sldb.format-restart-line r max-name-len has-star)]
         (set restarts-str
              (.. restarts-str "  R " idx-str restart-line "\n")))))
   (set restarts-str (.. restarts-str "\n"))
-  ((. vim.fn "nvlime#ui#AppendString") restarts-str)
+  (ui.append-string restarts-str)
 
   ;; Frames section
   (var frames-str "Frames:\n")
   (let [max-digits (string.len (tostring (- (length frames) 1)))]
     (each [_ f (ipairs frames)]
-      (let [idx-str ((. vim.fn "nvlime#ui#Pad") (tostring (. f 1)) "." max-digits)]
+      (let [idx-str (ui.pad nil (tostring (. f 1)) "." max-digits)]
         (set frames-str (.. frames-str "  F " idx-str (. f 2) "\n")))))
-  ((. vim.fn "nvlime#ui#AppendString") frames-str)
+  (ui.append-string frames-str)
 
   (vim.cmd "setlocal nomodifiable"))
 
@@ -484,7 +484,7 @@ lookup, eval, inspect, disassemble, return."
       (set nth 0))
 
     (let [[win-to-go count-specified]
-          ((. vim.fn "nvlime#ui#ChooseWindowWithCount") nil)]
+           (ui.choose-window-with-count nil)]
       (when (and (<= win-to-go 0) count-specified)
         (values))
 
@@ -503,7 +503,7 @@ lookup, eval, inspect, disassemble, return."
       (set nth 0))
 
     (let [[win-to-go count-specified]
-          ((. vim.fn "nvlime#ui#ChooseWindowWithCount") nil)]
+           (ui.choose-window-with-count nil)]
       (when (and (<= win-to-go 0) count-specified)
         (values))
 

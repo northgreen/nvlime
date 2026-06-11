@@ -134,7 +134,7 @@ sldb["show-frame-locals-cb"] = function(frame, restartable, line0, conn0, result
       end
     end
     for _, rlc in ipairs(rlocals) do
-      content = (content .. "\t  " .. vim.fn["nvlime#ui#Pad"](conn0.get(rlc, "NAME"), ":", max_name_len) .. conn0.get(rlc, "VALUE") .. "\n")
+      content = (content .. "\t  " .. ui.pad(nil, conn0.get(rlc, "NAME"), ":", max_name_len) .. conn0.get(rlc, "VALUE") .. "\n")
     end
   else
   end
@@ -319,7 +319,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
   sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
     vim.cmd("setlocal modifiable")
     nvim_buf_set_lines(0, 0, -1, false, {})
-    vim.fn["nvlime#ui#AppendString"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
+    ui["append-string"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
     local condition_str = ""
     for _, c in ipairs(condition) do
       if (type(c) == "string") then
@@ -328,7 +328,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
       end
     end
     condition_str = (condition_str .. "\n")
-    vim.fn["nvlime#ui#AppendString"](condition_str)
+    ui["append-string"](condition_str)
     local restarts_str = "Restarts:\n"
     do
       local _let_46_ = sldb["find-max-restart-name-len"](restarts)
@@ -337,22 +337,22 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
       local max_digits = string.len(tostring((#restarts - 1)))
       for ri = 0, (#restarts - 1) do
         local r = restarts[(ri + 1)]
-        local idx_str = vim.fn["nvlime#ui#Pad"](tostring(ri), ".", max_digits)
+        local idx_str = ui.pad(nil, tostring(ri), ".", max_digits)
         local restart_line = sldb["format-restart-line"](r, max_name_len, has_star)
         restarts_str = (restarts_str .. "  R " .. idx_str .. restart_line .. "\n")
       end
     end
     restarts_str = (restarts_str .. "\n")
-    vim.fn["nvlime#ui#AppendString"](restarts_str)
+    ui["append-string"](restarts_str)
     local frames_str = "Frames:\n"
     do
       local max_digits = string.len(tostring((#frames - 1)))
       for _, f in ipairs(frames) do
-        local idx_str = vim.fn["nvlime#ui#Pad"](tostring(f[1]), ".", max_digits)
+        local idx_str = ui.pad(nil, tostring(f[1]), ".", max_digits)
         frames_str = (frames_str .. "  F " .. idx_str .. f[2] .. "\n")
       end
     end
-    vim.fn["nvlime#ui#AppendString"](frames_str)
+    ui["append-string"](frames_str)
     return vim.cmd("setlocal nomodifiable")
   end
   sldb["choose-cur-restart"] = function()
@@ -418,7 +418,7 @@ sldb["open-frame-source"] = function(...)
     nth = 0
   else
   end
-  local _let_58_ = vim.fn["nvlime#ui#ChooseWindowWithCount"](nil)
+  local _let_58_ = ui["choose-window-with-count"](nil)
   local win_to_go = _let_58_[1]
   local count_specified = _let_58_[2]
   if ((win_to_go <= 0) and count_specified) then
@@ -436,7 +436,7 @@ sldb["find-source"] = function(...)
     nth = 0
   else
   end
-  local _let_62_ = vim.fn["nvlime#ui#ChooseWindowWithCount"](nil)
+  local _let_62_ = ui["choose-window-with-count"](nil)
   local win_to_go = _let_62_[1]
   local count_specified = _let_62_[2]
   if ((win_to_go <= 0) and count_specified) then
