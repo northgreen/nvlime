@@ -69,7 +69,8 @@
 (local source {})
 
 (fn source.is_available [self]
-  (not (= (buffer.get-conn-var! 0) nil)))
+  (and (= (vim.bo.filetype) "lisp")
+       (buffer.get-conn-var! 0)))
 
 (fn source.get_debug_name [self]
   "CMP Nvlime")

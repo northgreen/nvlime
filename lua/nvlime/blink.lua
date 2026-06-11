@@ -67,8 +67,7 @@ Source.new = function(_, opts0)
   return self
 end
 Source.enabled = function(self)
-  local conn = buffer["get-conn-var!"](0)
-  return not (conn == nil)
+  return ((vim.bo.filetype() == "lisp") and buffer["get-conn-var!"](0))
 end
 Source.get_trigger_characters = function(self)
   return {}
