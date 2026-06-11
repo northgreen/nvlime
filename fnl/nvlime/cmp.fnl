@@ -72,9 +72,8 @@
   (var called false)
   (let [conn (buffer.get-conn-var! 0)]
     (when conn
-      (local completion-fn (if +fuzzy?+
-                                (. conn "FuzzyCompletions")
-                                (. conn "simple-completions")))
+      (local completion-fn (or (and +fuzzy?+ (. conn "fuzzy-completions"))
+                               (. conn "simple-completions")))
       (local on-done (fn [_self candidates]
                        (when (not called)
                          (set called true)

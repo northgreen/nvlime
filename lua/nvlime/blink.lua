@@ -95,38 +95,33 @@ Source.get_completions = function(self, ctx, callback)
     local conn = buffer["get-conn-var!"](0)
     vim.notify(("nvlime blink: conn_type=" .. type(conn) .. " keyword=\"" .. keyword .. "\" start_col=" .. start_col), vim.log.levels.WARN)
     if conn then
-      local completion_fn
+      local completion_fn = ((_2bfuzzy_3f_2b and conn["fuzzy-completions"]) or conn["simple-completions"])
+      local _13_
       if _2bfuzzy_3f_2b then
-        completion_fn = conn.FuzzyCompletions
+        _13_ = "yes"
       else
-        completion_fn = conn["simple-completions"]
+        _13_ = "no"
       end
-      local _14_
-      if _2bfuzzy_3f_2b then
-        _14_ = "yes"
-      else
-        _14_ = "no"
-      end
-      vim.notify(("nvlime blink: completion_fn_type=" .. type(completion_fn) .. " fuzzy=" .. _14_), vim.log.levels.WARN)
+      vim.notify(("nvlime blink: completion_fn_type=" .. type(completion_fn) .. " fuzzy=" .. _13_), vim.log.levels.WARN)
       local on_done
-      local function _16_(_self, candidates)
-        local _17_
+      local function _15_(_self, candidates)
+        local _16_
         if called then
-          _17_ = "yes"
+          _16_ = "yes"
         else
-          _17_ = "no"
+          _16_ = "no"
         end
-        vim.notify(("nvlime blink: on-done CALLED! type=" .. type(candidates) .. " len=" .. (#candidates or "nil") .. " called=" .. _17_), vim.log.levels.WARN)
+        vim.notify(("nvlime blink: on-done CALLED! type=" .. type(candidates) .. " len=" .. (#candidates or "nil") .. " called=" .. _16_), vim.log.levels.WARN)
         if not called then
           called = true
           local raw_items
-          local _19_
+          local _18_
           if _2bfuzzy_3f_2b then
-            _19_ = vim.list_slice(candidates, 2)
+            _18_ = vim.list_slice(candidates, 2)
           else
-            _19_ = candidates
+            _18_ = candidates
           end
-          raw_items = (_19_ or {})
+          raw_items = (_18_ or {})
           vim.notify(("nvlime blink: raw_items_len=" .. #raw_items), vim.log.levels.WARN)
           local items
           do
@@ -157,7 +152,7 @@ Source.get_completions = function(self, ctx, callback)
           return nil
         end
       end
-      on_done = _16_
+      on_done = _15_
       completion_fn(conn, keyword, on_done)
     else
     end

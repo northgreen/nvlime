@@ -90,9 +90,8 @@
         conn (buffer.get-conn-var! 0)]
     (vim.notify (.. "nvlime blink: conn_type=" (type conn) " keyword=\"" keyword "\" start_col=" start-col) vim.log.levels.WARN)
     (when conn
-      (local completion-fn (if +fuzzy?+
-                                  (. conn "FuzzyCompletions")
-                                  (. conn "simple-completions")))
+      (local completion-fn (or (and +fuzzy?+ (. conn "fuzzy-completions"))
+                               (. conn "simple-completions")))
       (vim.notify (.. "nvlime blink: completion_fn_type=" (type completion-fn) " fuzzy=" (if +fuzzy?+ "yes" "no")) vim.log.levels.WARN)
       (local on-done (fn [_self candidates]
         (vim.notify (.. "nvlime blink: on-done CALLED! type=" (type candidates) " len=" (or (length candidates) "nil") " called=" (if called "yes" "no")) vim.log.levels.WARN)

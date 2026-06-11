@@ -70,26 +70,21 @@ source.complete = function(self, params, callback)
   local called = false
   local conn = buffer["get-conn-var!"](0)
   if conn then
-    local completion_fn
-    if _2bfuzzy_3f_2b then
-      completion_fn = conn.FuzzyCompletions
-    else
-      completion_fn = conn["simple-completions"]
-    end
+    local completion_fn = ((_2bfuzzy_3f_2b and conn["fuzzy-completions"]) or conn["simple-completions"])
     local on_done
-    local function _10_(_self, candidates)
+    local function _9_(_self, candidates)
       if not called then
         called = true
-        local function _11_()
+        local function _10_()
           local tbl_26_ = {}
           local i_27_ = 0
-          local _12_
+          local _11_
           if _2bfuzzy_3f_2b then
-            _12_ = vim.list_slice(candidates, 2)
+            _11_ = vim.list_slice(candidates, 2)
           else
-            _12_ = candidates
+            _11_ = candidates
           end
-          for _, c in ipairs((_12_ or {})) do
+          for _, c in ipairs((_11_ or {})) do
             local val_28_ = get_lsp_kind(c)
             if (nil ~= val_28_) then
               i_27_ = (i_27_ + 1)
@@ -99,12 +94,12 @@ source.complete = function(self, params, callback)
           end
           return tbl_26_
         end
-        return callback(_11_())
+        return callback(_10_())
       else
         return nil
       end
     end
-    on_done = _10_
+    on_done = _9_
     local input = string.sub(params.context.cursor_before_line, params.offset)
     return completion_fn(conn, input, on_done)
   else
@@ -114,11 +109,11 @@ end
 source.resolve = function(self, item, callback)
   local conn = buffer["get-conn-var!"](0)
   local doc_fn = conn["documentation-symbol"]
-  local function _17_(_self, doc_string)
+  local function _16_(_self, doc_string)
     item["documentation"] = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)
     return callback(item)
   end
-  return doc_fn(conn, item.label, _17_)
+  return doc_fn(conn, item.label, _16_)
 end
 source["flags->kind"] = flags__3ekind
 return source
