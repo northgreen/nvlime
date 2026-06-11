@@ -152,9 +152,10 @@
   (tset vim.g.nvlime_servers server-obj.id nil)
   (vim.cmd (.. "echom '" server-obj.name " stopped.'"))
 
-  (let [conn-dict (or server-obj.connections {})]
+  (let [conn-dict (or server-obj.connections {})
+        conn-manager (require "nvlime.core.conn_manager")]
     (each [conn-id conn (pairs conn-dict)]
-      ((. vim.fn "nvlime#connection#Close") conn))
+      (conn-manager.close conn))
     (tset server-obj :connections {})))
 
 ;;; ============================================================================

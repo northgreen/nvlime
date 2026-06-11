@@ -120,8 +120,9 @@ local function server_output_cb(server_obj, auto_connect, data)
     vim.g.nvlime_servers[server_obj0.id] = nil
     vim.cmd(("echom '" .. server_obj0.name .. " stopped.'"))
     local conn_dict = (server_obj0.connections or {})
+    local conn_manager = require("nvlime.core.conn_manager")
     for conn_id, conn in pairs(conn_dict) do
-      vim.fn["nvlime#connection#Close"](conn)
+      conn_manager.close(conn)
     end
     server_obj0["connections"] = {}
     return nil

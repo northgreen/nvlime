@@ -93,9 +93,10 @@ key - var name, value - var value."
 
 ;;; BufNr ->
 (fn buffer.set-conn-var! [bufnr]
-  "Sets b:nvlime_conn variable to current connection with
-proper vimscript methods (calling it with vimscript)."
-  (buffer.vim-call! bufnr ["call nvlime#connection#Get()"]))
+  "Ensures b:nvlime_conn is set to the current connection (no vimscript round-trip)."
+  (local conn-manager (require "nvlime.core.conn_manager"))
+  (conn-manager.get false)
+  nil)
 
 ;;; BufNr -> ?{any}
 (fn buffer.get-conn-var! [bufnr]
