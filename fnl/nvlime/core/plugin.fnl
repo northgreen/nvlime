@@ -740,7 +740,7 @@
 (fn on-fuzzy-completions-complete [start-col cur-pos conn result]
   "Handle fuzzy completion results."
   (let [cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3)
-        comps (or (. result 1) [])
+        comps (or (vim.list_slice result 2) [])
         r-comps []]
     (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
       (values nil))
@@ -751,7 +751,7 @@
 (fn on-simple-completions-complete [start-col cur-pos conn result]
   "Handle simple completion results."
   (let [cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3)
-        comps (or (. result 1) [])]
+        comps (or (vim.list_slice result 2) [])]
     (when (not= cur-pos (vim.list_slice (vim.fn.getcurpos) 2 3))
       (values nil))
     (pcall vim.fn.complete start-col comps)))

@@ -79,7 +79,7 @@
                        (when (not called)
                          (set called true)
                          (callback
-                           (icollect [_ c (ipairs (or (. candidates 1) []))]
+                           (icollect [_ c (ipairs (or (vim.list_slice candidates 2) []))]
                              (get-lsp-kind c))))))
       (let [input (string.sub params.context.cursor_before_line
                               params.offset)]

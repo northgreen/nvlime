@@ -89,7 +89,7 @@
       (local on-done (fn [_self candidates]
         (when (not called)
           (set called true)
-          (let [items (icollect [_ c (ipairs (or (. candidates 1) []))]
+          (let [items (icollect [_ c (ipairs (or (vim.list_slice candidates 2) []))]
                         (let [item (get-lsp-kind c)]
                           (when item
                             (tset item :textEdit

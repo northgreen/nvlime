@@ -83,7 +83,7 @@ source.complete = function(self, params, callback)
         local function _11_()
           local tbl_26_ = {}
           local i_27_ = 0
-          for _, c in ipairs((candidates[1] or {})) do
+          for _, c in ipairs((vim.list_slice(candidates, 2) or {})) do
             local val_28_ = get_lsp_kind(c)
             if (nil ~= val_28_) then
               i_27_ = (i_27_ + 1)

@@ -91,7 +91,7 @@ Source.get_completions = function(self, ctx, callback)
           do
             local tbl_26_ = {}
             local i_27_ = 0
-            for _, c in ipairs((candidates[1] or {})) do
+            for _, c in ipairs((vim.list_slice(candidates, 2) or {})) do
               local val_28_
               do
                 local item = get_lsp_kind(c)
