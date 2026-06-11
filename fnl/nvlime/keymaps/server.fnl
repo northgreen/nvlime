@@ -5,10 +5,10 @@
 
 (fn server.add []
   (km.buffer.normal sm.normal.connect
-                    "<Cmd>call nvlime#server#ConnectToCurServer()<CR>"
+                    "<Cmd>lua require('nvlime.core.server').connect_to_cur_server()<CR>"
                     "nvlime: Connect to this server")
   (km.buffer.normal sm.normal.stop
-                    "<Cmd>call nvlime#server#StopCurServer()<CR>"
+                    "<Cmd>lua require('nvlime.core.server').stop_cur_server()<CR>"
                     "nvlime: Stop this server"))
 
 server

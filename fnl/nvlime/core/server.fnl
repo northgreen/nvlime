@@ -66,26 +66,27 @@
   ["ccl" "--load" loader "--eval" eval-str])
 
 (fn server.build-server-command [cl-impl]
-  "Build server startup command for the given CL implementation.
+  "Generate SBCL/CCL server startup command.
   Checks for user-defined builder first (NvlimeBuildServerCommandFor_<impl>),
   then falls back to default builder.
   Throws if implementation is not supported."
   (let [cl-impl (or cl-impl
                     (. vim.g :nvlime_options :implementation))
-        nvlime-loader (.. nvlime-home path-sep "lisp" path-sep "load-nvlime.lisp")
-        user-func-name (.. "NvlimeBuildServerCommandFor_" cl-impl)
-        default-func-name (.. "nvlime#server#BuildServerCommandFor_" cl-impl)]
+        nvlime-loader (.. nvlime-home path-sep "lisp" path-sep "load-nvlime.lisp")]
 
     (cond
-      ;; User-defined builder exists
-      ((> (exists (.. "*" user-func-name)) 0)
-       (let [Builder ((. vim.fn user-func-name))]
+      ;; User-defined VimScript builder exists
+      ((> (exists (.. "*" "NvlimeBuildServerCommandFor_" cl-impl)) 0)
+       (let [user-func-name (.. "NvlimeBuildServerCommandFor_" cl-impl)
+             Builder ((. vim.fn user-func-name))]
          (Builder nvlime-loader "(nvlime:main)")))
 
-      ;; Default builder exists
-      ((> (exists (.. "*" default-func-name)) 0)
-       (let [Builder ((. vim.fn default-func-name))]
-         (Builder nvlime-loader "(nvlime:main)")))
+      ;; Default builders — call Fennel functions directly
+      (= cl-impl "sbcl")
+      (server.build-server-command-for-sbcl nvlime-loader "(nvlime:main)")
+
+      (= cl-impl "ccl")
+      (server.build-server-command-for-ccl nvlime-loader "(nvlime:main)")
 
       ;; No builder found
       :else

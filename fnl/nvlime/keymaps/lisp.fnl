@@ -48,7 +48,7 @@
                     "nvlime: Rename the current connection")
 
   (km.buffer.normal lm.normal.server.new
-                    "<Cmd>call nvlime#server#New(v:true, get(g:, 'nvlime_cl_use_terminal', v:false))<CR>"
+                    "<Cmd>lua require('nvlime.core.server').new(true, vim.fn.get('g:', 'nvlime_cl_use_terminal', false))<CR>"
                     "nvlime: Run a new server and connect to it")
   (km.buffer.normal lm.normal.server.show
                     "<Cmd>call nvlime#plugin#ShowCurrentServer()<CR>"

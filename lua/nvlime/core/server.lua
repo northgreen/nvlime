@@ -56,17 +56,12 @@ end
 server["build-server-command"] = function(cl_impl)
   local cl_impl0 = (cl_impl or vim.g.nvlime_options.implementation)
   local nvlime_loader = (nvlime_home .. path_sep .. "lisp" .. path_sep .. "load-nvlime.lisp")
-  local user_func_name = ("NvlimeBuildServerCommandFor_" .. cl_impl0)
-  local default_func_name = ("nvlime#server#BuildServerCommandFor_" .. cl_impl0)
   local function _8_()
+    local user_func_name = ("NvlimeBuildServerCommandFor_" .. cl_impl0)
     local Builder = vim.fn[user_func_name]()
     return Builder(nvlime_loader, "(nvlime:main)")
   end
-  local function _9_()
-    local Builder = vim.fn[default_func_name]()
-    return Builder(nvlime_loader, "(nvlime:main)")
-  end
-  return cond((exists(("*" .. user_func_name)) > 0)(_8_()), (exists(("*" .. default_func_name)) > 0)(_9_()), "else", error(("nvlime.core.server.build-server-command: implementation " .. vim.fn.string(cl_impl0) .. " not supported")))
+  return cond((exists(("*" .. "NvlimeBuildServerCommandFor_" .. cl_impl0)) > 0)(_8_()), (cl_impl0 == "sbcl"), server["build-server-command-for-sbcl"](nvlime_loader, "(nvlime:main)"), (cl_impl0 == "ccl"), server["build-server-command-for-ccl"](nvlime_loader, "(nvlime:main)"), "else", error(("nvlime.core.server.build-server-command: implementation " .. vim.fn.string(cl_impl0) .. " not supported")))
 end
 local function normalize_server_id(id)
   if (type(id) == "table") then
@@ -79,12 +74,12 @@ local function match_server_created_port()
   local port_line_nr = 0
   local old_pos = getcurpos()
   local pattern = "Server created: (#([[:digit:][:blank:]]\\+)\\s\\+\\(\\d\\+\\))"
-  local function _11_()
+  local function _10_()
     cursor({1, 1, 0, 1})
     port_line_nr = search(pattern, "n")
     return nil
   end
-  pcall(_11_)
+  pcall(_10_)
   setpos(".", old_pos)
   if (port_line_nr > 0) then
     local port_line = getline(port_line_nr)
@@ -132,18 +127,18 @@ local function server_output_cb(server_obj, auto_connect, data)
     local use_terminal0 = (use_terminal or false)
     local server_name = (name or ("nvlime server " .. vim.g.nvlime_next_server_id))
     local server_id = vim.g.nvlime_next_server_id
-    local _let_17_ = vim.fn.luaeval("require('nvlime.window.server').open(_A)", server_name)
-    local _win = _let_17_[1]
-    local bufnr0 = _let_17_[2]
+    local _let_16_ = vim.fn.luaeval("require('nvlime.window.server').open(_A)", server_name)
+    local _win = _let_16_[1]
+    local bufnr0 = _let_16_[2]
     local server_obj0 = {id = server_id, name = server_name, auto_connect = auto_connect1, use_terminal = use_terminal0, cl_impl = cl_impl}
     local server_job
-    local function _18_(data0)
+    local function _17_(data0)
       return server_output_cb(server_obj0, auto_connect1, data0)
     end
-    local function _19_(exit_status)
+    local function _18_(exit_status)
       return server_exit_cb(server_obj0, exit_status)
     end
-    server_job = async["job-start"](server["build-server-command"](cl_impl), {buf_name = bufname(bufnr0), callback = _18_, exit_cb = _19_, use_terminal = use_terminal0})
+    server_job = async["job-start"](server["build-server-command"](cl_impl), {buf_name = bufname(bufnr0), callback = _17_, exit_cb = _18_, use_terminal = use_terminal0})
     if not async["job-is-active"](server_job) then
       vim.fn.luaeval("require('nvlime.buffer')['fill!'](_A[1], _A[2])", {bufnr0, "Failed to start server."})
       error("nvlime.core.server.new: failed to start server job")
@@ -249,8 +244,8 @@ local function server_output_cb(server_obj, auto_connect, data)
   end
   return server["stop-cur-server"]
 end
-local function _31_(self, key)
+local function _30_(self, key)
   return self[string.gsub(key, "_", "-")]
 end
-setmetatable(server, {__index = _31_})
+setmetatable(server, {__index = _30_})
 return server
