@@ -4,6 +4,7 @@ local getbufvar = vim.fn.getbufvar
 local getcurpos = vim.fn.getcurpos
 local setpos = vim.fn.setpos
 local win_gotoid = vim.fn.win_gotoid
+local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local ui = require("nvlime.core.ui")
 local compiler_notes = {}
 compiler_notes["init-buffer"] = function(conn, orig_win)
@@ -27,7 +28,7 @@ compiler_notes["fill-buffer"] = function(note_list)
   end
   local coords = {}
   local nlist = {}
-  vim.fn["nvlime#ClearCurrentBuffer"]()
+  nvim_buf_set_lines(0, 0, -1, false, {})
   local idx = 0
   local note_count = #note_list
   for _ = note, ipairs(note_list) do

@@ -8,7 +8,10 @@ and interactive source location jumping."
          : getcurpos
          : setpos
          : win_gotoid}
-        vim.fn)
+       vim.fn)
+
+(local {: nvim_buf_set_lines}
+       vim.api)
 
 (local ui (require "nvlime.core.ui"))
 
@@ -45,7 +48,7 @@ and interactive source location jumping."
 
   (var coords [])
   (var nlist [])
-  ((. vim.fn "nvlime#ClearCurrentBuffer"))
+  (nvim_buf_set_lines 0 0 -1 false [])
   (var idx 0)
   (var note-count (length note-list))
 

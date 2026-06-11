@@ -1,4 +1,5 @@
 local nvim_buf_delete = vim.api.nvim_buf_delete
+local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local luaeval = vim.fn.luaeval
 local bufnr = vim.fn.bufnr
 local getline = vim.fn.getline
@@ -155,12 +156,12 @@ input["next-history-item"] = function(backward)
   end
   vim.b.nvlime_input_history_idx = next_idx
   if (#text > 0) then
-    vim.fn["nvlime#ClearCurrentBuffer"]()
+    nvim_buf_set_lines(0, 0, -1, false, {})
     ui["append-string"](text, nil)
   else
     if ((next_idx > 0) and vim.fn.exists("b:nvlime_input_orig_text")) then
       vim.fn.unlet("b:nvlime_input_history_idx")
-      vim.fn["nvlime#ClearCurrentBuffer"]()
+      nvim_buf_set_lines(0, 0, -1, false, {})
       ui["append-string"](vim.b.nvlime_input_orig_text, nil)
       vim.fn.unlet("b:nvlime_input_orig_text")
     else

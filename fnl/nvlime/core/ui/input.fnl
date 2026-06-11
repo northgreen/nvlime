@@ -1,7 +1,8 @@
 "Input module — Fennel migration of autoload/nvlime/ui/input.vim (145 lines).
 Provides buffer-based and inline input dialogs for nvlime."
 
-(local {: nvim_buf_delete}
+(local {: nvim_buf_delete
+         : nvim_buf_set_lines}
        vim.api)
 
 (local {: luaeval
@@ -161,12 +162,12 @@ Provides buffer-based and inline input dialogs for nvlime."
       (set vim.b.nvlime_input_history_idx next-idx)
       (if (> (length text) 0)
           (do
-            ((. vim.fn "nvlime#ClearCurrentBuffer"))
+            (nvim_buf_set_lines 0 0 -1 false [])
             (ui.append-string text nil))
           (when (and (> next-idx 0)
                      (vim.fn.exists "b:nvlime_input_orig_text"))
             (vim.fn.unlet "b:nvlime_input_history_idx")
-            ((. vim.fn "nvlime#ClearCurrentBuffer"))
+            (nvim_buf_set_lines 0 0 -1 false [])
             (ui.append-string vim.b.nvlime_input_orig_text nil)
             (vim.fn.unlet "b:nvlime_input_orig_text")))
       (cursor "$" (+ (length (getline "$")) 1)))))

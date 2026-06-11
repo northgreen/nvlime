@@ -5,31 +5,31 @@
 
 (fn inspector.add []
   (km.buffer.normal im.normal.action
-                    "<Cmd>call nvlime#ui#inspector#InspectorSelect()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').inspector_select()<CR>"
                     "nvlime: Activate the interactable field/button under the cursor")
   (km.buffer.normal im.normal.current.send
-                    "<Cmd>call nvlime#ui#inspector#SendCurValueToREPL()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').send_cur_value_to_repl()<CR>"
                     "nvlime: Send the value of the field under the cursor to the REPL")
   (km.buffer.normal im.normal.current.source
-                    "<Cmd>call nvlime#ui#inspector#FindSource('part')<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').find_source('part')<CR>"
                     "nvlime: Open the source code for the value of the field under the cursor")
   (km.buffer.normal im.normal.inspected.send
-                    "<Cmd>call nvlime#ui#inspector#SendCurInspecteeToREPL()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').send_cur_inspectee_to_repl()<CR>"
                     "nvlime: Send the value being inspected to the REPL")
   (km.buffer.normal im.normal.inspected.source
-                    "<Cmd>call nvlime#ui#inspector#FindSource('inspectee')<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').find_source('inspectee')<CR>"
                     "nvlime: Open the source code for the value being inspected")
   (km.buffer.normal im.normal.inspected.previous
-                    "<Cmd>call nvlime#ui#inspector#InspectorPop()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').inspector_pop()<CR>"
                     "nvlime: Return to the previous inspected object")
   (km.buffer.normal im.normal.inspected.next
-                    "<Cmd>call nvlime#ui#inspector#InspectorNext()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').inspector_next()<CR>"
                     "nvlime: Move to the next inspected object")
   (km.buffer.normal im.normal.next_field
-                    "<Cmd>call nvlime#ui#inspector#NextField(v:true)<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').next_field(v:true)<CR>"
                     "nvlime: Select the next interactable field/button")
   (km.buffer.normal im.normal.prev_field
-                    "<Cmd>call nvlime#ui#inspector#NextField(v:false)<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').next_field(v:false)<CR>"
                     "nvlime: Select the previous interactable field/button")
   (km.buffer.normal im.normal.refresh
                     "<Cmd>call b:nvlime_conn.InspectorReinspect({c, r -> c.ui.OnInspect(c, r, v:null, v:null)})<CR>"

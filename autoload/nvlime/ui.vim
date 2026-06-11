@@ -115,15 +115,13 @@ endfunction
 " because the Fennel ui_events references undefined callbacks.
 
 function! nvlime#ui#OnReadString(conn, thread, ttag) dict
-  call nvlime#ui#input#FromBuffer(
-        \ a:conn, 'Input string:', v:null,
-        \ function('s:ReadStringInputComplete', [a:thread, a:ttag]))
+  call luaeval("require('nvlime.core.ui.input').from_buffer(_A[1], _A[2], _A[3], function() require('nvlime.core.ui_events')['return-mini-buffer-content'](_A[1], _A[2]) end)",
+        \ [a:conn, a:thread, a:ttag])
 endfunction
 
 function! nvlime#ui#OnReadFromMiniBuffer(conn, thread, ttag, prompt, init_val) dict
-  call nvlime#ui#input#FromBuffer(
-        \ a:conn, a:prompt, a:init_val,
-        \ function('s:ReturnMiniBufferContent', [a:thread, a:ttag]))
+  call luaeval("require('nvlime.core.ui.input').from_buffer(_A[1], _A[2], _A[3], function() require('nvlime.core.ui_events')['return-string-input-complete'](_A[1], _A[2]) end)",
+        \ [a:conn, a:thread, a:ttag])
 endfunction
 
 function! nvlime#ui#OnIndentationUpdate(conn, indent_info) dict

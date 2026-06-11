@@ -16,8 +16,8 @@ local trace_entry_fold_pattern = "^\\(\\s*\\d*[[:space:]|]\\+\\)\\(`-\\)\\|\\( >
 local next_fetch_key = 0
 trace_dialog["init-trace-dialog-buffer"] = function()
   vim.cmd(("setlocal shiftwidth=" .. indent_level_width))
-  vim.cmd("setlocal foldtext=nvlime#ui#trace_dialog#BuildFoldText(v:foldstart)")
-  vim.cmd("setlocal foldexpr=nvlime#ui#trace_dialog#CalcFoldLevel(v:lnum)")
+  vim.cmd("setlocal foldtext=v:lua.require('nvlime.core.ui.trace_dialog').build_fold_text(v:foldstart)")
+  vim.cmd("setlocal foldexpr=v:lua.require('nvlime.core.ui.trace_dialog').calc_fold_level(v:lnum)")
   return vim.cmd("setlocal foldmethod=expr")
 end
 trace_dialog["add-button"] = function(buttons_str, name, co_type, co_id, cur_line, coords)

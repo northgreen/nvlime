@@ -25,7 +25,8 @@ ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames
   local _ = _let_2_[1]
   local bufnr = _let_2_[2]
   local function _3_()
-    return call(vim.fn["nvlime#ui#sldb#FillSLDBBuf"], {thread, level, condition, restarts, frames})
+    local sldb = require("nvlime.core.ui.sldb")
+    return sldb["fill-sldb-buf"](thread, level, condition, restarts, frames)
   end
   return ui["with-buffer"](bufnr, _3_)
 end
@@ -51,16 +52,18 @@ ui["on-write-string"] = function(self, conn, str, str_type, thread)
   end
 end
 ui["on-read-string"] = function(self, conn, thread, ttag)
+  local input = require("nvlime.core.ui.input")
   local function _7_()
     return return_mini_buffer_content(thread, ttag)
   end
-  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, "Input string:", nil, _7_})
+  return input["from-buffer"](conn, "Input string:", nil, _7_)
 end
 ui["on-read-from-minibuffer"] = function(self, conn, thread, ttag, prompt, init_val)
+  local input = require("nvlime.core.ui.input")
   local function _8_()
     return return_string_input_complete(thread, ttag)
   end
-  return call(vim.fn["nvlime#ui#input#FromBuffer"], {conn, prompt, init_val, _8_})
+  return input["from-buffer"](conn, prompt, init_val, _8_)
 end
 ui["on-indentation-update"] = function(self, conn, indent_info)
   if not conn.cb_data["indent-info"] then
@@ -106,9 +109,10 @@ ui["on-inspect"] = function(self, conn, content, thread, tag)
   end
 end
 ui["on-trace-dialog"] = function(self, conn, spec_list, trace_count)
-  local trace_buf = call(vim.fn["nvlime#ui#trace_dialog#InitTraceDialogBuf"], {conn})
+  local trace_dialog = require("nvlime.core.ui.trace_dialog")
+  local trace_buf = trace_dialog["init-trace-dialog-buf"](conn)
   ui["open-buffer-with-win-settings"](trace_buf, false, "trace")
-  return call(vim.fn["nvlime#ui#trace_dialog#FillTraceDialogBuf"], {spec_list, trace_count})
+  return trace_dialog["fill-trace-dialog-buf"](spec_list, trace_count)
 end
 ui["on-xref"] = function(self, conn, xref_list)
   return cond(not xref_list, ui["err-msg"]("No xref found."), ((type(xref_list) == "table") and (xref_list.name == "NOT-IMPLEMENTED")), ui["err-msg"]("Not implemented."), "else", xref["open-xref-buf"](conn, xref_list))
@@ -122,14 +126,16 @@ ui["on-compiler-notes"] = function(self, conn, note_list, orig_win)
   local bufnr = _let_17_[2]
   nvim_buf_set_var(bufnr, "nvlime_notes_orig_win", orig_win)
   nvim_buf_set_var(bufnr, "nvlime_conn", conn)
-  return call(vim.fn["nvlime#ui#compiler_notes#FillCompilerNotesBuf"], {note_list})
+  local compiler_notes = require("nvlime.core.ui.compiler_notes")
+  return compiler_notes["fill-buffer"](note_list)
 end
 ui["on-threads"] = function(self, conn, thread_list)
   if not thread_list then
     ui["err-msg"]("The thread list is empty.")
   else
   end
-  return call(vim.fn["nvlime#ui#threads#FillThreadsBuf"], {conn, thread_list})
+  local threads = require("nvlime.core.ui.threads")
+  return threads["fill-threads-buf"](conn, thread_list)
 end
 local function _19_(self, key)
   return self[string.gsub(key, "_", "-")]

@@ -1,3 +1,4 @@
+local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_buf_set_option = vim.api.nvim_buf_set_option
 local luaeval = vim.fn.luaeval
 local bufnr = vim.fn.bufnr
@@ -314,7 +315,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
   end
   sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
     vim.cmd("setlocal modifiable")
-    vim.fn["nvlime#ClearCurrentBuffer"]()
+    nvim_buf_set_lines(0, 0, -1, false, {})
     vim.fn["nvlime#ui#AppendString"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
     local condition_str = ""
     for _, c in ipairs(condition) do

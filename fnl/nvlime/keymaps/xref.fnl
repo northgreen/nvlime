@@ -5,16 +5,16 @@
 
 (fn xref.add []
   (km.buffer.normal xm.normal.source
-                    "<Cmd>call nvlime#ui#xref#OpenCurXref()<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.xref').open_cur_xref()<CR>"
                     "nvlime: Open the selected source location")
   (km.buffer.normal xm.normal.source_split
-                    "<Cmd>call nvlime#ui#xref#OpenCurXref('split')<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.xref').open_cur_xref('split')<CR>"
                     "nvlime: Open the selected source location in a split")
   (km.buffer.normal xm.normal.source_vsplit
-                    "<Cmd>call nvlime#ui#xref#OpenCurXref('vsplit')<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.xref').open_cur_xref('vsplit')<CR>"
                     "nvlime: Open the selected source location in a vertical split")
   (km.buffer.normal xm.normal.source_tab
-                    "<Cmd>call nvlime#ui#xref#OpenCurXref('tabedit')<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.xref').open_cur_xref('tabedit')<CR>"
                     "nvlime: Open the selected source location in a new tabpage"))
 
 xref

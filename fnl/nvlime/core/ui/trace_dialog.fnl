@@ -36,8 +36,8 @@
 (fn trace-dialog.init-trace-dialog-buffer []
   "Set buffer-local options for trace dialog."
   (vim.cmd (.. "setlocal shiftwidth=" indent-level-width))
-  (vim.cmd "setlocal foldtext=nvlime#ui#trace_dialog#BuildFoldText(v:foldstart)")
-  (vim.cmd "setlocal foldexpr=nvlime#ui#trace_dialog#CalcFoldLevel(v:lnum)")
+  (vim.cmd "setlocal foldtext=v:lua.require('nvlime.core.ui.trace_dialog').build_fold_text(v:foldstart)")
+  (vim.cmd "setlocal foldexpr=v:lua.require('nvlime.core.ui.trace_dialog').calc_fold_level(v:lnum)")
   (vim.cmd "setlocal foldmethod=expr"))
 
 (fn trace-dialog.add-button [buttons-str name co-type co-id cur-line coords]

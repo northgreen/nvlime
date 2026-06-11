@@ -2,13 +2,16 @@
 Provides MREPL buffer management: init, submit, clear, disconnect, interrupt."
 
 (local {: bufnr
-          : getline
-          : setbufvar
-          : getcurpos
-          : setpos
-          : searchpos
-          : feedkeys}
-       vim.fn)
+           : getline
+           : setbufvar
+           : getcurpos
+           : setpos
+           : searchpos
+           : feedkeys}
+          vim.fn)
+
+(local {: nvim_buf_set_lines}
+       vim.api)
 
 (local ui (require "nvlime.core.ui"))
 (local connection (require "nvlime.core.connection"))
@@ -92,8 +95,8 @@ Provides MREPL buffer management: init, submit, clear, disconnect, interrupt."
   (let [read-mode (. vim.b.nvlime_mrepl_channel :mrepl :mode)]
     (if (= read-mode "EVAL")
         ;; EVAL mode: extract text after last prompt
-        (let [prompt (vim.fn.eval
-                       "nvlime#contrib#mrepl#BuildPrompt(b:nvlime_mrepl_channel)")
+        (let [prompt (let [chan-obj vim.b.nvlime_mrepl_channel]
+                       (.. (. (. chan-obj :mrepl) :prompt 1) "> "))
               old-pos (getcurpos)]
           (vim.cmd "normal! G$")
           (let [eof-pos (getcurpos)
@@ -128,10 +131,10 @@ Provides MREPL buffer management: init, submit, clear, disconnect, interrupt."
 
 (fn mrepl.clear []
   "Clear MREPL buffer and reinitialize with banner and prompt."
-  ((. vim.fn "nvlime#ClearCurrentBuffer"))
+  (nvim_buf_set_lines 0 0 -1 false [])
   (mrepl.show-banner vim.b.nvlime_conn vim.b.nvlime_mrepl_channel)
-  (let [prompt (vim.fn.eval
-                 "nvlime#contrib#mrepl#BuildPrompt(b:nvlime_mrepl_channel)")]
+  (let [prompt (let [chan-obj vim.b.nvlime_mrepl_channel]
+                 (.. (. (. chan-obj :mrepl) :prompt 1) "> "))]
     (mrepl.show-prompt (bufnr "%") prompt)))
 
 (fn mrepl.disconnect []

@@ -56,8 +56,8 @@ Also exports private callbacks used by input buffer completion."
     (ui.with-buffer
       bufnr
       (fn []
-        (call (. vim.fn "nvlime#ui#sldb#FillSLDBBuf")
-              [thread level condition restarts frames])))))
+        (let [sldb (require "nvlime.core.ui.sldb")]
+          (sldb.fill-sldb-buf thread level condition restarts frames))))))
 
 (fn ui.on-debug-activate [self conn thread level select]
   "Opens SLDB window and positions cursor.
@@ -97,16 +97,16 @@ Also exports private callbacks used by input buffer completion."
 
 (fn ui.on-read-string [self conn thread ttag]
   "Opens input buffer for string input from Lisp."
-  (call (. vim.fn "nvlime#ui#input#FromBuffer")
-        [conn "Input string:" nil
-         (fn [] (return-mini-buffer-content thread ttag))]))
+  (let [input (require "nvlime.core.ui.input")]
+    (input.from-buffer conn "Input string:" nil
+                       (fn [] (return-mini-buffer-content thread ttag)))))
 
 (fn ui.on-read-from-minibuffer
      [self conn thread ttag prompt init-val]
   "Opens input buffer with prompt for minibuffer-style input."
-  (call (. vim.fn "nvlime#ui#input#FromBuffer")
-        [conn prompt init-val
-         (fn [] (return-string-input-complete thread ttag))]))
+  (let [input (require "nvlime.core.ui.input")]
+    (input.from-buffer conn prompt init-val
+                       (fn [] (return-string-input-complete thread ttag)))))
 
 ;;; ============================================================================
 ;;; Editor state events
@@ -160,12 +160,10 @@ Also exports private callbacks used by input buffer completion."
 
 (fn ui.on-trace-dialog [self conn spec-list trace-count]
   "Opens trace dialog window."
-  (let [trace-buf (call
-                    (. vim.fn "nvlime#ui#trace_dialog#InitTraceDialogBuf")
-                    [conn])]
+  (let [trace-dialog (require "nvlime.core.ui.trace_dialog")
+        trace-buf (trace-dialog.init-trace-dialog-buf conn)]
     (ui.open-buffer-with-win-settings trace-buf false "trace")
-    (call (. vim.fn "nvlime#ui#trace_dialog#FillTraceDialogBuf")
-          [spec-list trace-count])))
+    (trace-dialog.fill-trace-dialog-buf spec-list trace-count)))
 
 ;;; ============================================================================
 ;;; Cross-reference event
@@ -198,8 +196,8 @@ Also exports private callbacks used by input buffer completion."
                     {:conn-name (. (. conn :cb_data) :name)})]
     (nvim_buf_set_var bufnr "nvlime_notes_orig_win" orig-win)
     (nvim_buf_set_var bufnr "nvlime_conn" conn)
-    (call (. vim.fn "nvlime#ui#compiler_notes#FillCompilerNotesBuf")
-          [note-list])))
+    (let [compiler-notes (require "nvlime.core.ui.compiler_notes")]
+      (compiler-notes.fill-buffer note-list))))
 
 ;;; ============================================================================
 ;;; Threads event
@@ -211,8 +209,8 @@ Also exports private callbacks used by input buffer completion."
   (when (not thread-list)
     (ui.err-msg "The thread list is empty.")
     (values))
-  (call (. vim.fn "nvlime#ui#threads#FillThreadsBuf")
-        [conn thread-list]))
+  (let [threads (require "nvlime.core.ui.threads")]
+    (threads.fill-threads-buf conn thread-list)))
 
 
 ;;; ============================================================================

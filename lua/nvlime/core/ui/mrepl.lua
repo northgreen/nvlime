@@ -5,6 +5,7 @@ local getcurpos = vim.fn.getcurpos
 local setpos = vim.fn.setpos
 local searchpos = vim.fn.searchpos
 local feedkeys = vim.fn.feedkeys
+local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local ui = require("nvlime.core.ui")
 local connection = require("nvlime.core.connection")
 local mrepl = {}
@@ -91,7 +92,11 @@ end
 mrepl.submit = function()
   local read_mode = vim.b.nvlime_mrepl_channel.mrepl.mode
   if (read_mode == "EVAL") then
-    local prompt = vim.fn.eval("nvlime#contrib#mrepl#BuildPrompt(b:nvlime_mrepl_channel)")
+    local prompt
+    do
+      local chan_obj = vim.b.nvlime_mrepl_channel
+      prompt = (chan_obj.mrepl.prompt[1] .. "> ")
+    end
     local old_pos = getcurpos()
     vim.cmd("normal! G$")
     local eof_pos = getcurpos()
@@ -118,9 +123,13 @@ mrepl.submit = function()
   end
 end
 mrepl.clear = function()
-  vim.fn["nvlime#ClearCurrentBuffer"]()
+  nvim_buf_set_lines(0, 0, -1, false, {})
   mrepl["show-banner"](vim.b.nvlime_conn, vim.b.nvlime_mrepl_channel)
-  local prompt = vim.fn.eval("nvlime#contrib#mrepl#BuildPrompt(b:nvlime_mrepl_channel)")
+  local prompt
+  do
+    local chan_obj = vim.b.nvlime_mrepl_channel
+    prompt = (chan_obj.mrepl.prompt[1] .. "> ")
+  end
   return mrepl["show-prompt"](bufnr("%"), prompt)
 end
 mrepl.disconnect = function()
