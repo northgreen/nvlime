@@ -2,6 +2,9 @@ local lsp_types = require("cmp.types.lsp")
 local buffer = require("nvlime.buffer")
 local opts = require("nvlime.config")
 require("cmp.types.cmp")
+require("nvlime.core.connection.swank")
+require("nvlime.core.contrib.fuzzy")
+local connection = require("nvlime.core.connection")
 local has_fuzzy_3f = false
 for _, v in ipairs(opts.contribs) do
   if ("SWANK-FUZZY" == v) then
@@ -70,7 +73,7 @@ source.complete = function(self, params, callback)
   local called = false
   local conn = buffer["get-conn-var!"](0)
   if conn then
-    local completion_fn = ((_2bfuzzy_3f_2b and conn["fuzzy-completions"]) or conn["simple-completions"])
+    local completion_fn = ((_2bfuzzy_3f_2b and connection["fuzzy-completions"]) or connection["simple-completions"])
     local on_done
     local function _9_(_self, candidates)
       if not called then
@@ -108,12 +111,11 @@ source.complete = function(self, params, callback)
 end
 source.resolve = function(self, item, callback)
   local conn = buffer["get-conn-var!"](0)
-  local doc_fn = conn["documentation-symbol"]
   local function _16_(_self, doc_string)
     item["documentation"] = string.gsub(doc_string, "^Documentation for the symbol.-\n\n", "", 1)
     return callback(item)
   end
-  return doc_fn(conn, item.label, _16_)
+  return conn["documentation-symbol"](conn, item.label, _16_)
 end
 source["flags->kind"] = flags__3ekind
 return source

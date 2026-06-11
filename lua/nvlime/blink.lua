@@ -1,6 +1,9 @@
 local blink_types = require("blink.cmp.types")
 local buffer = require("nvlime.buffer")
 local opts = require("nvlime.config")
+require("nvlime.core.connection.swank")
+require("nvlime.core.contrib.fuzzy")
+local connection = require("nvlime.core.connection")
 local has_fuzzy_3f = false
 for _, v in ipairs(opts.contribs) do
   if ("SWANK-FUZZY" == v) then
@@ -95,7 +98,7 @@ Source.get_completions = function(self, ctx, callback)
     local conn = buffer["get-conn-var!"](0)
     vim.notify(("nvlime blink: conn_type=" .. type(conn) .. " keyword=\"" .. keyword .. "\" start_col=" .. start_col), vim.log.levels.WARN)
     if conn then
-      local completion_fn = ((_2bfuzzy_3f_2b and conn["fuzzy-completions"]) or conn["simple-completions"])
+      local completion_fn = ((_2bfuzzy_3f_2b and connection["fuzzy-completions"]) or connection["simple-completions"])
       local _13_
       if _2bfuzzy_3f_2b then
         _13_ = "yes"

@@ -3,6 +3,11 @@
 (local opts (require "nvlime.config"))
 (require "cmp.types.cmp")
 
+;; Load connection mixin modules to ensure methods are registered
+(require "nvlime.core.connection.swank")
+(require "nvlime.core.contrib.fuzzy")
+(local connection (require "nvlime.core.connection"))
+
 (var has-fuzzy? false)
 (each [_ v (ipairs opts.contribs)]
   (when (= "SWANK-FUZZY" v) (set has-fuzzy? true)))
@@ -72,8 +77,8 @@
   (var called false)
   (let [conn (buffer.get-conn-var! 0)]
     (when conn
-      (local completion-fn (or (and +fuzzy?+ (. conn "fuzzy-completions"))
-                               (. conn "simple-completions")))
+      (local completion-fn (or (and +fuzzy?+ connection.fuzzy-completions)
+                               connection.simple-completions))
       (local on-done (fn [_self candidates]
                        (when (not called)
                          (set called true)
@@ -86,8 +91,7 @@
 
 (fn source.resolve [self item callback]
   (let [conn (buffer.get-conn-var! 0)]
-    (local doc-fn (. conn "documentation-symbol"))
-    (doc-fn conn
+    (conn:documentation-symbol
       item.label
       (fn [_self doc-string]
         (tset item :documentation
