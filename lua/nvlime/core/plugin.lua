@@ -894,7 +894,7 @@ plugin["interaction-mode"] = function(enable)
   else
     _153_ = "disabled"
   end
-  return vim.cmd(("echom 'Interaction mode " .. _153_ .. "'."))
+  return vim.cmd(("echom 'Interaction mode " .. _153_ .. ".'"))
 end
 local function _155_(self, key)
   return self[string.gsub(key, "_", "-")]

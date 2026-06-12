@@ -857,7 +857,7 @@
           (vim.cmd "vnoremap <buffer> <CR> <CR>")))
     (vim.cmd (.. "echom 'Interaction mode "
                   (if enable "enabled" "disabled")
-                   "'."))))
+                    ".'"))))
 
 ;;; ============================================================================
 ;;; Module export
