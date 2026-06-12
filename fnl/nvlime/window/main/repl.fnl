@@ -49,8 +49,8 @@
                 false
                 #(buf-callback $))]
     (buffer.append! bufnr lines)
-    (vim.notify (.. "repl.open: lines=" (length lines) " buf=" bufnr)
-                vim.log.levels.DEBUG)
+    (vim.notify (.. "REPL_OPEN: buf=" bufnr " lines_count=" (tostring (length lines)))
+                vim.log.levels.INFO)
     (let [winid (main.repl:open bufnr config.focus?)]
       (nvim_win_set_cursor
         winid [(nvim_buf_line_count bufnr) 0])

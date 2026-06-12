@@ -44,6 +44,7 @@ ui["on-debug-return"] = function(self, conn, thread, level, stepping)
   return luaeval("require('nvlime.window.main.sldb')['on-debug-return'](_A)", {["conn-name"] = conn.cb_data.name, thread = thread, level = level})
 end
 ui["on-write-string"] = function(self, conn, str, str_type, thread)
+  vim.notify(("UI_EVENT: Received str=" .. tostring(str)), vim.log.levels.INFO)
   luaeval("require('nvlime.window.main.repl').open(_A[1], _A[2])", {str, {["conn-name"] = conn.cb_data.name}})
   if thread then
     return conn:send({connection.kw("NVLIME-RAW-MSG"), ("(:WRITE-DONE " .. thread .. ")")}, nil)

@@ -86,6 +86,7 @@ Also exports private callbacks used by input buffer completion."
 (fn ui.on-write-string [self conn str str-type thread]
   "Writes str to REPL buffer.
   If thread is provided, sends WRITE-DONE back to server."
+  (vim.notify (.. "UI_EVENT: Received str=" (tostring str)) vim.log.levels.INFO)
   (luaeval
     "require('nvlime.window.main.repl').open(_A[1], _A[2])"
     [str {:conn-name (. (. conn :cb_data) :name)}])

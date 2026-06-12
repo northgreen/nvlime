@@ -50,7 +50,7 @@ repl.open = function(content, config)
   end
   bufnr = buffer["create-if-not-exists"](buffer["gen-repl-name"](config["conn-name"]), false, _6_)
   buffer["append!"](bufnr, lines)
-  vim.notify(("repl.open: lines=" .. #lines .. " buf=" .. bufnr), vim.log.levels.DEBUG)
+  vim.notify(("REPL_OPEN: buf=" .. bufnr .. " lines_count=" .. tostring(#lines)), vim.log.levels.INFO)
   local winid = main.repl:open(bufnr, config["focus?"])
   nvim_win_set_cursor(winid, {nvim_buf_line_count(bufnr), 0})
   return {winid, bufnr}
