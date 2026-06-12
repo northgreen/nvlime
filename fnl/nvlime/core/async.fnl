@@ -17,7 +17,7 @@
 
 (local async {})
 
-;;; Module-level registry: chan_id → chan_obj
+;;; Module-level registry: chan_id -> chan_obj
 ;;; Required because Neovim chan callbacks receive (chan-id data event),
 ;;; not a `self` parameter. We map chan_id back to the channel object.
 (local chan-registry {})
@@ -48,7 +48,7 @@
                 (nvim_err_writeln
                   (.. "nvlime: callback failed: "
                       (tostring err)))))
-             ((: (logger:get) :warn) (.. "dispatch: NO CALLBACK for msg-id=" (tostring msg-id)))))))
+             ((: (logger:get) :warn) (.. "dispatch: NO CALLBACK for msg-id=" (tostring msg-id))))))))
 
 ;;; Internal: JSON buffer parser (replaces s:ChanInputCB)
 ;;; Accumulates data fragments, parses complete JSON messages, dispatches
@@ -107,13 +107,13 @@ when chan is a deserialized copy from nvim_buf_get_var."
       (let [msg [real-chan.next_msg_id expr]]
         (when callback
           (tset real-chan.msg_callbacks real-chan.next_msg_id callback))
-      (inc-msg-id real-chan)
-      (let [ret (chansend real-chan.ch_id
-                        (.. (vim.json.encode msg) "\n"))]
-        (when (= ret 0)
-          (set real-chan.is_connected false)
-          (error "async.ch-sendexpr: chansend() failed"))
-        ret))))
+        (inc-msg-id real-chan)
+        (let [ret (chansend real-chan.ch_id
+                          (.. (vim.json.encode msg) "\n"))]
+          (when (= ret 0)
+            (set real-chan.is_connected false)
+            (error "async.ch-sendexpr: chansend() failed"))
+          ret))))
 
 ;;; [string] {buf_name callback exit_cb use_terminal} -> {job_id ...}
 (fn async.job-start [cmd opts]
@@ -139,26 +139,26 @@ Returns job object."
            (nvim_set_option_value "swapfile" false {:buf buf})
            (nvim_set_option_value "buflisted" true {:buf buf})
            (nvim_set_option_value "modifiable" false {:buf buf})
-          (let [job-obj {:use_terminal false
-                         :out_name buf-name
-                         :err_name buf-name
-                         :out_buf buf
-                         :err_buf buf}]
-            (tset job-obj :on_stdout
-                  (fn [job-id data event-name]
-                    (when callback (callback data))
-                    (buffer.with-modifiable buf
-                      (nvim_buf_set_lines buf -1 -1 false data))))
-            (tset job-obj :on_stderr
-                  (fn [job-id data event-name]
-                    (when callback (callback data))
-                    (buffer.with-modifiable buf
-                      (nvim_buf_set_lines buf -1 -1 false data))))
-            (tset job-obj :on_exit
-                  (fn [job-id exit-code event-name]
-                    (when exit-cb (exit-cb exit-code))))
+           (let [job-obj {:use_terminal false
+                          :out_name buf-name
+                          :err_name buf-name
+                          :out_buf buf
+                          :err_buf buf}]
+             (tset job-obj :on_stdout
+                   (fn [job-id data event-name]
+                     (when callback (callback data))
+                     (buffer.with-modifiable buf
+                       (nvim_buf_set_lines buf -1 -1 false data))))
+             (tset job-obj :on_stderr
+                   (fn [job-id data event-name]
+                     (when callback (callback data))
+                     (buffer.with-modifiable buf
+                       (nvim_buf_set_lines buf -1 -1 false data))))
+             (tset job-obj :on_exit
+                   (fn [job-id exit-code event-name]
+                     (when exit-cb (exit-cb exit-code))))
              (set job-obj.job_id (jobstart cmd job-obj))
-             job-obj))))))
+             job-obj)))))
 
 ;;; {job_id} -> boolean
 (fn async.job-is-active [job]
