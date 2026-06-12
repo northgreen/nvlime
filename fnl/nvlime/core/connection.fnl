@@ -200,7 +200,7 @@
   (let [msg-type (. msg 1)]
     (when msg-type
       (let [event-name msg-type.name
-            handler (self:get self.server_event_handlers event-name nil)]
+             handler (. self.server_event_handlers event-name)]
         (when (= (type handler) "function")
           (handler self msg))))))
 
