@@ -29,7 +29,7 @@ local function repl_banner(conn)
   return {banner, border, ""}
 end
 local function clear_repl_2a(bufnr, conn)
-  logger:get():debug()(("clear-repl: bufnr=" .. tostring(bufnr)))
+  logger.debug(("clear-repl: bufnr=" .. tostring(bufnr)))
   presentations["coords"] = {}
   buffer["fill!"](bufnr, repl_banner(conn))
   return nvim_buf_clear_namespace(bufnr, presentations.namespace, 0, -1)
@@ -39,7 +39,7 @@ local function buf_callback(bufnr)
   local conn_manager = require("nvlime.core.conn_manager")
   local active_conn = (buffer["get-conn-var!"](bufnr) or conn_manager.get(true))
   if active_conn then
-    logger:get():debug()(("buf-callback: initialized bufnr=" .. tostring(bufnr) .. " conn=" .. tostring(active_conn.cb_data.name)))
+    logger.debug(("buf-callback: initialized bufnr=" .. tostring(bufnr) .. " conn=" .. tostring(active_conn.cb_data.name)))
     return clear_repl_2a(bufnr, active_conn)
   else
     return nil
@@ -53,13 +53,13 @@ repl.open = function(content, config)
   end
   bufnr = buffer["create-if-not-exists"](buffer["gen-repl-name"](config["conn-name"]), false, _6_)
   buffer["append!"](bufnr, lines)
-  logger:get():debug()(("REPL_OPEN: buf=" .. bufnr .. " lines_count=" .. tostring(#lines)))
+  logger.debug(("REPL_OPEN: buf=" .. bufnr .. " lines_count=" .. tostring(#lines)))
   local winid = main.repl:open(bufnr, config["focus?"])
   nvim_win_set_cursor(winid, {nvim_buf_line_count(bufnr), 0})
   return {winid, bufnr}
 end
 repl.clear = function()
-  logger:get():debug()("repl.clear: called")
+  logger.debug("repl.clear: called")
   local cur_bufnr = nvim_get_current_buf()
   local conn = buffer["get-conn-var!"](cur_bufnr)
   if conn then

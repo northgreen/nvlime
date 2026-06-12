@@ -134,7 +134,7 @@ Source.get_completions = function(self, ctx, callback)
         local function _14_()
           if not handling_complete then
             fuzzy_disabled_3f = true
-            logger:get():warn()("fuzzy-completions timed out after 5s, falling back to simple-completions")
+            logger.warn("fuzzy-completions timed out after 5s, falling back to simple-completions")
             local function _15_(_self, candidates)
               return process_candidates(candidates, false)
             end

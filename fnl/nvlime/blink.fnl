@@ -123,7 +123,7 @@
             (vim.defer_fn (fn []
               (when (not handling-complete)
                 (set fuzzy-disabled? true)
-                ((: (logger:get) :warn) "fuzzy-completions timed out after 5s, falling back to simple-completions")
+                 (logger.warn "fuzzy-completions timed out after 5s, falling back to simple-completions")
                 (connection.simple-completions conn keyword (fn [_self candidates]
                   (process-candidates candidates false)))))
               FUZZY-TIMEOUT))

@@ -56,8 +56,8 @@
         cb-wrapper (fn [chan msg]
                      (let [(ok err) (pcall check-return-status msg "nvlime#ConnectionInfo")]
                        (when (not ok)
-                          ((: (logger:get) :warn) (.. "msg: " (tostring err)))
-                          (return))
+                             (logger.warn (.. "msg: " (tostring err)))
+                           (return))
                        (if return-dict
                          (try-to-call callback
                            [self (self:plist-to-dict (. msg 2 2))])
@@ -90,7 +90,7 @@
   (let [status (. msg 2 1)]
     (let [(ok err) (pcall check-return-status msg caller)]
       (when (not ok)
-        ((: (logger:get) :warn) (.. "msg: " (tostring err)))
+          (logger.warn (.. "msg: " (tostring err)))
         ;; 错误情况下传空列表给回调，让补全显示为空而非完全无响应
         (try-to-call callback [self []])
         (return)))

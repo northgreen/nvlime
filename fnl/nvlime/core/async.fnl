@@ -44,11 +44,11 @@
         (if CB
             (let [(ok err) (pcall CB chan payload)]
               (when (not ok)
-                ((: (logger:get) :warn) (.. "callback failed: " (tostring err)))
+                 (logger.warn (.. "callback failed: " (tostring err)))
                 (nvim_err_writeln
                   (.. "nvlime: callback failed: "
                       (tostring err)))))
-             ((: (logger:get) :warn) (.. "dispatch: NO CALLBACK for msg-id=" (tostring msg-id))))))))
+             (logger.warn (.. "dispatch: NO CALLBACK for msg-id=" (tostring msg-id))))))))
 
 ;;; Internal: JSON buffer parser (replaces s:ChanInputCB)
 ;;; Accumulates data fragments, parses complete JSON messages, dispatches

@@ -37,13 +37,13 @@ local function dispatch_msg(chan, json_obj)
     if CB then
       local ok, err = pcall(CB, chan, payload)
       if not ok then
-        logger:get():warn()(("callback failed: " .. tostring(err)))
+        logger.warn(("callback failed: " .. tostring(err)))
         return nvim_err_writeln(("nvlime: callback failed: " .. tostring(err)))
       else
         return nil
       end
     else
-      return logger:get():warn()(("dispatch: NO CALLBACK for msg-id=" .. tostring(msg_id)))
+      return logger.warn(("dispatch: NO CALLBACK for msg-id=" .. tostring(msg_id)))
     end
   else
     return nil

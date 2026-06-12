@@ -132,10 +132,10 @@ main_win.open = function(self, bufnr, focus_3f)
   else
   end
   if pwin["visible?"](self.id) then
-    logger:get():debug()(("main-win.open: show-buf winid=" .. tostring(self.id)))
+    logger.debug(("main-win.open: show-buf winid=" .. tostring(self.id)))
     self["show-buf"](self, bufnr, focus_3f)
   else
-    logger:get():debug()(("main-win.open: open-new bufnr=" .. tostring(bufnr)))
+    logger.debug(("main-win.open: open-new bufnr=" .. tostring(bufnr)))
     self["open-new"](self, bufnr, focus_3f)
   end
   return self.id

@@ -22,7 +22,7 @@ local function return_string_input_complete(thread, ttag)
   return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
 end
 ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames, conts)
-  logger:get():debug()(("on-debug: thread=" .. tostring(thread) .. " level=" .. tostring(level)))
+  logger.debug(("on-debug: thread=" .. tostring(thread) .. " level=" .. tostring(level)))
   local _let_2_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
   local _ = _let_2_[1]
   local bufnr = _let_2_[2]
@@ -46,8 +46,8 @@ ui["on-debug-return"] = function(self, conn, thread, level, stepping)
   return luaeval("require('nvlime.window.main.sldb')['on-debug-return'](_A)", {["conn-name"] = conn.cb_data.name, thread = thread, level = level})
 end
 ui["on-write-string"] = function(self, conn, str, str_type, thread)
-  logger:get():debug()(("on-write-string: len=" .. tostring(#str)))
-  logger:get():debug()(("on-write-string: type=" .. tostring(str_type) .. " conn=" .. tostring(conn.cb_data.name)))
+  logger.debug(("on-write-string: len=" .. tostring(#str)))
+  logger.debug(("on-write-string: type=" .. tostring(str_type) .. " conn=" .. tostring(conn.cb_data.name)))
   luaeval("require('nvlime.window.main.repl').open(_A[1], _A[2])", {str, {["conn-name"] = conn.cb_data.name}})
   if thread then
     return conn:send({connection.kw("NVLIME-RAW-MSG"), ("(:WRITE-DONE " .. thread .. ")")}, nil)

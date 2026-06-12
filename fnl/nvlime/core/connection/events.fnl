@@ -308,7 +308,7 @@
     (let [str (. msg 2)
           str-type (if (>= (length msg) 3) (. msg 3) nil)
           thread (if (>= (length msg) 4) (. msg 4) nil)]
-      ((: (logger:get) :debug) (.. "on-write-string: len=" (tostring (length str)) " thread=" (tostring thread)))
+       (logger.debug (.. "on-write-string: len=" (tostring (length str)) " thread=" (tostring thread)))
       (self.ui:on-write-string self str str-type thread))))
 
 (fn connection.on-read-string [self msg]
@@ -359,7 +359,7 @@
   (let [chan-id (. msg 2)
         msg-body (. msg 3)
         chan-obj (. self.local_channels chan-id)]
-    ((: (logger:get) :debug) (.. "channel-send: chan-id=" (tostring chan-id)))
+    (logger.debug (.. "channel-send: chan-id=" (tostring chan-id)))
     (if chan-obj
         (if chan-obj.callback
             (chan-obj.callback self chan-obj msg-body)

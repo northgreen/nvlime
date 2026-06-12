@@ -16,4 +16,20 @@ local function get()
   end
   return instance
 end
-return {get = get}
+local function debug(msg)
+  local logger = get()
+  return logger:debug(msg)
+end
+local function warn(msg)
+  local logger = get()
+  return logger:warn(msg)
+end
+local function info(msg)
+  local logger = get()
+  return logger:info(msg)
+end
+local function error(msg)
+  local logger = get()
+  return logger:error(msg)
+end
+return {get = get, debug = debug, warn = warn, info = info, error = error}

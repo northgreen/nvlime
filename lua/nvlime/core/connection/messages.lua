@@ -56,7 +56,7 @@ connection["connection-info"] = function(self, return_dict, callback)
   local function _7_(chan, msg)
     local ok, err = pcall(check_return_status, msg, "nvlime#ConnectionInfo")
     if not ok then
-      logger:get():warn()(("msg: " .. tostring(err)))
+      logger.warn(("msg: " .. tostring(err)))
       __fnl_global__return()
     else
     end
@@ -92,7 +92,7 @@ connection["simple-send-cb"] = function(self, callback, caller, chan, msg)
   do
     local ok, err = pcall(check_return_status, msg, caller)
     if not ok then
-      logger:get():warn()(("msg: " .. tostring(err)))
+      logger.warn(("msg: " .. tostring(err)))
       try_to_call(callback, {self, {}})
       __fnl_global__return()
     else

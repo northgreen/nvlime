@@ -122,10 +122,10 @@
     (tset self :buffers []))
   (if (pwin.visible? self.id)
       (do
-        ((: (logger:get) :debug) (.. "main-win.open: show-buf winid=" (tostring self.id)))
+        (logger.debug (.. "main-win.open: show-buf winid=" (tostring self.id)))
         (self:show-buf bufnr focus?))
       (do
-        ((: (logger:get) :debug) (.. "main-win.open: open-new bufnr=" (tostring bufnr)))
+        (logger.debug (.. "main-win.open: open-new bufnr=" (tostring bufnr)))
         (self:open-new bufnr focus?)))
   self.id)
 
