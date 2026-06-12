@@ -17,7 +17,7 @@
                     "<Cmd>lua require('nvlime.core.plugin').interaction_mode()<CR>"
                     "nvlime: Toggle interaction mode")
   (km.buffer.normal lm.normal.load_file
-                    "<Cmd>lua require('nvlime.core.plugin').load_file(vim.fn.nvim_buf_get_name(0))<CR>"
+                    "<Cmd>lua require('nvlime.core.plugin').load_file(vim.api.nvim_buf_get_name(0))<CR>"
                     "nvlime: Load the current file")
   (km.buffer.normal lm.normal.disassemble.expr
                     "<Cmd>lua require('nvlime.core.plugin').disassemble_form(uc.cur_expr())<CR>"
@@ -112,7 +112,7 @@
                     "<Cmd>lua require('nvlime.core.plugin').compile(uc.cur_top_expr(true))<CR>"
                     "nvlime: Compile the top-level expression under the cursor")
   (km.buffer.normal lm.normal.compile.file
-                    "<Cmd>lua require('nvlime.core.plugin').compile_file(vim.fn.nvim_buf_get_name(0))<CR>"
+                    "<Cmd>lua require('nvlime.core.plugin').compile_file(vim.api.nvim_buf_get_name(0))<CR>"
                     "nvlime: Compile the current file")
   (km.buffer.visual lm.visual.compile.selection
                     "<Cmd>lua require('nvlime.core.plugin').compile(uc.cur_selection(true))<CR>"
