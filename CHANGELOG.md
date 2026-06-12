@@ -5,6 +5,36 @@ All notable changes to Nvlime plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2026-06-12
+
+### Added
+
+- **Server management commands fully integrated**: `NvlimeShowCurrentServer`, `NvlimeShowSelectedServer`, `NvlimeStopCurrentServer`, `NvlimeStopSelectedServer`, `NvlimeRestartCurrentServer`, `NvlimeRenameSelectedServer`
+- **Connection close now supports server stop**: `close-cur-connection` prompts to stop associated server when disconnecting
+- **Trace Dialog fully integrated**: `NvlimeDialogToggleTrace`, `NvlimeOpenTraceDialog` — toggle trace state and view trace results
+- **MREPL fully integrated**: `NvlimeCreateMREPL` — create multiple REPL threads
+- **New REPL show keymap**: `<LocalLeader>so` to open REPL window
+
+### Changed
+
+- Migration of deprecated Neovim APIs to 0.10+ `nvim_set_option_value` / `nvim_get_option_value` (6 files)
+
+### Fixed
+
+- **SWAN-FUZZY completion parsing**: fixed incorrect plist format assumption — fuzzy items use `[label, type, flags, menu]` format with flags at index 3
+- **Package tracking**: `ui.cur-in-package` now reads buffer-local `vim.b.nvlime_cur_pkg` instead of always returning empty string
+- **`vim.bo.filetype` access bug**: removed erroneous parens that caused `(vim.bo.filetype)` to compile as function call
+- **`with-modifiable` macro pcall destructuring**: fixed multi-value return handling in Fennel `pcall`
+- **Vararg indexing bug**: fixed `(args N)` function call vs `(. args N)` table index confusion
+- **Macro underscope vs hyphen**: fixed global variable lookup in Fennel macro templates
+- **mrepl.fnl setbufvar inconsistency**: unified to `nvim_set_option_value` API
+- **Scrollbar hardcoding**: extracted `100` to `SCROLLBAR-BUFFER-SIZE` constant
+
+### Deprecated
+
+- **`user_contrib_initializers`** config option: does not work with Fennel (requires vim funcrefs), marked as DEPRECATED
+- **`nvim_buf_get_option`/`nvim_buf_set_option`**: all uses migrated to `nvim_get/set_option_value` — zero deprecated API remaining in Fennel sources
+
 ## 2022-12-31
 
 ### Changed

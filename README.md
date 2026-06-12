@@ -28,7 +28,7 @@ features. Check `CHANGELOG.md` to find out what have changed.
 ## Current State
 
 Nvlime is currently in beta state and in active development. So expect some
-changes to configuration, UI or behavior. MREPLs currently do not work.
+changes to configuration, UI or behavior. MREPL support is now fully integrated.
 Please beware of bugs, and file an issue if you find anything weird/unexpected.
 
 ## Dependencies
