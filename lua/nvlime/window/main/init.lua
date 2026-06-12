@@ -8,6 +8,7 @@ local nvim_get_current_win = vim.api.nvim_get_current_win
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
 local nvim_win_get_buf = vim.api.nvim_win_get_buf
 local nvim_set_option_value = vim.api.nvim_set_option_value
+local nvim_win_is_valid = vim.api.nvim_win_is_valid
 local main_win_pos
 do
   local case_1_ = opts.main_window.position
@@ -124,6 +125,11 @@ main_win["show-buf"] = function(self, bufnr, focus_3f)
   end
 end
 main_win.open = function(self, bufnr, focus_3f)
+  if (self.id and not nvim_win_is_valid(self.id)) then
+    self["id"] = nil
+    self["buffers"] = {}
+  else
+  end
   if pwin["visible?"](self.id) then
     self["show-buf"](self, bufnr, focus_3f)
   else

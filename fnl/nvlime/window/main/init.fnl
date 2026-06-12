@@ -7,7 +7,8 @@
         : nvim_get_current_win
         : nvim_buf_get_name
         : nvim_win_get_buf
-        : nvim_set_option_value}
+        : nvim_set_option_value
+        : nvim_win_is_valid}
        vim.api)
 
 (local main-win-pos
@@ -114,6 +115,10 @@
 
 ;;; MainWin BufNr bool -> WinID
 (fn main-win.open [self bufnr focus?]
+  (when (and self.id
+             (not (nvim_win_is_valid self.id)))
+    (tset self :id nil)
+    (tset self :buffers []))
   (if (pwin.visible? self.id)
       (self:show-buf bufnr focus?)
       (self:open-new bufnr focus?))
