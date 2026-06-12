@@ -50,7 +50,7 @@ even if its 'nomodifiable' option is set."
 ;;; string -> BufName
 (fn buffer.gen-repl-name [conn-name]
   "Generates repl buffer name."
-  (buffer.gen-name conn-name buffer.names.repl))
+  (buffer.gen-name (or conn-name "default") buffer.names.repl))
 
 ;;; string integer -> BufName
 (fn buffer.gen-sldb-name [conn-name thread]

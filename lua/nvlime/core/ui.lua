@@ -173,10 +173,13 @@ ui["keep-cur-window"] = function(func)
     return nil
   end
 end
+local function win_getid_safe()
+  return win_getid()
+end
 ui["with-buffer"] = function(buf, func, ev_ignore)
   local buf_win = bufwinid(buf)
   local buf_visible = (buf_win >= 0)
-  local old_win = __fnl_global__win_2dgetid_2dsafe()
+  local old_win = win_getid_safe()
   local old_lazyredraw = vim.o.lazyredraw
   local old_ei = vim.o.eventignore
   local ev_ignore0 = (ev_ignore or "all")
@@ -233,9 +236,6 @@ ui["with-buffer-hidden"] = function(buf, func, old_ei, ev_ignore)
   pcall(_18_)
   vim.o.eventignore = ev_ignore
   return ui["restore-window-layout"](old_layout)
-end
-local function win_getid_safe()
-  return win_getid()
 end
 ui["open-buffer"] = function(name, create, pos, vertical, initial_size)
   local buf = bufnr(name, (create or false))

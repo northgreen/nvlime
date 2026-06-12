@@ -16,7 +16,7 @@ buffer["gen-name"] = function(...)
   return ("nvlime://" .. table.concat({...}, "/"))
 end
 buffer["gen-repl-name"] = function(conn_name)
-  return buffer["gen-name"](conn_name, buffer.names.repl)
+  return buffer["gen-name"]((conn_name or "default"), buffer.names.repl)
 end
 buffer["gen-sldb-name"] = function(conn_name, thread)
   return buffer["gen-name"](conn_name, buffer.names.sldb, thread)

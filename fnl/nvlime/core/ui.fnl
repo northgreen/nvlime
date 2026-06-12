@@ -214,6 +214,10 @@ Functions deferred to later files:
     (when (win_id2win cur-win-id)
       (nvim_set_current_win cur-win-id))))
 
+(fn win-getid-safe []
+  "Safe wrapper for win_getid."
+  (win_getid))
+
 (fn ui.with-buffer [buf func ev-ignore]
   "Call func with buf set as the current buffer.
   ev-ignore specifies what autocmd events to ignore (default: 'all')."
@@ -263,10 +267,6 @@ Functions deferred to later files:
                    result)))))
     (set vim.o.eventignore ev-ignore)
     (ui.restore-window-layout old-layout)))
-
-(fn win-getid-safe []
-  "Safe wrapper for win_getid."
-  (win_getid))
 
 ;;; ============================================================================
 ;;; Buffer opening / closing
