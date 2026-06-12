@@ -297,7 +297,7 @@
       (input.maybe-input
         text
         (fn [str]
-          (when (. conn :ui)
+          (when (and conn (. conn :ui))
             ((. conn.ui :on-write-string) conn "--\n"
              {:name "REPL-SEP" :package "KEYWORD"})
             (conn:with-thread

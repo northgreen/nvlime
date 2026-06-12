@@ -185,7 +185,7 @@ ui["with-buffer"] = function(buf, func, ev_ignore)
   local ev_ignore0 = (ev_ignore or "all")
   vim.o.lazyredraw = true
   vim.o.eventignore = ev_ignore0
-  local result
+  local success_23, result_or_err_23
   local function _14_()
     if buf_visible then
       return ui["with-buffer-visible"](buf_win, func, old_ei)
@@ -193,17 +193,17 @@ ui["with-buffer"] = function(buf, func, ev_ignore)
       return ui["with-buffer-hidden"](buf, func, old_ei, ev_ignore0)
     end
   end
-  result = pcall(_14_)
+  success_23, result_or_err_23 = pcall(_14_)
   if win_id2win(old_win) then
     nvim_set_current_win(old_win)
   else
   end
   vim.o.lazyredraw = old_lazyredraw
   vim.o.eventignore = old_ei
-  if result[1] then
-    return result[2]
+  if success_23 then
+    return result_or_err_23
   else
-    return error(result[2])
+    return error(result_or_err_23)
   end
 end
 ui["with-buffer-visible"] = function(buf_win, func, old_ei)

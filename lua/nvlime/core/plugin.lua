@@ -311,7 +311,7 @@ plugin["send-to-repl"] = function(content, edit)
   local text = _let_43_[1]
   local default = _let_43_[2]
   local function _44_(str)
-    if conn.ui then
+    if (conn and conn.ui) then
       conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
       local function _45_()
         return conn["listener-eval"](conn, str, on_listener_eval_complete)

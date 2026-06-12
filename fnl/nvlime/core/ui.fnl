@@ -229,17 +229,17 @@ Functions deferred to later files:
         ev-ignore (or ev-ignore "all")]
     (set vim.o.lazyredraw true)
     (set vim.o.eventignore ev-ignore)
-    (let [result (pcall (fn []
-                          (if buf-visible
-                              (ui.with-buffer-visible buf-win func old-ei)
-                              (ui.with-buffer-hidden buf func old-ei ev-ignore))))]
+    (let [(success# result-or-err#) (pcall (fn []
+                                   (if buf-visible
+                                       (ui.with-buffer-visible buf-win func old-ei)
+                                       (ui.with-buffer-hidden buf func old-ei ev-ignore))))]
       (when (win_id2win old-win)
         (nvim_set_current_win old-win))
       (set vim.o.lazyredraw old-lazyredraw)
       (set vim.o.eventignore old-ei)
-      (if (. result 1)
-          (. result 2)
-          (error (. result 2))))))
+      (if success#
+          result-or-err#
+          (error result-or-err#)))))
 
 (fn ui.with-buffer-visible [buf-win func old-ei]
   "Execute func with a visible buffer's window active."
