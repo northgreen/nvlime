@@ -14,7 +14,7 @@ end
 --- Get atom under cursor (with expanded iskeyword for Lisp operators)
 local function cur_atom()
   local old_kw = vim.o.iskeyword
-  vim.o.iskeyword = old_kw .. ",+,-,*,/,%,<,=,>,:,$,?,!,@-@,94,~,#,|,&,.,{,},[,"
+  vim.o.iskeyword = old_kw .. ",+,-,*,/,%,<,=,>,:,$,?,!,@-@,94,~,#,|,&,.,{,},[,]"
   local result = vim.fn.expand("<cword>")
   vim.o.iskeyword = old_kw
   return result
