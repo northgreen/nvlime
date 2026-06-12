@@ -128,7 +128,7 @@ connection["get-current-package"] = function(self)
   if self.ui then
     return self.ui["get-current-package"](self.ui)
   else
-    return {"CL-USER", "CL-USER"}
+    return {"COMMON-LISP-USER", "CL-USER"}
   end
 end
 connection["set-current-package"] = function(self, package)
