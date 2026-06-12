@@ -2,8 +2,7 @@
 Provides SLDB debugger buffer interactions: fill, restart, frame locals, source
 lookup, eval, inspect, disassemble, return."
 
-(local {: nvim_buf_set_lines
-         : nvim_buf_set_option}
+(local {: nvim_buf_set_lines}
        vim.api)
 
 (local {: luaeval

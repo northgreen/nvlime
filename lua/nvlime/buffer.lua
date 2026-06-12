@@ -1,10 +1,10 @@
 local pbuf = require("parsley.buffer")
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_buf_call = vim.api.nvim_buf_call
-local nvim_buf_get_option = vim.api.nvim_buf_get_option
+local nvim_get_option_value = vim.api.nvim_get_option_value
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local nvim_buf_set_name = vim.api.nvim_buf_set_name
 local nvim_buf_set_var = vim.api.nvim_buf_set_var
-local nvim_buf_set_option = vim.api.nvim_buf_set_option
 local nvim_clear_autocmds = vim.api.nvim_clear_autocmds
 local nvim_create_buf = vim.api.nvim_create_buf
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
@@ -25,11 +25,11 @@ buffer["gen-filetype"] = function(suffix)
   return ("nvlime_" .. suffix)
 end
 buffer["get-opt"] = function(bufnr, opt)
-  return nvim_buf_get_option(bufnr, opt)
+  return nvim_get_option_value(opt, {buf = bufnr})
 end
 buffer["set-opts"] = function(bufnr, opts)
   for opt, val in pairs(opts) do
-    nvim_buf_set_option(bufnr, opt, val)
+    nvim_set_option_value(opt, val, {buf = bufnr})
   end
   return nil
 end
@@ -125,8 +125,8 @@ buffer["fill!"] = function(bufnr, ...)
   local args = {...}
   local lines = args[1]
   table.remove(args, 1)
-  local old_mod_2_auto = nvim_buf_get_option(bufnr, "modifiable")
-  nvim_buf_set_option(bufnr, "modifiable", true)
+  local old_mod_2_auto = nvim_get_option_value("modifiable", {buf = bufnr})
+  nvim_set_option_value("modifiable", true, {buf = bufnr})
   local ok_3_auto, err_4_auto
   local function _15_()
     nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -136,7 +136,7 @@ buffer["fill!"] = function(bufnr, ...)
     return nil
   end
   ok_3_auto, err_4_auto = pcall(_15_)
-  nvim_buf_set_option(bufnr, "modifiable", old_mod_2_auto)
+  nvim_set_option_value("modifiable", old_mod_2_auto, {buf = bufnr})
   if not ok_3_auto then
     return error(err_4_auto)
   else
@@ -145,8 +145,8 @@ buffer["fill!"] = function(bufnr, ...)
 end
 buffer["append!"] = function(bufnr, ...)
   local args = {...}
-  local old_mod_2_auto = nvim_buf_get_option(bufnr, "modifiable")
-  nvim_buf_set_option(bufnr, "modifiable", true)
+  local old_mod_2_auto = nvim_get_option_value("modifiable", {buf = bufnr})
+  nvim_set_option_value("modifiable", true, {buf = bufnr})
   local ok_3_auto, err_4_auto
   local function _17_()
     if (#args > 0) then
@@ -159,7 +159,7 @@ buffer["append!"] = function(bufnr, ...)
     end
   end
   ok_3_auto, err_4_auto = pcall(_17_)
-  nvim_buf_set_option(bufnr, "modifiable", old_mod_2_auto)
+  nvim_set_option_value("modifiable", old_mod_2_auto, {buf = bufnr})
   if not ok_3_auto then
     return error(err_4_auto)
   else

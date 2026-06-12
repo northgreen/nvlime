@@ -1,8 +1,8 @@
 (local {: nvim_err_writeln
         : nvim_get_chan_info
         : nvim_buf_set_lines
-        : nvim_buf_set_option
-        : nvim_buf_get_option}
+        : nvim_get_option_value
+        : nvim_set_option_value}
        vim.api)
 
 (local {: sockconnect
@@ -132,12 +132,12 @@ Returns job object."
           (set job-obj.job_id (termopen cmd job-obj))
           (set job-obj.out_buf (bufnr "$"))
           job-obj)
-        (let [buf (bufnr buf-name true)]
-          (nvim_buf_set_option buf :buftype "nofile")
-          (nvim_buf_set_option buf :bufhidden "hide")
-          (nvim_buf_set_option buf :swapfile 0)
-          (nvim_buf_set_option buf :buflisted 1)
-          (nvim_buf_set_option buf :modifiable 0)
+         (let [buf (bufnr buf-name true)]
+           (nvim_set_option_value "buftype" "nofile" {:buf buf})
+           (nvim_set_option_value "bufhidden" "hide" {:buf buf})
+           (nvim_set_option_value "swapfile" false {:buf buf})
+           (nvim_set_option_value "buflisted" true {:buf buf})
+           (nvim_set_option_value "modifiable" false {:buf buf})
           (let [job-obj {:use_terminal false
                          :out_name buf-name
                          :err_name buf-name

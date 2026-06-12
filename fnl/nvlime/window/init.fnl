@@ -4,14 +4,11 @@
 (local pwin (require "parsley.window"))
 (local options (require "nvlime.config"))
 
-;; TODO: after neovim 0.10 release
-;; Change `nvim_buf_set_option` and `nvim_win_set_option` 
-;; and the same get functions to `nvim_set_option_value`.
-;; Change `nvim_exec` to `nvim_exec2`
+;; TODO: Change `nvim_exec` to `nvim_exec2`
 (local {: nvim_buf_line_count
         : nvim_buf_get_name
-        : nvim_win_set_option
-        : nvim_win_get_option
+        : nvim_set_option_value
+        : nvim_get_option_value
         : nvim_win_get_buf
         : nvim_win_set_cursor
         : nvim_win_set_config
@@ -50,14 +47,14 @@ any of the listed `filetypes`. If there is no such window returns nil."
 ;;; WinID string any ->
 (fn window.set-opt [winid opt value]
   "Set the window's local option."
-  (nvim_win_set_option winid opt value))
+  (nvim_set_option_value opt value {:win winid}))
 
 ;;; WinID {any} ->
 (fn window.set-opts [winid opts]
   "Sets window's local options, `opts` is table with
 option name as key and new value as it's value."
   (each [opt val (pairs opts)]
-    (nvim_win_set_option winid opt val)))
+    (nvim_set_option_value opt val {:win winid})))
 
 ;;; WinID ->
 (fn window.set-minimal-style-options [winid]
@@ -176,9 +173,9 @@ and returns its ID. Returns nil if such window wasn't found."
 If `reverse?` is provided and true, then scrolls upwards."
   (let [last-float-winid (window.last-float-except-current)]
     (when last-float-winid
-      (let [wininfo (pwin.get-info last-float-winid)
-            old-scrolloff (nvim_win_get_option
-                            last-float-winid "scrolloff")
+             (let [wininfo (pwin.get-info last-float-winid)
+             old-scrolloff (nvim_get_option_value
+                             "scrolloff" {:win last-float-winid})
             set-float-cursor #(nvim_win_set_cursor
                           last-float-winid [$1 0])]
         (window.set-opt last-float-winid "scrolloff" 0)

@@ -7,7 +7,7 @@ local nvim_set_current_win = vim.api.nvim_set_current_win
 local nvim_get_current_win = vim.api.nvim_get_current_win
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
 local nvim_win_get_buf = vim.api.nvim_win_get_buf
-local nvim_win_set_option = vim.api.nvim_win_set_option
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local main_win_pos
 do
   local case_1_ = opts.main_window.position
@@ -58,8 +58,8 @@ main_win["set-id"] = function(self, winid)
 end
 main_win["set-options"] = function(self)
   window["set-minimal-style-options"](self.id)
-  nvim_win_set_option(self.id, "foldcolumn", "1")
-  return nvim_win_set_option(self.id, "winhighlight", "FoldColumn:Normal")
+  nvim_set_option_value("foldcolumn", "1", {win = self.id})
+  return nvim_set_option_value("winhighlight", "FoldColumn:Normal", {win = self.id})
 end
 main_win["remove-buf"] = function(self, bufnr)
   for i, b in ipairs(self.buffers) do

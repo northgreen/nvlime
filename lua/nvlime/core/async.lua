@@ -1,8 +1,8 @@
 local nvim_err_writeln = vim.api.nvim_err_writeln
 local nvim_get_chan_info = vim.api.nvim_get_chan_info
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
-local nvim_buf_set_option = vim.api.nvim_buf_set_option
-local nvim_buf_get_option = vim.api.nvim_buf_get_option
+local nvim_get_option_value = vim.api.nvim_get_option_value
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local sockconnect = vim.fn.sockconnect
 local chansend = vim.fn.chansend
 local jobstart = vim.fn.jobstart
@@ -146,11 +146,11 @@ async["job-start"] = function(cmd, opts)
     return job_obj
   else
     local buf = bufnr(buf_name, true)
-    nvim_buf_set_option(buf, "buftype", "nofile")
-    nvim_buf_set_option(buf, "bufhidden", "hide")
-    nvim_buf_set_option(buf, "swapfile", 0)
-    nvim_buf_set_option(buf, "buflisted", 1)
-    nvim_buf_set_option(buf, "modifiable", 0)
+    nvim_set_option_value("buftype", "nofile", {buf = buf})
+    nvim_set_option_value("bufhidden", "hide", {buf = buf})
+    nvim_set_option_value("swapfile", false, {buf = buf})
+    nvim_set_option_value("buflisted", true, {buf = buf})
+    nvim_set_option_value("modifiable", false, {buf = buf})
     local job_obj = {out_name = buf_name, err_name = buf_name, out_buf = buf, err_buf = buf, use_terminal = false}
     local function _18_(job_id, data, event_name)
       if callback then

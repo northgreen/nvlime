@@ -1,5 +1,5 @@
 local nvim_set_current_win = vim.api.nvim_set_current_win
-local nvim_buf_set_option = vim.api.nvim_buf_set_option
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local nvim_buf_set_var = vim.api.nvim_buf_set_var
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
@@ -476,10 +476,10 @@ ui["is-yes-string"] = function(str)
   return not not string.find(str, "^[yY][eE][sS]?$")
 end
 ui["set-nvlime-buffer-opts"] = function(buf, conn)
-  nvim_buf_set_option(buf, "buftype", "nofile")
-  nvim_buf_set_option(buf, "bufhidden", "hide")
-  nvim_buf_set_option(buf, "swapfile", false)
-  nvim_buf_set_option(buf, "buflisted", true)
+  nvim_set_option_value("buftype", "nofile", {buf = buf})
+  nvim_set_option_value("bufhidden", "hide", {buf = buf})
+  nvim_set_option_value("swapfile", false, {buf = buf})
+  nvim_set_option_value("buflisted", true, {buf = buf})
   return nvim_buf_set_var(buf, "nvlime_conn", conn)
 end
 ui["nvlime-buffer-initialized"] = function(buf)

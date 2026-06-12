@@ -6,7 +6,7 @@ Functions deferred to later files:
   - ui_file.fnl: JumpToOrOpenFile, ShowSource"
 
 (local {: nvim_set_current_win
-        : nvim_buf_set_option
+        : nvim_set_option_value
         : nvim_buf_set_var
         : nvim_buf_get_var
         : nvim_win_set_cursor
@@ -484,10 +484,10 @@ Functions deferred to later files:
 
 (fn ui.set-nvlime-buffer-opts [buf conn]
   "Set standard nvlime buffer options and connection variable."
-  (nvim_buf_set_option buf :buftype "nofile")
-  (nvim_buf_set_option buf :bufhidden "hide")
-  (nvim_buf_set_option buf :swapfile false)
-  (nvim_buf_set_option buf :buflisted true)
+  (nvim_set_option_value "buftype" "nofile" {:buf buf})
+  (nvim_set_option_value "bufhidden" "hide" {:buf buf})
+  (nvim_set_option_value "swapfile" false {:buf buf})
+  (nvim_set_option_value "buflisted" true {:buf buf})
   (nvim_buf_set_var buf "nvlime_conn" conn))
 
 (fn ui.nvlime-buffer-initialized [buf]

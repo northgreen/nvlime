@@ -1,5 +1,4 @@
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
-local nvim_buf_set_option = vim.api.nvim_buf_set_option
 local luaeval = vim.fn.luaeval
 local bufnr = vim.fn.bufnr
 local getline = vim.fn.getline

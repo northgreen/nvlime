@@ -5,8 +5,8 @@ local pwin = require("parsley.window")
 local options = require("nvlime.config")
 local nvim_buf_line_count = vim.api.nvim_buf_line_count
 local nvim_buf_get_name = vim.api.nvim_buf_get_name
-local nvim_win_set_option = vim.api.nvim_win_set_option
-local nvim_win_get_option = vim.api.nvim_win_get_option
+local nvim_set_option_value = vim.api.nvim_set_option_value
+local nvim_get_option_value = vim.api.nvim_get_option_value
 local nvim_win_get_buf = vim.api.nvim_win_get_buf
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
 local nvim_win_set_config = vim.api.nvim_win_set_config
@@ -42,11 +42,11 @@ local function filetype_win(filetypes)
   return found_winid
 end
 window["set-opt"] = function(winid, opt, value)
-  return nvim_win_set_option(winid, opt, value)
+  return nvim_set_option_value(opt, value, {win = winid})
 end
 window["set-opts"] = function(winid, opts)
   for opt, val in pairs(opts) do
-    nvim_win_set_option(winid, opt, val)
+    nvim_set_option_value(opt, val, {win = winid})
   end
   return nil
 end
@@ -151,7 +151,7 @@ window.scroll_float = function(step, reverse_3f)
   if last_float_winid then
     do
       local wininfo = pwin["get-info"](last_float_winid)
-      local old_scrolloff = nvim_win_get_option(last_float_winid, "scrolloff")
+      local old_scrolloff = nvim_get_option_value("scrolloff", {win = last_float_winid})
       local set_float_cursor
       local function _13_(_241)
         return nvim_win_set_cursor(last_float_winid, {_241, 0})

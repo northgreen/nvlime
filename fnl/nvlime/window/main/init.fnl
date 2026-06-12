@@ -7,7 +7,7 @@
         : nvim_get_current_win
         : nvim_buf_get_name
         : nvim_win_get_buf
-        : nvim_win_set_option}
+        : nvim_set_option_value}
        vim.api)
 
 (local main-win-pos
@@ -48,9 +48,8 @@
 ;;; MainWin ->
 (fn main-win.set-options [self]
   (window.set-minimal-style-options self.id)
-  (nvim_win_set_option self.id "foldcolumn" "1")
-  (nvim_win_set_option
-    self.id "winhighlight" "FoldColumn:Normal"))
+  (nvim_set_option_value "foldcolumn" "1" {:win self.id})
+  (nvim_set_option_value "winhighlight" "FoldColumn:Normal" {:win self.id}))
 
 ;;; MainWin BufNr ->
 (fn main-win.remove-buf [self bufnr]

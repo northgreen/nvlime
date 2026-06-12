@@ -1,10 +1,10 @@
 (local pbuf (require "parsley.buffer"))
 (local {: nvim_create_autocmd
         : nvim_buf_call
-        : nvim_buf_get_option
+        : nvim_get_option_value
+        : nvim_set_option_value
         : nvim_buf_set_name
         : nvim_buf_set_var
-        : nvim_buf_set_option
         : nvim_clear_autocmds
         : nvim_create_buf
         : nvim_buf_set_lines
@@ -35,10 +35,10 @@
 (macro with-modifiable [bufnr ...]
   "Allows making changes to the text in the buffer
 even if its 'nomodifiable' option is set."
-  `(let [old-mod# (nvim_buf_get_option ,bufnr :modifiable)]
-     (nvim_buf_set_option ,bufnr :modifiable true)
+  `(let [old-mod# (nvim_get_option_value "modifiable" {:buf ,bufnr})]
+     (nvim_set_option_value "modifiable" true {:buf ,bufnr})
      (let [(ok# err#) (pcall (fn [] (do ,(unpack [...]))))]
-       (nvim_buf_set_option ,bufnr :modifiable old-mod#)
+       (nvim_set_option_value "modifiable" old-mod# {:buf ,bufnr})
        (when (not ok#)
          (error err#)))))
 
@@ -66,14 +66,14 @@ even if its 'nomodifiable' option is set."
 ;;; BufNr string -> any
 (fn buffer.get-opt [bufnr opt]
   "Gets buffer local option `opt`."
-  (nvim_buf_get_option bufnr opt))
+  (nvim_get_option_value opt {:buf bufnr}))
 
 ;;; BufNr {any} ->
 (fn buffer.set-opts [bufnr opts]
   "Sets buffer local options from the hash table where
 key - option name, value - option value."
   (each [opt val (pairs opts)]
-    (nvim_buf_set_option bufnr opt val))
+    (nvim_set_option_value opt val {:buf bufnr}))
   nil)
 
 ;;; BufNr {any} ->
