@@ -69,7 +69,7 @@ input["maybe-input"] = function(str, str_cb, prompt, default, conn, comp_type)
     return input["check-input-validity"](str, str_cb, false)
   end
 end
-input["from-buffer-complete"] = function()
+input.from_buffer_complete = function()
   local buf = bufnr("%")
   local callback = vim.fn.getbufvar(buf, "nvlime_input_complete_cb", nil)
   if not callback then
@@ -146,7 +146,7 @@ input["get-history"] = function(backward, idx)
     end
   end
 end
-input["next-history-item"] = function(backward)
+input.next_history_item = function(backward)
   local backward0 = (backward or true)
   local next_idx, text
   if vim.fn.exists("b:nvlime_input_history_idx") then

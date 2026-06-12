@@ -297,12 +297,13 @@
       (input.maybe-input
         text
         (fn [str]
-          ((. conn.ui :on-write-string) conn "--\n"
-           {:name "REPL-SEP" :package "KEYWORD"})
-          (conn:with-thread
-            {:name "REPL-THREAD" :package "KEYWORD"}
-            (fn []
-              (conn:listener-eval str on-listener-eval-complete))))
+          (when (. conn :ui)
+            ((. conn.ui :on-write-string) conn "--\n"
+             {:name "REPL-SEP" :package "KEYWORD"})
+            (conn:with-thread
+              {:name "REPL-THREAD" :package "KEYWORD"}
+              (fn []
+                (conn:listener-eval str on-listener-eval-complete)))))
         " Send to REPL "
         default
         conn))))
@@ -315,13 +316,14 @@
       (input.maybe-input
         text
         (fn [str]
-          ((. conn.ui :on-write-string) conn "--\n"
-           {:name "REPL-SEP" :package "KEYWORD"})
-          (let [win (vim.fn.win_getid)
-                policy (or policy config.compiler_policy)]
-            (conn:compile-string-for-emacs
-              str nil 1 nil policy
-              (fn [c r] (on-compilation-complete win c r)))))
+          (when (. conn :ui)
+            ((. conn.ui :on-write-string) conn "--\n"
+             {:name "REPL-SEP" :package "KEYWORD"})
+            (let [win (vim.fn.win_getid)
+                  policy (or policy config.compiler_policy)]
+              (conn:compile-string-for-emacs
+                str nil 1 nil policy
+                (fn [c r] (on-compilation-complete win c r))))))
         " Compile "
         default
         conn))))
@@ -389,14 +391,15 @@
       (input.maybe-input
         text
         (fn [fname]
-          ((. conn.ui :on-write-string) conn "--\n"
-           {:name "REPL-SEP" :package "KEYWORD"})
-          (let [win (vim.fn.win_getid)
-                policy (or policy config.compiler_policy)
-                load (or load true)]
-            (conn:compile-file-for-emacs
-              fname load policy
-              (fn [c r] (on-compilation-complete win c r)))))
+          (when (. conn :ui)
+            ((. conn.ui :on-write-string) conn "--\n"
+             {:name "REPL-SEP" :package "KEYWORD"})
+            (let [win (vim.fn.win_getid)
+                  policy (or policy config.compiler_policy)
+                  load (or load true)]
+              (conn:compile-file-for-emacs
+                fname load policy
+                (fn [c r] (on-compilation-complete win c r))))))
         " Compile file "
         (or default "")
         nil

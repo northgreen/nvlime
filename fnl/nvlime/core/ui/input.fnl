@@ -92,7 +92,7 @@ Provides buffer-based and inline input dialogs for nvlime."
         ;; str is provided — validate directly
         (input.check-input-validity str str-cb false))))
 
-(fn input.from-buffer-complete []
+(fn input.from_buffer_complete []
   "Complete the current input buffer session.
   Saves to history, stops insert mode, calls callback, and deletes buffer."
   (let [buf (bufnr "%")
@@ -149,7 +149,7 @@ Provides buffer-based and inline input dialogs for nvlime."
                     (let [idx (if (< idx -1) -1 idx)]
                       [(+ idx 1) (. vim.g.nvlime_input_history (+ idx 2))]))))))))
 
-(fn input.next-history-item [backward]
+(fn input.next_history_item [backward]
   "Replace buffer content with previous/next history entry.
   backward: true for older entries, false for newer."
   (let [backward (or backward true)]
