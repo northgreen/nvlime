@@ -70,7 +70,9 @@
                     "<Cmd>lua require('nvlime.core.plugin').restart_current_server()<CR>"
                     "nvlime: Restart the current server")
 
-  ;;; TODO repl show
+  (km.buffer.normal lm.normal.repl.show
+                    #(repl.open "" {:focus? false})
+                    "nvlime: Show the REPL window")
   (km.buffer.normal lm.normal.repl.clear
                     #(repl.clear)
                     "nvlime: Clear the REPL buffer")

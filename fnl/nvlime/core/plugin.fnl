@@ -326,9 +326,9 @@
         conn))))
 
 (fn plugin.compile-defun []
-  "Compile the top-level form at point."
-  ;; Stub - requires UI cursor extraction from ui_cursor.fnl
-  (ui.err-msg "compile-defun: not yet implemented (requires ui_cursor.fnl)"))
+  "Compile the top-level form at point.
+   BLOCKED: requires ui_cursor.fnl for cursor-based form extraction."
+  (ui.err-msg "compile-defun: blocked on ui_cursor.fnl (cursor-based form extraction not yet implemented)"))
 
 (fn plugin.load-file [file-name edit]
   "Load a Lisp file."
@@ -548,17 +548,13 @@
         conn))))
 
 (fn plugin.cur-autodoc []
-  "Show autodoc for current expression at cursor."
+  "Show autodoc for current expression at cursor.
+   BLOCKED: requires ui_cursor.fnl for cursor-based expression parsing."
   (let [conn (conn-manager.get true)]
     (when (not conn) (values nil))
     (if (conn-has-contrib conn "SWANK-ARGLISTS")
-        ;; Autodoc path - requires ui.CurRawForm (deferred to ui_cursor.fnl)
-        (do
-          (ui.err-msg "cur-autodoc: requires ui_cursor.fnl (deferred)"))
-        ;; Fallback: show operator arglist
-        (do
-          ;; Requires ui.SurroundingOperator (deferred to ui_cursor.fnl)
-          (ui.err-msg "cur-autodoc: requires ui_cursor.fnl (deferred)")))))
+        (ui.err-msg "cur-autodoc: blocked on ui_cursor.fnl (ui.CurRawForm unavailable)")
+        (ui.err-msg "cur-autodoc: blocked on ui_cursor.fnl (ui.SurroundingOperator unavailable)"))))
 
 ;;; ============================================================================
 ;;; Breakpoint / Debug commands
@@ -806,12 +802,10 @@
 
 (fn plugin.calc-cur-indent [shift-width]
   "Calculate indent for current line.
-  Requires ui.ParseOuterOperators (deferred to ui_cursor.fnl)."
+   BLOCKED: requires ui_cursor.fnl for ui.ParseOuterOperators.
+   Falls back to vim.fn.lispindent."
   (let [shift-width (or shift-width 2)
         line-no (vim.fn.line ".")]
-    ;; Multiline string check - requires syntax highlighting (deferred)
-    ;; Parse outer operators - requires ui.ParseOuterOperators (deferred)
-    ;; For now, fall back to lispindent
     (vim.fn.lispindent line-no)))
 
 ;;; ============================================================================
@@ -831,8 +825,8 @@
   (set key-timer (vim.fn.timer_start 150 space-enter-cb)))
 
 (fn plugin.tab-key [key]
-  "Handle tab key - indent or complete."
-  ;; Requires isInString and CalcLeadingSpaces (deferred)
+  "Handle tab key - indent or complete.
+   BLOCKED: requires ui_cursor.fnl for isInString and CalcLeadingSpaces."
   (.. key))
 
 ;;; ============================================================================

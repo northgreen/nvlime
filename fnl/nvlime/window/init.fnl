@@ -29,6 +29,7 @@
 (local window {:cursor {} :center {}})
 
 (local +scrollbar-bufname+ (buffer.gen-name "scrollbar"))
+(local SCROLLBAR-BUFFER-SIZE 100)
 (var *focus-winid* 1000)
 
 ;;; [FileType] -> ?(true WinID)
@@ -227,9 +228,7 @@ It is filled with `icon` on the first columnt of it."
     (true bufnr) bufnr
     _ (let [bufnr (buffer.create +scrollbar-bufname+)]
         (buffer.fill!
-          ;; TODO: convert magic number 100 to neovim window height
-          ;; and update it on VimResized autocmd
-          bufnr (fcollect [_ 1 100] icon))
+          bufnr (fcollect [_ 1 SCROLLBAR-BUFFER-SIZE] icon))
         bufnr)))
 
 ;;; {any} integer -> bool

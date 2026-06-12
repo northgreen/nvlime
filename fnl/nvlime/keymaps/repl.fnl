@@ -74,7 +74,10 @@
 (fn inspect-cur-presentation []
   (do-cur-presentation
     (fn [coord]
-      ;; TODO: rewrite when `Conn` will be converted to fennel
+      ;; NOTE: This uses buffer.vim-call! because InspectPresentation
+      ;; requires a callback with closure capture. Once Conn has a native
+      ;; Fennel InspectPresentation method that accepts Fennel callbacks,
+      ;; this should be rewritten to: (conn:InspectPresentation id true cb)
       (buffer.vim-call!
         0 [(.. "call b:nvlime_conn.InspectPresentation("
                (. coord :id) ", v:true, "

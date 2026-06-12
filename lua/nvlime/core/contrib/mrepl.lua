@@ -1,13 +1,14 @@
 local connection = require("nvlime.core.connection")
 local ui = require("nvlime.core.ui")
 local mrepl_ui = require("nvlime.core.ui.mrepl")
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local function append_output(repl_buf, str)
-  setbufvar(repl_buf, "modifiable", 1)
+  nvim_set_option_value("modifiable", true, {buf = repl_buf})
   local function _1_()
     return ui["append-string"](str)
   end
   ui["with-buffer"](repl_buf, _1_)
-  return setbufvar(repl_buf, "modifiable", 0)
+  return nvim_set_option_value("modifiable", false, {buf = repl_buf})
 end
 local function ensure_buffer_open(buf, win_type)
   if (#vim.fn.win_findbuf(buf) <= 0) then

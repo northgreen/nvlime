@@ -24,6 +24,7 @@ local nvim_exec = vim.api.nvim_exec
 local nvim_open_win = vim.api.nvim_open_win
 local window = {cursor = {}, center = {}}
 local _2bscrollbar_bufname_2b = buffer["gen-name"]("scrollbar")
+local SCROLLBAR_BUFFER_SIZE = 100
 local _2afocus_winid_2a = 1000
 local function filetype_win(filetypes)
   local found_winid = nil
@@ -207,7 +208,7 @@ local function create_scrollbar_buffer(icon)
     local function _21_()
       local tbl_26_ = {}
       local i_27_ = 0
-      for _0 = 1, 100 do
+      for _0 = 1, SCROLLBAR_BUFFER_SIZE do
         local val_28_ = icon
         if (nil ~= val_28_) then
           i_27_ = (i_27_ + 1)

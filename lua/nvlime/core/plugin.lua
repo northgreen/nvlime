@@ -338,7 +338,7 @@ plugin.compile = function(content, policy, edit)
   return input["maybe-input"](text, _48_, " Compile ", default, conn)
 end
 plugin["compile-defun"] = function()
-  return ui["err-msg"]("compile-defun: not yet implemented (requires ui_cursor.fnl)")
+  return ui["err-msg"]("compile-defun: blocked on ui_cursor.fnl (cursor-based form extraction not yet implemented)")
 end
 plugin["load-file"] = function(file_name, edit)
   local conn = conn_manager.get(true)
@@ -583,9 +583,9 @@ plugin["cur-autodoc"] = function()
   else
   end
   if conn_has_contrib(conn, "SWANK-ARGLISTS") then
-    return ui["err-msg"]("cur-autodoc: requires ui_cursor.fnl (deferred)")
+    return ui["err-msg"]("cur-autodoc: blocked on ui_cursor.fnl (ui.CurRawForm unavailable)")
   else
-    return ui["err-msg"]("cur-autodoc: requires ui_cursor.fnl (deferred)")
+    return ui["err-msg"]("cur-autodoc: blocked on ui_cursor.fnl (ui.SurroundingOperator unavailable)")
   end
 end
 plugin["set-breakpoint"] = function(sym, edit)

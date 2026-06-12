@@ -3,13 +3,15 @@
 (local connection (require "nvlime.core.connection"))
 (local ui (require "nvlime.core.ui"))
 (local mrepl-ui (require "nvlime.core.ui.mrepl"))
+(local {: nvim_set_option_value}
+       vim.api)
 
 ;;; Private helper functions
 
 (fn append-output [repl-buf str]
-  (setbufvar repl-buf :modifiable 1)
+  (nvim_set_option_value "modifiable" true {:buf repl-buf})
   (ui.with-buffer repl-buf #(ui.append-string str))
-  (setbufvar repl-buf :modifiable 0))
+  (nvim_set_option_value "modifiable" false {:buf repl-buf}))
 
 (fn ensure-buffer-open [buf win-type]
   (when (<= (length (vim.fn.win_findbuf buf)) 0)

@@ -66,11 +66,12 @@
    :compiler_policy nil
    :indent_keywords default-indent-keywords
    :input_history_limit 100
-   :contribs default-contribs
-   ;; this option doesn't work for now
-   ;; because it requires vim funcrefs
-   :user_contrib_initializers nil
-   :autodoc {:enabled false
+    :contribs default-contribs
+    ;; DEPRECATED: user_contrib_initializers does not work with Fennel.
+    ;; It requires Vim funcrefs which are incompatible with Fennel's
+    ;; compilation model. Use connection.call-initializers instead.
+    :user_contrib_initializers nil
+    :autodoc {:enabled false
              :max_level 5
              :max_lines 50}
    :main_window {:position "right"
