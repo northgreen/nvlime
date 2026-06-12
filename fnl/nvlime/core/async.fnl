@@ -35,9 +35,12 @@
 (fn dispatch-msg [chan json-obj]
   (let [msg-id (. json-obj 1)
         payload (. json-obj 2)]
+    (logger.debug (.. "dispatch-msg: msg-id=" (tostring msg-id) " payload-type=" (tostring (type payload))))
     (when msg-id
       (let [CB (if (= msg-id 0)
-                      chan.chan_callback
+                      (do
+                        (logger.debug "dispatch: using chan_callback")
+                        chan.chan_callback)
                       (let [cb (. chan.msg_callbacks msg-id)]
                         (tset chan.msg_callbacks msg-id nil)
                         cb))]
@@ -53,6 +56,7 @@
 ;;; Internal: JSON buffer parser (replaces s:ChanInputCB)
 ;;; Accumulates data fragments, parses complete JSON messages, dispatches
 (fn chan-input-cb [chan-id data event]
+  (logger.debug (.. "chan-input-cb: chan-id=" (tostring chan-id) " data-len=" (tostring (length data))))
   (let [chan (. chan-registry chan-id)]
     (when chan
       (var obj-list [])
@@ -61,9 +65,12 @@
         (let [(ok result) (pcall vim.json.decode (.. buffered frag))]
           (if ok
               (do
+                (logger.debug (.. "JSON parse OK: type=" (tostring (type result))))
                 (table.insert obj-list result)
                 (set buffered ""))
-              (set buffered (.. buffered frag)))))
+              (do
+                (logger.debug (.. "JSON parse FAIL: buffering..."))
+                (set buffered (.. buffered frag))))))
       (set chan.recv_buffer buffered)
       (each [_ json-obj (ipairs obj-list)]
         (dispatch-msg chan json-obj)))))

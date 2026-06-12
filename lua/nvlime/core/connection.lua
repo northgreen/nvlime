@@ -185,12 +185,24 @@ connection._call = function(conn_ref, method_name, args)
   end
 end
 connection["on-server-event"] = function(self, chan, msg)
+  logger.debug(("on-server-event: received msg len=" .. tostring(#msg)))
   local msg_type = msg[1]
   if msg_type then
-    local event_name = msg_type.name
+    local event_name
+    if (type(msg_type) == "table") then
+      event_name = msg_type.name
+    else
+      event_name = ((type(msg_type) == "string") and msg_type)
+    end
     local handler = self.server_event_handlers[event_name]
+    logger.debug(("on-server-event: msg-type-type=" .. tostring(type(msg_type)) .. " event-name=" .. tostring(event_name)))
     if (type(handler) == "function") then
-      return handler(self, msg)
+      logger.debug(("on-server-event: HANDLER FOUND for " .. tostring(event_name)))
+      handler(self, msg)
+    else
+    end
+    if (not handler and event_name) then
+      return logger.warn(("on-server-event: NO HANDLER for event=" .. tostring(event_name)))
     else
       return nil
     end

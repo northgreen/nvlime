@@ -199,11 +199,18 @@
 (fn connection.on-server-event [self chan msg]
   "Routes server events to appropriate handlers.
   First element of msg is the symbol dict identifying the event type."
+  (logger.debug (.. "on-server-event: received msg len=" (tostring (length msg))))
   (let [msg-type (. msg 1)]
     (when msg-type
-      (let [event-name msg-type.name
-             handler (. self.server_event_handlers event-name)]
+      (let [event-name (if (= (type msg-type) "table")
+                           msg-type.name
+                           (and (= (type msg-type) "string") msg-type))
+            handler (. self.server_event_handlers event-name)]
+        (logger.debug (.. "on-server-event: msg-type-type=" (tostring (type msg-type)) " event-name=" (tostring event-name)))
         (when (= (type handler) "function")
-          (handler self msg))))))
+          (logger.debug (.. "on-server-event: HANDLER FOUND for " (tostring event-name)))
+          (handler self msg))
+        (when (and (not handler) event-name)
+          (logger.warn (.. "on-server-event: NO HANDLER for event=" (tostring event-name))))))))
 
 connection

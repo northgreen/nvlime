@@ -25,9 +25,11 @@ end
 local function dispatch_msg(chan, json_obj)
   local msg_id = json_obj[1]
   local payload = json_obj[2]
+  logger.debug(("dispatch-msg: msg-id=" .. tostring(msg_id) .. " payload-type=" .. tostring(type(payload))))
   if msg_id then
     local CB
     if (msg_id == 0) then
+      logger.debug("dispatch: using chan_callback")
       CB = chan.chan_callback
     else
       local cb = chan.msg_callbacks[msg_id]
@@ -50,6 +52,7 @@ local function dispatch_msg(chan, json_obj)
   end
 end
 local function chan_input_cb(chan_id, data, event)
+  logger.debug(("chan-input-cb: chan-id=" .. tostring(chan_id) .. " data-len=" .. tostring(#data)))
   local chan = chan_registry[chan_id]
   if chan then
     local obj_list = {}
@@ -57,9 +60,11 @@ local function chan_input_cb(chan_id, data, event)
     for _, frag in ipairs(data) do
       local ok, result = pcall(vim.json.decode, (buffered .. frag))
       if ok then
+        logger.debug(("JSON parse OK: type=" .. tostring(type(result))))
         table.insert(obj_list, result)
         buffered = ""
       else
+        logger.debug("JSON parse FAIL: buffering...")
         buffered = (buffered .. frag)
       end
     end
