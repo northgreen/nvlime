@@ -11,6 +11,7 @@ require("nvlime.core.connection.inspector")
 require("nvlime.core.connection.swank")
 require("nvlime.core.connection.events")
 local contrib = require("nvlime.core.contrib")
+local server = require("nvlime.core.server")
 local plugin = {}
 local function input_check_edit_flag(edit, text)
   if edit then
@@ -261,14 +262,14 @@ plugin["close-cur-connection"] = function()
   if not conn then
   else
   end
-  local server = conn.cb_data.server
-  if not server then
+  local server0 = conn.cb_data.server
+  if not server0 then
     conn_manager.close(conn)
     return vim.cmd(("echom '" .. conn.cb_data.name .. " disconnected.'"))
   else
-    local answer = vim.fn.input(("Also stop server " .. vim.inspect(server.name) .. "? (y/n) "))
+    local answer = vim.fn.input(("Also stop server " .. vim.inspect(server0.name) .. "? (y/n) "))
     if ui["is-yes-string"](answer) then
-      vim.cmd("echom 'Server stop not yet implemented.'")
+      server0.stop(server0)
     else
     end
     if (not ui["is-yes-string"](answer) and string.find(answer, "^[nN]")) then
@@ -692,7 +693,10 @@ plugin["dialog-toggle-trace"] = function(func, edit)
   local text = _let_122_[1]
   local default = _let_122_[2]
   local function _123_(func_spec)
-    return ui["err-msg"]("dialog-toggle-trace: not yet implemented")
+    local function _124_(c, r)
+      return vim.cmd("echom 'Traced state toggled.'")
+    end
+    return conn:DialogToggleTrace(func_spec, _124_)
   end
   return input["maybe-input"](text, _123_, " Toggle tracing ", default, conn)
 end
@@ -705,7 +709,14 @@ plugin["open-trace-dialog"] = function()
     ui["err-msg"]("SWANK-TRACE-DIALOG is not available.")
   else
   end
-  return ui["err-msg"]("open-trace-dialog: not yet implemented")
+  local function _127_(c, r)
+    if r then
+      return vim.fn.luaeval("require(\"nvlime.window.trace\").open(_A)", r)
+    else
+      return nil
+    end
+  end
+  return conn:ReportSpecs(_127_)
 end
 plugin["create-mrepl"] = function()
   local conn = conn_manager.get(true)
@@ -713,28 +724,79 @@ plugin["create-mrepl"] = function()
   else
   end
   if conn_has_contrib(conn, "SWANK-MREPL") then
-    return ui["err-msg"]("create-mrepl: not yet implemented")
+    local function _130_(c, r)
+      return vim.cmd("echom 'MREPL created.'")
+    end
+    return conn:CreateMREPL(vim.v.null, _130_)
   else
-    return ui["err-msg"]("The SWANK-MREPL contrib module is not available.")
+    return nil
   end
 end
 plugin["show-current-server"] = function()
-  return ui["err-msg"]("show-current-server: not yet implemented")
+  local conn = conn_manager.get(true)
+  if not conn then
+  else
+  end
+  local server_obj = conn.cb_data.server
+  if server_obj then
+    return server.show(server_obj)
+  else
+    return ui["err-msg"]("No server bound to current connection.")
+  end
 end
 plugin["show-selected-server"] = function()
-  return ui["err-msg"]("show-selected-server: not yet implemented")
+  local srv = server.select()
+  if srv then
+    return server.show(srv)
+  else
+    return nil
+  end
 end
 plugin["stop-current-server"] = function()
-  return ui["err-msg"]("stop-current-server: not yet implemented")
+  local conn = conn_manager.get(true)
+  if not conn then
+  else
+  end
+  local server_obj = conn.cb_data.server
+  if server_obj then
+    return server.stop(server_obj)
+  else
+    return ui["err-msg"]("No server bound to current connection.")
+  end
 end
 plugin["restart-current-server"] = function()
-  return ui["err-msg"]("restart-current-server: not yet implemented")
+  local conn = conn_manager.get(true)
+  if not conn then
+  else
+  end
+  local server_obj = conn.cb_data.server
+  if server_obj then
+    server.stop(server_obj)
+    return server.new(true, false, nil, nil)
+  else
+    return ui["err-msg"]("No server bound to current connection.")
+  end
 end
 plugin["stop-selected-server"] = function()
-  return ui["err-msg"]("stop-selected-server: not yet implemented")
+  local srv = server.select()
+  if srv then
+    return server.stop(srv)
+  else
+    return nil
+  end
 end
 plugin["rename-selected-server"] = function()
-  return ui["err-msg"]("rename-selected-server: not yet implemented")
+  local srv = server.select()
+  if srv then
+    local new_name = vim.fn.input("New name: ", srv.name)
+    if (string.len(new_name) > 0) then
+      return server.rename(srv, new_name)
+    else
+      return nil
+    end
+  else
+    return nil
+  end
 end
 local function on_fuzzy_completions_complete(start_col, cur_pos, conn, result)
   local cur_pos0 = vim.list_slice(vim.fn.getcurpos(), 2, 3)
@@ -768,15 +830,15 @@ plugin.completefunc = function(find_start, base)
       local raw_pos = vim.list_slice(vim.fn.getcurpos(), 2, 3)
       local cur_pos = {vim.fn.bufnr("%"), raw_pos[1], (raw_pos[2] + string.len(base))}
       if conn_has_contrib(conn, "SWANK-FUZZY") then
-        local function _130_(c, r)
+        local function _144_(c, r)
           return on_fuzzy_completions_complete((start_col + 1), cur_pos, c, r)
         end
-        conn["fuzzy-completions"](conn, base, _130_)
+        conn["fuzzy-completions"](conn, base, _144_)
       else
-        local function _131_(c, r)
+        local function _145_(c, r)
           return on_simple_completions_complete((start_col + 1), cur_pos, c, r)
         end
-        conn["simple-completions"](conn, base, _131_)
+        conn["simple-completions"](conn, base, _145_)
       end
       return {words = {}, refresh = "always"}
     end
@@ -825,16 +887,16 @@ plugin["interaction-mode"] = function(enable)
     vim.cmd("nnoremap <buffer> <CR> <CR>")
     vim.cmd("vnoremap <buffer> <CR> <CR>")
   end
-  local _139_
+  local _153_
   if enable0 then
-    _139_ = "enabled"
+    _153_ = "enabled"
   else
-    _139_ = "disabled"
+    _153_ = "disabled"
   end
-  return vim.cmd(("echom 'Interaction mode " .. _139_ .. "."))
+  return vim.cmd(("echom 'Interaction mode " .. _153_ .. "."))
 end
-local function _141_(self, key)
+local function _155_(self, key)
   return self[string.gsub(key, "_", "-")]
 end
-setmetatable(plugin, {__index = _141_})
+setmetatable(plugin, {__index = _155_})
 return plugin

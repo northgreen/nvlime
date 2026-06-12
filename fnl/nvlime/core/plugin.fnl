@@ -16,6 +16,7 @@
 (require "nvlime.core.connection.events")
 ;; Load contrib module (registers call-initializers on connection table)
 (local contrib (require "nvlime.core.contrib"))
+(local server (require "nvlime.core.server"))
 
 (local plugin {})
 
@@ -261,9 +262,8 @@
           (let [answer (vim.fn.input
                          (.. "Also stop server "
                              (vim.inspect server.name) "? (y/n) "))]
-            (when (ui.is-yes-string answer)
-              ;; Server stop not yet implemented - placeholder
-              (vim.cmd "echom 'Server stop not yet implemented.'"))
+             (when (ui.is-yes-string answer)
+               (server.stop server))
             (when (and (not (ui.is-yes-string answer))
                        (string.find answer "^[nN]"))
               (conn-manager.close conn)
@@ -667,8 +667,8 @@
       (input.maybe-input
         text
         (fn [func-spec]
-          ;; DialogToggleTrace not yet in connection methods (deferred)
-          (ui.err-msg "dialog-toggle-trace: not yet implemented"))
+          (conn:DialogToggleTrace func-spec
+            (fn [c r] (vim.cmd "echom 'Traced state toggled.'"))))
         " Toggle tracing "
         default
         conn))))
@@ -680,8 +680,12 @@
     (when (not (conn-has-contrib conn "SWANK-TRACE-DIALOG"))
       (ui.err-msg "SWANK-TRACE-DIALOG is not available.")
       (values nil))
-    ;; ReportSpecs not yet in connection methods (deferred)
-    (ui.err-msg "open-trace-dialog: not yet implemented")))
+    (conn:ReportSpecs
+      (fn [c r]
+        (when r
+          (vim.fn.luaeval
+            "require(\"nvlime.window.trace\").open(_A)"
+            r))))))
 
 ;;; ============================================================================
 ;;; MREPL commands (requires SWANK-MREPL contrib)
@@ -692,9 +696,9 @@
   (let [conn (conn-manager.get true)]
     (when (not conn) (values nil))
     (if (conn-has-contrib conn "SWANK-MREPL")
-        ;; CreateMREPL not yet in connection methods (deferred)
-        (ui.err-msg "create-mrepl: not yet implemented")
-        (ui.err-msg "The SWANK-MREPL contrib module is not available."))))
+        (conn:CreateMREPL vim.v.null
+          (fn [c r]
+            (vim.cmd "echom 'MREPL created.'"))))))
 
 ;;; ============================================================================
 ;;; Server management stubs (require server.fnl integration)
@@ -702,33 +706,50 @@
 
 (fn plugin.show-current-server []
   "Show the current server console."
-  ;; Requires server module - deferred
-  (ui.err-msg "show-current-server: not yet implemented"))
+  (let [conn (conn-manager.get true)]
+    (when (not conn) (values nil))
+    (let [server-obj (. conn.cb_data :server)]
+      (if server-obj
+          (server.show server-obj)
+          (ui.err-msg "No server bound to current connection.")))))
 
 (fn plugin.show-selected-server []
   "Show a selected server console."
-  ;; Requires server module - deferred
-  (ui.err-msg "show-selected-server: not yet implemented"))
+  (let [srv (server.select)]
+    (when srv (server.show srv))))
 
 (fn plugin.stop-current-server []
   "Stop the current server."
-  ;; Requires server module - deferred
-  (ui.err-msg "stop-current-server: not yet implemented"))
+  (let [conn (conn-manager.get true)]
+    (when (not conn) (values nil))
+    (let [server-obj (. conn.cb_data :server)]
+      (if server-obj
+          (server.stop server-obj)
+          (ui.err-msg "No server bound to current connection.")))))
 
 (fn plugin.restart-current-server []
   "Restart the current server."
-  ;; Requires server module - deferred
-  (ui.err-msg "restart-current-server: not yet implemented"))
+  (let [conn (conn-manager.get true)]
+    (when (not conn) (values nil))
+    (let [server-obj (. conn.cb_data :server)]
+      (if server-obj
+          (do
+            (server.stop server-obj)
+            (server.new true false nil nil))
+          (ui.err-msg "No server bound to current connection.")))))
 
 (fn plugin.stop-selected-server []
   "Stop a selected server."
-  ;; Requires server module - deferred
-  (ui.err-msg "stop-selected-server: not yet implemented"))
+  (let [srv (server.select)]
+    (when srv (server.stop srv))))
 
 (fn plugin.rename-selected-server []
   "Rename a selected server."
-  ;; Requires server module - deferred
-  (ui.err-msg "rename-selected-server: not yet implemented"))
+  (let [srv (server.select)]
+    (when srv
+      (let [new-name (vim.fn.input "New name: " srv.name)]
+        (when (> (string.len new-name) 0)
+          (server.rename srv new-name))))))
 
 ;;; ============================================================================
 ;;; Completion
