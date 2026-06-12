@@ -64,7 +64,7 @@
     ;; Still set metatable as fallback for dynamically added methods
     (setmetatable self {:__index connection})
     ;; Register all server event handlers (WRITE-STRING, DEBUG, etc.)
-    (self:setup-event-handlers)
+    (connection.setup_event_handlers self)
     self))
 
 ;;; Core connection methods
