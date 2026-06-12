@@ -38,8 +38,8 @@ connection.new = function(cb_data, ui)
     else
     end
   end
-  self["setup-event-handlers"](self)
   setmetatable(self, {__index = connection})
+  self["setup-event-handlers"](self)
   return self
 end
 connection.connect = function(self, host, port, prefix, timeout)

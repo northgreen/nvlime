@@ -61,10 +61,10 @@
     (each [k v (pairs connection)]
       (when (= (type v) "function")
         (tset self k v)))
-    ;; Register all server event handlers (WRITE-STRING, DEBUG, etc.)
-    (self:setup-event-handlers)
     ;; Still set metatable as fallback for dynamically added methods
     (setmetatable self {:__index connection})
+    ;; Register all server event handlers (WRITE-STRING, DEBUG, etc.)
+    (self:setup-event-handlers)
     self))
 
 ;;; Core connection methods
