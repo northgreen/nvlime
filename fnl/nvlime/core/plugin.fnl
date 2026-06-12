@@ -17,6 +17,7 @@
 ;; Load contrib module (registers call-initializers on connection table)
 (local contrib (require "nvlime.core.contrib"))
 (local server (require "nvlime.core.server"))
+(local uc (require "nvlime.ui_cursors"))
 
 (local plugin {})
 
@@ -849,14 +850,14 @@
     (set vim.b.nvlime_interaction_mode enable)
     (if enable
         (do
-          (vim.cmd "nnoremap <buffer> <silent> <CR> :lua require'nvlime.core.plugin'.send-to-repl()<CR>")
-          (vim.cmd "vnoremap <buffer> <silent> <CR> :<C-u>lua require'nvlime.core.plugin'.send-to-repl()<CR>"))
+          (vim.cmd "nnoremap <buffer> <silent> <CR> :lua require('nvlime.core.plugin').send_to_repl(require('nvlime.ui_cursors').cur_expr_or_atom())<CR>")
+          (vim.cmd "vnoremap <buffer> <silent> <CR> :<C-u>lua require('nvlime.core.plugin').send_to_repl(require('nvlime.ui_cursors').cur_selection())<CR>"))
         (do
           (vim.cmd "nnoremap <buffer> <CR> <CR>")
           (vim.cmd "vnoremap <buffer> <CR> <CR>")))
     (vim.cmd (.. "echom 'Interaction mode "
                   (if enable "enabled" "disabled")
-                 "."))))
+                   "'."))))
 
 ;;; ============================================================================
 ;;; Module export

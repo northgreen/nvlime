@@ -12,6 +12,7 @@ require("nvlime.core.connection.swank")
 require("nvlime.core.connection.events")
 local contrib = require("nvlime.core.contrib")
 local server = require("nvlime.core.server")
+local uc = require("nvlime.ui_cursors")
 local plugin = {}
 local function input_check_edit_flag(edit, text)
   if edit then
@@ -881,8 +882,8 @@ plugin["interaction-mode"] = function(enable)
   local enable0 = (enable or not (vim.b.nvlime_interaction_mode or false))
   vim.b.nvlime_interaction_mode = enable0
   if enable0 then
-    vim.cmd("nnoremap <buffer> <silent> <CR> :lua require'nvlime.core.plugin'.send-to-repl()<CR>")
-    vim.cmd("vnoremap <buffer> <silent> <CR> :<C-u>lua require'nvlime.core.plugin'.send-to-repl()<CR>")
+    vim.cmd("nnoremap <buffer> <silent> <CR> :lua require('nvlime.core.plugin').send_to_repl(require('nvlime.ui_cursors').cur_expr_or_atom())<CR>")
+    vim.cmd("vnoremap <buffer> <silent> <CR> :<C-u>lua require('nvlime.core.plugin').send_to_repl(require('nvlime.ui_cursors').cur_selection())<CR>")
   else
     vim.cmd("nnoremap <buffer> <CR> <CR>")
     vim.cmd("vnoremap <buffer> <CR> <CR>")
@@ -893,7 +894,7 @@ plugin["interaction-mode"] = function(enable)
   else
     _153_ = "disabled"
   end
-  return vim.cmd(("echom 'Interaction mode " .. _153_ .. "."))
+  return vim.cmd(("echom 'Interaction mode " .. _153_ .. "'."))
 end
 local function _155_(self, key)
   return self[string.gsub(key, "_", "-")]
