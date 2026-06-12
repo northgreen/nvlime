@@ -13,6 +13,7 @@
        vim.fn)
 
 (local buffer (require "nvlime.buffer"))
+(local logger (require "nvlime.logger"))
 
 (local async {})
 
@@ -43,11 +44,11 @@
         (if CB
             (let [(ok err) (pcall CB chan payload)]
               (when (not ok)
-                (vim.notify (.. "nvlime: callback failed: " (tostring err)) vim.log.levels.WARN)
+                ((: (logger:get) :warn) (.. "callback failed: " (tostring err)))
                 (nvim_err_writeln
                   (.. "nvlime: callback failed: "
                       (tostring err)))))
-            (vim.notify (.. "nvlime dispatch: NO CALLBACK for msg-id=" (tostring msg-id)) vim.log.levels.WARN))))))
+             ((: (logger:get) :warn) (.. "dispatch: NO CALLBACK for msg-id=" (tostring msg-id)))))))
 
 ;;; Internal: JSON buffer parser (replaces s:ChanInputCB)
 ;;; Accumulates data fragments, parses complete JSON messages, dispatches
@@ -156,8 +157,8 @@ Returns job object."
             (tset job-obj :on_exit
                   (fn [job-id exit-code event-name]
                     (when exit-cb (exit-cb exit-code))))
-            (set job-obj.job_id (jobstart cmd job-obj))
-            job-obj)))))
+             (set job-obj.job_id (jobstart cmd job-obj))
+             job-obj))))))
 
 ;;; {job_id} -> boolean
 (fn async.job-is-active [job]

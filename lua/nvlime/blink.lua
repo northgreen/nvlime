@@ -1,5 +1,6 @@
 local blink_types = require("blink.cmp.types")
 local buffer = require("nvlime.buffer")
+local logger = require("nvlime.logger")
 local opts = require("nvlime.config")
 require("nvlime.core.connection.swank")
 require("nvlime.core.contrib.fuzzy")
@@ -133,7 +134,7 @@ Source.get_completions = function(self, ctx, callback)
         local function _14_()
           if not handling_complete then
             fuzzy_disabled_3f = true
-            vim.notify("nvlime: fuzzy-completions timed out after 5s, falling back to simple-completions", vim.log.levels.WARN)
+            logger:get():warn()("fuzzy-completions timed out after 5s, falling back to simple-completions")
             local function _15_(_self, candidates)
               return process_candidates(candidates, false)
             end

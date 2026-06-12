@@ -1,4 +1,5 @@
 (local buffer (require "nvlime.buffer"))
+(local logger (require "nvlime.logger"))
 (local main (require "nvlime.window.main"))
 (local ut (require "nvlime.utilities"))
 (local presentations (require "nvlime.contrib.presentations"))
@@ -27,6 +28,7 @@
 
 ;;; BufNr ->
 (fn clear-repl* [bufnr conn]
+  ((: (logger:get) :debug) (.. "clear-repl: bufnr=" (tostring bufnr)))
   (tset presentations :coords {})
   (buffer.fill! bufnr (repl-banner conn))
   ;; remove all leftover highlight extmarks for presentations
@@ -39,6 +41,7 @@
   (let [conn-manager (require "nvlime.core.conn_manager")]
     (let [active-conn (or (buffer.get-conn-var! bufnr) (conn-manager.get true))]
       (when active-conn
+        ((: (logger:get) :debug) (.. "buf-callback: initialized bufnr=" (tostring bufnr) " conn=" (tostring (. active-conn :cb_data :name))))
         (clear-repl* bufnr active-conn)))))
 
 ;;; string {any} -> [WinID BufNr]
@@ -49,8 +52,7 @@
                 false
                 #(buf-callback $))]
     (buffer.append! bufnr lines)
-    (vim.notify (.. "REPL_OPEN: buf=" bufnr " lines_count=" (tostring (length lines)))
-                vim.log.levels.INFO)
+    ((: (logger:get) :debug) (.. "REPL_OPEN: buf=" bufnr " lines_count=" (tostring (length lines))))
     (let [winid (main.repl:open bufnr config.focus?)]
       (nvim_win_set_cursor
         winid [(nvim_buf_line_count bufnr) 0])
@@ -58,6 +60,7 @@
 
 ;;; ->
 (fn repl.clear []
+  ((: (logger:get) :debug) "repl.clear: called")
   (let [cur-bufnr (nvim_get_current_buf)
         conn (buffer.get-conn-var! cur-bufnr)]
     (when conn

@@ -1,6 +1,7 @@
 (local window (require "nvlime.window"))
 (local pwin (require "parsley.window"))
 (local opts (require "nvlime.config"))
+(local logger (require "nvlime.logger"))
 (local {: nvim_exec
         : nvim_win_set_buf
         : nvim_set_current_win
@@ -120,8 +121,12 @@
     (tset self :id nil)
     (tset self :buffers []))
   (if (pwin.visible? self.id)
-      (self:show-buf bufnr focus?)
-      (self:open-new bufnr focus?))
+      (do
+        ((: (logger:get) :debug) (.. "main-win.open: show-buf winid=" (tostring self.id)))
+        (self:show-buf bufnr focus?))
+      (do
+        ((: (logger:get) :debug) (.. "main-win.open: open-new bufnr=" (tostring bufnr)))
+        (self:open-new bufnr focus?)))
   self.id)
 
 main-win

@@ -1,13 +1,11 @@
 ;; fennel-ls: macro-file
-
-(fn notification [msg level]
-  `(vim.notify ,(.. "nvlime: " msg) ,level))
+;; Logging macros - expanded at compile time to call the runtime logger.
 
 (fn warn-msg [msg]
-  (notification msg `vim.log.levels.WARN))
+  `((: ((require "nvlime.logger") :get) :warn) ,(.. "nvlime: " msg)))
 
 (fn info-msg [msg]
-  (notification msg `vim.log.levels.INFO))
+  `((: ((require "nvlime.logger") :get) :info) ,(.. "nvlime: " msg)))
 
 {: warn-msg
  : info-msg}

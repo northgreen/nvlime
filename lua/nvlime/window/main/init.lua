@@ -1,6 +1,7 @@
 local window = require("nvlime.window")
 local pwin = require("parsley.window")
 local opts = require("nvlime.config")
+local logger = require("nvlime.logger")
 local nvim_exec = vim.api.nvim_exec
 local nvim_win_set_buf = vim.api.nvim_win_set_buf
 local nvim_set_current_win = vim.api.nvim_set_current_win
@@ -131,8 +132,10 @@ main_win.open = function(self, bufnr, focus_3f)
   else
   end
   if pwin["visible?"](self.id) then
+    logger:get():debug()(("main-win.open: show-buf winid=" .. tostring(self.id)))
     self["show-buf"](self, bufnr, focus_3f)
   else
+    logger:get():debug()(("main-win.open: open-new bufnr=" .. tostring(bufnr)))
     self["open-new"](self, bufnr, focus_3f)
   end
   return self.id

@@ -1,4 +1,5 @@
 local connection = require("nvlime.core.connection")
+local logger = require("nvlime.logger")
 local function check_return_status(return_msg, caller)
   local status = return_msg[2][1]
   if not (status.name == "OK") then
@@ -55,7 +56,7 @@ connection["connection-info"] = function(self, return_dict, callback)
   local function _7_(chan, msg)
     local ok, err = pcall(check_return_status, msg, "nvlime#ConnectionInfo")
     if not ok then
-      vim.notify(("nvlime msg: " .. tostring(err)), vim.log.levels.WARN)
+      logger:get():warn()(("msg: " .. tostring(err)))
       __fnl_global__return()
     else
     end
@@ -91,7 +92,7 @@ connection["simple-send-cb"] = function(self, callback, caller, chan, msg)
   do
     local ok, err = pcall(check_return_status, msg, caller)
     if not ok then
-      vim.notify(("nvlime msg: " .. tostring(err)), vim.log.levels.WARN)
+      logger:get():warn()(("msg: " .. tostring(err)))
       try_to_call(callback, {self, {}})
       __fnl_global__return()
     else

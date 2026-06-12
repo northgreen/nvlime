@@ -3,6 +3,7 @@ local nvim_buf_set_var = vim.api.nvim_buf_set_var
 local luaeval = vim.fn.luaeval
 local cursor = vim.fn.cursor
 local call = vim.fn.call
+local logger = require("nvlime.logger")
 local ui = require("nvlime.core.ui")
 local connection = require("nvlime.core.connection")
 local xref = require("nvlime.core.ui.xref")
@@ -21,6 +22,7 @@ local function return_string_input_complete(thread, ttag)
   return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
 end
 ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames, conts)
+  logger:get():debug()(("on-debug: thread=" .. tostring(thread) .. " level=" .. tostring(level)))
   local _let_2_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
   local _ = _let_2_[1]
   local bufnr = _let_2_[2]
@@ -44,7 +46,8 @@ ui["on-debug-return"] = function(self, conn, thread, level, stepping)
   return luaeval("require('nvlime.window.main.sldb')['on-debug-return'](_A)", {["conn-name"] = conn.cb_data.name, thread = thread, level = level})
 end
 ui["on-write-string"] = function(self, conn, str, str_type, thread)
-  vim.notify(("UI_EVENT: Received str=" .. tostring(str)), vim.log.levels.INFO)
+  logger:get():debug()(("on-write-string: len=" .. tostring(#str)))
+  logger:get():debug()(("on-write-string: type=" .. tostring(str_type) .. " conn=" .. tostring(conn.cb_data.name)))
   luaeval("require('nvlime.window.main.repl').open(_A[1], _A[2])", {str, {["conn-name"] = conn.cb_data.name}})
   if thread then
     return conn:send({connection.kw("NVLIME-RAW-MSG"), ("(:WRITE-DONE " .. thread .. ")")}, nil)

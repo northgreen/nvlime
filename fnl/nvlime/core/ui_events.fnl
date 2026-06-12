@@ -11,6 +11,7 @@ Also exports private callbacks used by input buffer completion."
        vim.fn)
 
 (local call vim.fn.call)
+(local logger (require "nvlime.logger"))
 (local ui (require "nvlime.core.ui"))
 (local connection (require "nvlime.core.connection"))
 (local xref (require "nvlime.core.ui.xref"))
@@ -46,6 +47,7 @@ Also exports private callbacks used by input buffer completion."
 (fn ui.on-debug [self conn thread level condition restarts frames conts]
   "Opens SLDB window and fills buffer with debugger state.
   Called when the Lisp debugger is activated."
+  ((: (logger:get) :debug) (.. "on-debug: thread=" (tostring thread) " level=" (tostring level)))
   (let [[_ bufnr] (luaeval
                     "require('nvlime.window.main.sldb').open(_A[1], _A[2])"
                     [[]
@@ -86,7 +88,8 @@ Also exports private callbacks used by input buffer completion."
 (fn ui.on-write-string [self conn str str-type thread]
   "Writes str to REPL buffer.
   If thread is provided, sends WRITE-DONE back to server."
-  (vim.notify (.. "UI_EVENT: Received str=" (tostring str)) vim.log.levels.INFO)
+  ((: (logger:get) :debug) (.. "on-write-string: len=" (tostring (length str))))
+  ((: (logger:get) :debug) (.. "on-write-string: type=" (tostring str-type) " conn=" (tostring (. (. conn :cb_data) :name))))
   (luaeval
     "require('nvlime.window.main.repl').open(_A[1], _A[2])"
     [str {:conn-name (. (. conn :cb_data) :name)}])

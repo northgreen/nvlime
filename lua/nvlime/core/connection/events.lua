@@ -1,4 +1,5 @@
 local connection = require("nvlime.core.connection")
+local logger = require("nvlime.logger")
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_err_writeln = vim.api.nvim_err_writeln
 connection["parse-source-location"] = function(self, loc)
@@ -371,6 +372,7 @@ connection["on-write-string"] = function(self, msg)
     else
       thread = nil
     end
+    logger:get():debug()(("on-write-string: len=" .. tostring(#str) .. " thread=" .. tostring(thread)))
     return self.ui["on-write-string"](self.ui, self, str, str_type, thread)
   else
     return nil
@@ -435,6 +437,7 @@ connection["on-channel-send"] = function(self, msg)
   local chan_id = msg[2]
   local msg_body = msg[3]
   local chan_obj = self.local_channels[chan_id]
+  logger:get():debug()(("channel-send: chan-id=" .. tostring(chan_id)))
   if chan_obj then
     if chan_obj.callback then
       return chan_obj.callback(self, chan_obj, msg_body)
