@@ -190,7 +190,12 @@ async["job-getbufnr"] = function(job)
   return (job.out_buf or 0)
 end
 local function _25_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(async, {__index = _25_})
 return async

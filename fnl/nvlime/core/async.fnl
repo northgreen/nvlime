@@ -174,6 +174,9 @@ Returns job object."
 ;;; Hyphen/underscore compatibility for VimScript shim
 (setmetatable async
   {:__index (fn [self key]
-              (. self (string.gsub key "_" "-")))})
+              (let [new-key (string.gsub key "_" "-")]
+                (if (= new-key key)
+                    nil
+                    (. self new-key))))})
 
 async
