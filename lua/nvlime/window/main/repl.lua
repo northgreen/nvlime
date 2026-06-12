@@ -34,9 +34,10 @@ local function clear_repl_2a(bufnr, conn)
 end
 local function buf_callback(bufnr)
   buffer["set-opts"](bufnr, {filetype = _2bfiletype_2b})
-  local conn = buffer["get-conn-var!"](bufnr)
-  if conn then
-    return clear_repl_2a(bufnr, conn)
+  local conn_manager = require("nvlime.core.conn_manager")
+  local active_conn = (buffer["get-conn-var!"](bufnr) or conn_manager.get(true))
+  if active_conn then
+    return clear_repl_2a(bufnr, active_conn)
   else
     return nil
   end

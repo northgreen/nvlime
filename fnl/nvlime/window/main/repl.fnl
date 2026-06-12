@@ -36,9 +36,10 @@
 ;;; BufNr {any} ->
 (fn buf-callback [bufnr]
   (buffer.set-opts bufnr {:filetype +filetype+})
-  (let [conn (buffer.get-conn-var! bufnr)]
-    (when conn
-      (clear-repl* bufnr conn))))
+  (let [conn-manager (require "nvlime.core.conn_manager")]
+    (let [active-conn (or (buffer.get-conn-var! bufnr) (conn-manager.get true))]
+      (when active-conn
+        (clear-repl* bufnr active-conn)))))
 
 ;;; string {any} -> [WinID BufNr]
 (fn repl.open [content config]
