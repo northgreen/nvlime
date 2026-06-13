@@ -13,6 +13,7 @@ Provides buffer-based and inline input dialogs for nvlime."
         vim.fn)
 
 (local ui (require "nvlime.core.ui"))
+(local logger (require "nvlime.logger"))
 (local config (require "nvlime.config"))
 
 (local input {})
@@ -50,12 +51,15 @@ Provides buffer-based and inline input dialogs for nvlime."
   prompt: string to show as window title
   init-val: initial text content
   complete-cb: function called when user submits input"
+  (logger.debug (.. "from-buffer: prompt=" prompt " init-val=" (tostring init-val) " callback-type=" (tostring (type complete-cb))))
   (let [[_win-id buf-nr] (luaeval
                            "require(\"nvlime.window.input\").open(_A[1], _A[2])"
                            [init-val
                             {:conn-name (. (. conn :cb_data) :name)
                              :prompt prompt}])]
+    (logger.debug (.. "from-buffer: buf-nr=" (tostring buf-nr)))
     (vim.fn.setbufvar buf-nr "nvlime_input_complete_cb" complete-cb)
+    (logger.debug "from-buffer: setbufvar done")
     (cursor "$" (+ (length (getline "$")) 1))))
 
 (fn input.maybe-input [str str-cb prompt default conn comp-type]
@@ -97,14 +101,19 @@ Provides buffer-based and inline input dialogs for nvlime."
   Saves to history, stops insert mode, calls callback, and deletes buffer."
   (let [buf (bufnr "%")
         callback (vim.fn.getbufvar buf "nvlime_input_complete_cb" nil)]
+    (logger.debug (.. "from_buffer_complete: buf=" (tostring buf) " callback-type=" (tostring (type callback))))
     (when (not callback)
+      (logger.warn "from_buffer_complete: callback is nil!")
       (values))
     (let [content (ui.cur-buffer-content true)]
+      (logger.debug (.. "from_buffer_complete: content-len=" (tostring (length content))))
       (when (> (length content) 0)
         (input.save-history content)))
     (when (string.match (mode) "^i")
       (vim.cmd "stopinsert"))
+    (logger.debug "from_buffer_complete: calling callback")
     (callback)
+    (logger.debug "from_buffer_complete: callback returned")
     (when (vim.fn.bufloaded buf)
       (nvim_buf_delete buf {:force true}))))
 

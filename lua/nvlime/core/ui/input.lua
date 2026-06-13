@@ -6,6 +6,7 @@ local getline = vim.fn.getline
 local cursor = vim.fn.cursor
 local mode = vim.fn.mode
 local ui = require("nvlime.core.ui")
+local logger = require("nvlime.logger")
 local config = require("nvlime.config")
 local input = {}
 vim.g["nvlime_input_history"] = {}
@@ -26,10 +27,13 @@ input["check-input-validity"] = function(str_val, cb, cancellable)
   end
 end
 input["from-buffer"] = function(conn, prompt, init_val, complete_cb)
+  logger.debug(("from-buffer: prompt=" .. prompt .. " init-val=" .. tostring(init_val) .. " callback-type=" .. tostring(type(complete_cb))))
   local _let_4_ = luaeval("require(\"nvlime.window.input\").open(_A[1], _A[2])", {init_val, {["conn-name"] = conn.cb_data.name, prompt = prompt}})
   local _win_id = _let_4_[1]
   local buf_nr = _let_4_[2]
+  logger.debug(("from-buffer: buf-nr=" .. tostring(buf_nr)))
   vim.fn.setbufvar(buf_nr, "nvlime_input_complete_cb", complete_cb)
+  logger.debug("from-buffer: setbufvar done")
   return cursor("$", (#getline("$") + 1))
 end
 input["maybe-input"] = function(str, str_cb, prompt, default, conn, comp_type)
@@ -72,11 +76,14 @@ end
 input.from_buffer_complete = function()
   local buf = bufnr("%")
   local callback = vim.fn.getbufvar(buf, "nvlime_input_complete_cb", nil)
+  logger.debug(("from_buffer_complete: buf=" .. tostring(buf) .. " callback-type=" .. tostring(type(callback))))
   if not callback then
+    logger.warn("from_buffer_complete: callback is nil!")
   else
   end
   do
     local content = ui["cur-buffer-content"](true)
+    logger.debug(("from_buffer_complete: content-len=" .. tostring(#content)))
     if (#content > 0) then
       input["save-history"](content)
     else
@@ -86,7 +93,9 @@ input.from_buffer_complete = function()
     vim.cmd("stopinsert")
   else
   end
+  logger.debug("from_buffer_complete: calling callback")
   callback()
+  logger.debug("from_buffer_complete: callback returned")
   if vim.fn.bufloaded(buf) then
     return nvim_buf_delete(buf, {force = true})
   else

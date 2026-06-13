@@ -298,12 +298,16 @@
 
 (fn plugin.send-to-repl [content edit]
   "Evaluate content in the REPL and show result."
+  (logger.debug (.. "send-to-repl: content=" (tostring content) " edit=" (tostring edit)))
   (let [conn (conn-manager.get true)]
+    (logger.debug (.. "send-to-repl: conn=" (tostring (if conn (. conn :cb_data :name) "nil"))))
     (when (not conn) (values nil))
     (let [[text default] (input-check-edit-flag (or edit false) content)]
+      (logger.debug (.. "send-to-repl: text=" (tostring text) " default=" (tostring default)))
       (input.maybe-input
         text
         (fn [str]
+          (logger.debug (.. "send-to-repl callback: str=" str))
           (when (and conn (. conn :ui))
             ((. conn.ui :on-write-string) conn "--\n"
              {:name "REPL-SEP" :package "KEYWORD"})
