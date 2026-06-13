@@ -44,7 +44,7 @@
       (when active-conn
         (logger.debug (.. "buf-callback: initialized bufnr=" (tostring bufnr) " conn=" (tostring (. active-conn :cb_data :name))))
         ;; Set REPL-THREAD mapping so get-current-thread returns valid thread
-        (active-conn.ui:set-current-thread {:name "REPL-THREAD" :package "KEYWORD"} bufnr)
+        (active-conn.ui:set-current-thread "REPL-THREAD" bufnr)
         (clear-repl* bufnr active-conn)))))
 
 ;;; string {any} -> [WinID BufNr]
