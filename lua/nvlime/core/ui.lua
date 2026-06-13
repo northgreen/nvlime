@@ -214,7 +214,6 @@ ui["with-buffer-visible"] = function(buf_win, func, old_ei)
   nvim_set_current_win(buf_win)
   logger.debug("ui.with-buffer-visible: after nvim_set_current_win")
   local saved_ei = vim.o.eventignore
-  vim.o.eventignore = old_ei
   local result = func()
   vim.o.eventignore = saved_ei
   return result
@@ -228,7 +227,6 @@ ui["with-buffer-hidden"] = function(buf, func, old_ei, ev_ignore)
     logger.debug("ui.with-buffer-hidden: open-buffer returned")
     local tmp_win_id = win_getid()
     local saved_ei = vim.o.eventignore
-    vim.o.eventignore = old_ei
     local result = func()
     vim.o.eventignore = saved_ei
     vim.o.eventignore = ev_ignore

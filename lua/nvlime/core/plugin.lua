@@ -361,7 +361,7 @@ plugin["send-to-repl"] = function(content, edit)
           logger.debug("send-to-repl callback: inside with-thread")
           return conn["listener-eval"](conn, str, on_listener_eval_complete)
         end
-        return conn["with-thread"](conn, "REPL-THREAD", _50_)
+        return conn["with-thread"](conn, true, _50_)
       else
         return nil
       end

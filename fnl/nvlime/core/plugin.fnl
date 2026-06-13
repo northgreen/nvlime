@@ -323,7 +323,7 @@
                {:name "REPL-SEP" :package "KEYWORD"})
               (logger.debug "send-to-repl callback: on-write-string returned")
                (conn:with-thread
-                 "REPL-THREAD"
+                 true
                  (fn []
                   (logger.debug "send-to-repl callback: inside with-thread")
                   (conn:listener-eval str on-listener-eval-complete)))))

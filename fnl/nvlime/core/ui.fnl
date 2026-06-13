@@ -250,9 +250,8 @@ Functions deferred to later files:
   (logger.debug (.. "ui.with-buffer-visible: ENTER buf-win=" (tostring buf-win)))
   (nvim_set_current_win buf-win)
   (logger.debug "ui.with-buffer-visible: after nvim_set_current_win")
-  (let [saved-ei vim.o.eventignore]
-    (set vim.o.eventignore old-ei)
-    (let [result (func)]
+                (let [saved-ei vim.o.eventignore]
+                  (let [result (func)]
       (set vim.o.eventignore saved-ei)
       result)))
 
@@ -266,8 +265,7 @@ Functions deferred to later files:
              (logger.debug "ui.with-buffer-hidden: open-buffer returned")
              (let [tmp-win-id (win_getid)]
                (let [saved-ei vim.o.eventignore]
-                 (set vim.o.eventignore old-ei)
-                 (let [result (func)]
+                  (let [result (func)]
                    (set vim.o.eventignore saved-ei)
                    (set vim.o.eventignore ev-ignore)
                    (let [win-num (win_id2win tmp-win-id)]

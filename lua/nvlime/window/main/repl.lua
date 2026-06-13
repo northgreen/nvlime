@@ -41,7 +41,7 @@ local function buf_callback(bufnr)
   local active_conn = (buffer["get-conn-var!"](bufnr) or conn_manager.get(true))
   if active_conn then
     logger.debug(("buf-callback: initialized bufnr=" .. tostring(bufnr) .. " conn=" .. tostring(active_conn.cb_data.name)))
-    active_conn.ui["set-current-thread"](active_conn.ui, "REPL-THREAD", bufnr)
+    active_conn.ui["set-current-thread"](active_conn.ui, true, bufnr)
     return clear_repl_2a(bufnr, active_conn)
   else
     return nil
