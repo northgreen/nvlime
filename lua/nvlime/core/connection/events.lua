@@ -1,5 +1,6 @@
 local connection = require("nvlime.core.connection")
 local logger = require("nvlime.logger")
+local processing_debug = false
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_err_writeln = vim.api.nvim_err_writeln
 connection["parse-source-location"] = function(self, loc)
@@ -321,16 +322,20 @@ connection["on-new-package"] = function(self, msg)
 end
 connection["on-debug"] = function(self, msg)
   logger.debug("connection.on-debug: ENTER")
-  if self.ui then
-    local thread = msg[2]
-    local level = msg[3]
-    local condition = msg[4]
-    local restarts = msg[5]
-    local frames = msg[6]
-    local conts = msg[7]
-    logger.debug(("connection.on-debug: calling ui.on-debug, thread=" .. tostring(thread) .. " level=" .. tostring(level)))
-    self.ui["on-debug"](self.ui, self, thread, level, condition, restarts, frames, conts)
-    logger.debug("connection.on-debug: AFTER ui.on-debug call")
+  if (self.ui and not processing_debug) then
+    processing_debug = true
+    do
+      local thread = msg[2]
+      local level = msg[3]
+      local condition = msg[4]
+      local restarts = msg[5]
+      local frames = msg[6]
+      local conts = msg[7]
+      logger.debug(("connection.on-debug: calling ui.on-debug, thread=" .. tostring(thread) .. " level=" .. tostring(level)))
+      self.ui["on-debug"](self.ui, self, thread, level, condition, restarts, frames, conts)
+      logger.debug("connection.on-debug: AFTER ui.on-debug call")
+    end
+    processing_debug = false
   else
   end
   return logger.debug("connection.on-debug: EXIT")

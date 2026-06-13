@@ -1,5 +1,10 @@
 (local connection (require "nvlime.core.connection"))
 (local logger (require "nvlime.logger"))
+
+;; Reentrancy guard: prevents recursive DEBUG event handling when
+;; nvim_set_current_win triggers processing of pending channel messages.
+(var processing-debug false)
+
 (local {: nvim_buf_set_lines
         : nvim_err_writeln}
        vim.api)
@@ -274,9 +279,12 @@
   (self:set-current-package [(or (. msg 1) nil) (or (. msg 2) nil)]))
 
 (fn connection.on-debug [self msg]
-  "Activates debugger UI via self.ui:on-debug."
+  "Activates debugger UI via self.ui:on-debug.
+   Uses reentrancy guard to prevent stack overflow when nvim_set_current_win
+   triggers processing of pending channel messages."
   (logger.debug "connection.on-debug: ENTER")
-  (when self.ui
+  (when (and self.ui (not processing-debug))
+    (set processing-debug true)
     (let [thread (. msg 2)
           level (. msg 3)
           condition (. msg 4)
@@ -285,7 +293,8 @@
           conts (. msg 7)]
       (logger.debug (.. "connection.on-debug: calling ui.on-debug, thread=" (tostring thread) " level=" (tostring level)))
       (self.ui:on-debug self thread level condition restarts frames conts)
-      (logger.debug "connection.on-debug: AFTER ui.on-debug call")))
+      (logger.debug "connection.on-debug: AFTER ui.on-debug call"))
+    (set processing-debug false))
   (logger.debug "connection.on-debug: EXIT"))
 
 (fn connection.on-debug-activate [self msg]
