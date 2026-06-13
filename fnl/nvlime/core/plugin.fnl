@@ -85,7 +85,7 @@
 (fn on-xref-complete [conn result]
   "Handle XRef results."
   (when (. conn :ui)
-    ((. conn.ui :on-xref) conn result)))
+    (conn.ui:on-xref conn result)))
 
 (fn on-apropos-list-complete [conn result]
   "Handle apropos list results."
@@ -127,11 +127,11 @@
               (do
                 (logger.debug (.. "on-listener-eval-complete: writing " (tostring (length result-values)) " values"))
                 (each [_ val (ipairs result-values)]
-                  ((. conn.ui :on-write-string) conn
+                  (conn.ui:on-write-string conn
                    (.. val "\n")
                    {:name "REPL-RESULT" :package "KEYWORD"})))
-              ((. conn.ui :on-write-string) conn
-               "; No value\n"
+            (conn.ui:on-write-string conn
+             "; No value\n"
                {:name "REPL-RESULT" :package "KEYWORD"}))))
       (logger.warn (.. "on-listener-eval-complete: result format INVALID, expected VALUES, got " (tostring (. result 1 :name)))))
   (reset-arglist-state))
@@ -148,7 +148,7 @@
                             (fn [c r] (on-load-file-complete faslfile c r)))))
         (ui.err-msg "Compilation failed."))
     (when (. conn :ui)
-      ((. conn.ui :on-compiler-notes) conn notes orig-win))))
+      (conn.ui:on-compiler-notes conn notes orig-win))))
 
 ;;; ============================================================================
 ;;; Module-level state
@@ -319,7 +319,7 @@
               (logger.warn "send-to-repl callback: conn.ui IS NIL!"))
             (when (and conn (. conn :ui))
               (logger.debug "send-to-repl callback: entering when block")
-              ((. conn.ui :on-write-string) conn "--\n"
+              (conn.ui:on-write-string conn "--\n"
                {:name "REPL-SEP" :package "KEYWORD"})
               (logger.debug "send-to-repl callback: on-write-string returned")
               (conn:with-thread
@@ -340,7 +340,7 @@
         text
         (fn [str]
           (when (. conn :ui)
-            ((. conn.ui :on-write-string) conn "--\n"
+            (conn.ui:on-write-string conn "--\n"
              {:name "REPL-SEP" :package "KEYWORD"})
             (let [win (vim.fn.win_getid)
                   policy (or policy config.compiler_policy)]
@@ -397,7 +397,7 @@
           (conn:init-inspector
             str
             (fn [c r]
-              ((. c.ui :on-inspect) c r nil nil))))
+              (c.ui:on-inspect c r nil nil))))
         " Inspect "
         default
         conn))))
@@ -415,7 +415,7 @@
         text
         (fn [fname]
           (when (. conn :ui)
-            ((. conn.ui :on-write-string) conn "--\n"
+            (conn.ui:on-write-string conn "--\n"
              {:name "REPL-SEP" :package "KEYWORD"})
             (let [win (vim.fn.win_getid)
                   policy (or policy config.compiler_policy)
@@ -606,7 +606,7 @@
     (conn:list-threads
       (fn [c result]
         (when (. c :ui)
-          ((. c.ui :on-threads) c result))))))
+          (c.ui:on-threads c result))))))
 
 ;;; ============================================================================
 ;;; Undefine / Unintern commands

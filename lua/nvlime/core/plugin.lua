@@ -58,7 +58,7 @@ local function show_symbol_documentation(conn, content)
 end
 local function on_xref_complete(conn, result)
   if conn.ui then
-    return conn.ui["on-xref"](conn, result)
+    return conn.ui["on-xref"](conn.ui, conn, result)
   else
     return nil
   end
@@ -91,10 +91,10 @@ local function on_listener_eval_complete(conn, result)
     if (#result_values > 0) then
       logger.debug(("on-listener-eval-complete: writing " .. tostring(#result_values) .. " values"))
       for _, val in ipairs(result_values) do
-        conn.ui["on-write-string"](conn, (val .. "\n"), {name = "REPL-RESULT", package = "KEYWORD"})
+        conn.ui["on-write-string"](conn.ui, conn, (val .. "\n"), {name = "REPL-RESULT", package = "KEYWORD"})
       end
     else
-      conn.ui["on-write-string"](conn, "; No value\n", {name = "REPL-RESULT", package = "KEYWORD"})
+      conn.ui["on-write-string"](conn.ui, conn, "; No value\n", {name = "REPL-RESULT", package = "KEYWORD"})
     end
   else
     logger.warn(("on-listener-eval-complete: result format INVALID, expected VALUES, got " .. tostring(result[1].name)))
@@ -121,7 +121,7 @@ local function on_compilation_complete(orig_win, conn, result)
     ui["err-msg"]("Compilation failed.")
   end
   if conn.ui then
-    return conn.ui["on-compiler-notes"](conn, notes, orig_win)
+    return conn.ui["on-compiler-notes"](conn.ui, conn, notes, orig_win)
   else
     return nil
   end
@@ -355,7 +355,7 @@ plugin["send-to-repl"] = function(content, edit)
       end
       if (conn and conn.ui) then
         logger.debug("send-to-repl callback: entering when block")
-        conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
+        conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
         logger.debug("send-to-repl callback: on-write-string returned")
         local function _50_()
           logger.debug("send-to-repl callback: inside with-thread")
@@ -381,7 +381,7 @@ plugin.compile = function(content, policy, edit)
   local default = _let_54_[2]
   local function _55_(str)
     if conn.ui then
-      conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
+      conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
       local win = vim.fn.win_getid()
       local policy0 = (policy or config.compiler_policy)
       local function _56_(c, r)
@@ -440,7 +440,7 @@ plugin.inspect = function(content, edit)
   local default = _let_66_[2]
   local function _67_(str)
     local function _68_(c, r)
-      return c.ui["on-inspect"](c, r, nil, nil)
+      return c.ui["on-inspect"](c.ui, c, r, nil, nil)
     end
     return conn["init-inspector"](conn, str, _68_)
   end
@@ -456,7 +456,7 @@ plugin["compile-file"] = function(file_name, policy, load, edit)
   local default = _let_70_[2]
   local function _71_(fname)
     if conn.ui then
-      conn.ui["on-write-string"](conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
+      conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
       local win = vim.fn.win_getid()
       local policy0 = (policy or config.compiler_policy)
       local load0 = (load or true)
@@ -669,7 +669,7 @@ plugin["list-threads"] = function()
   end
   local function _115_(c, result)
     if c.ui then
-      return c.ui["on-threads"](c, result)
+      return c.ui["on-threads"](c.ui, c, result)
     else
       return nil
     end
