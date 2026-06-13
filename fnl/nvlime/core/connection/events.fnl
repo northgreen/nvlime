@@ -275,6 +275,7 @@
 
 (fn connection.on-debug [self msg]
   "Activates debugger UI via self.ui:on-debug."
+  (logger.debug "connection.on-debug: ENTER")
   (when self.ui
     (let [thread (. msg 2)
           level (. msg 3)
@@ -282,7 +283,10 @@
           restarts (. msg 5)
           frames (. msg 6)
           conts (. msg 7)]
-      (self.ui:on-debug self thread level condition restarts frames conts))))
+      (logger.debug (.. "connection.on-debug: calling ui.on-debug, thread=" (tostring thread) " level=" (tostring level)))
+      (self.ui:on-debug self thread level condition restarts frames conts)
+      (logger.debug "connection.on-debug: AFTER ui.on-debug call")))
+  (logger.debug "connection.on-debug: EXIT"))
 
 (fn connection.on-debug-activate [self msg]
   "Debug activate."

@@ -38,10 +38,13 @@
 ;;; BufNr {any} ->
 (fn buf-callback [bufnr]
   (buffer.set-opts bufnr {:filetype +filetype+})
+  (tset presentations :coords {})
   (let [conn-manager (require "nvlime.core.conn_manager")]
     (let [active-conn (or (buffer.get-conn-var! bufnr) (conn-manager.get true))]
       (when active-conn
-          (logger.debug (.. "buf-callback: initialized bufnr=" (tostring bufnr) " conn=" (tostring (. active-conn :cb_data :name))))
+        (logger.debug (.. "buf-callback: initialized bufnr=" (tostring bufnr) " conn=" (tostring (. active-conn :cb_data :name))))
+        ;; Set REPL-THREAD mapping so get-current-thread returns valid thread
+        (active-conn:set-current-thread {:name "REPL-THREAD" :package "KEYWORD"})
         (clear-repl* bufnr active-conn)))))
 
 ;;; string {any} -> [WinID BufNr]

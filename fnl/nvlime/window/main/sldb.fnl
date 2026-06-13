@@ -13,13 +13,18 @@
 
 ;;; BufNr {any} ->
 (fn buf-callback [bufnr opts]
+  (logger.debug (.. "sldb.buf-callback: ENTER bufnr=" (tostring bufnr)))
   (buffer.set-opts bufnr {:filetype +filetype+})
   (buffer.set-vars
     bufnr {:nvlime_sldb_level opts.level
            :nvlime_sldb_frames opts.frames})
   (let [conn (buffer.set-conn-var! bufnr)]
+    (logger.debug (.. "sldb.buf-callback: conn=" (tostring (if conn (. conn :cb_data :name) "nil"))))
     (when conn
-      (conn:set-current-thread opts.thread))))
+      (logger.debug (.. "sldb.buf-callback: calling set-current-thread thread=" (tostring opts.thread)))
+      (conn:set-current-thread opts.thread)
+      (logger.debug "sldb.buf-callback: set-current-thread returned")))
+  (logger.debug "sldb.buf-callback: EXIT"))
 
 ;;; TODO should process config.stepping?
 ;;; TODO remove flickering of stepping and continue

@@ -22,15 +22,21 @@ local function return_string_input_complete(thread, ttag)
   return call(vim.b.nvlime_conn.ReturnString, {thread, ttag, content0})
 end
 ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames, conts)
-  logger.debug(("on-debug: thread=" .. tostring(thread) .. " level=" .. tostring(level)))
+  logger.debug(("ui.on-debug: ENTER thread=" .. tostring(thread) .. " level=" .. tostring(level)))
   local _let_2_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread, frames = frames, level = level}})
   local _ = _let_2_[1]
   local bufnr = _let_2_[2]
+  logger.debug(("ui.on-debug: sldb.open returned, bufnr=" .. tostring(bufnr)))
   local function _3_()
-    local sldb = require("nvlime.core.ui.sldb")
-    return sldb["fill-sldb-buf"](thread, level, condition, restarts, frames)
+    logger.debug("ui.on-debug: inside with-buffer, calling fill-sldb-buf")
+    do
+      local sldb = require("nvlime.core.ui.sldb")
+      sldb["fill-sldb-buf"](thread, level, condition, restarts, frames)
+    end
+    return logger.debug("ui.on-debug: fill-sldb-buf returned")
   end
-  return ui["with-buffer"](bufnr, _3_)
+  ui["with-buffer"](bufnr, _3_)
+  return logger.debug("ui.on-debug: EXIT")
 end
 ui["on-debug-activate"] = function(self, conn, thread, level, select)
   local _let_4_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread}})

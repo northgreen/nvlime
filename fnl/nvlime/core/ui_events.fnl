@@ -47,7 +47,7 @@ Also exports private callbacks used by input buffer completion."
 (fn ui.on-debug [self conn thread level condition restarts frames conts]
   "Opens SLDB window and fills buffer with debugger state.
   Called when the Lisp debugger is activated."
-  (logger.debug (.. "on-debug: thread=" (tostring thread) " level=" (tostring level)))
+  (logger.debug (.. "ui.on-debug: ENTER thread=" (tostring thread) " level=" (tostring level)))
   (let [[_ bufnr] (luaeval
                     "require('nvlime.window.main.sldb').open(_A[1], _A[2])"
                     [[]
@@ -55,11 +55,15 @@ Also exports private callbacks used by input buffer completion."
                       :thread thread
                       :frames frames
                       :level level}])]
+    (logger.debug (.. "ui.on-debug: sldb.open returned, bufnr=" (tostring bufnr)))
     (ui.with-buffer
       bufnr
       (fn []
+        (logger.debug "ui.on-debug: inside with-buffer, calling fill-sldb-buf")
         (let [sldb (require "nvlime.core.ui.sldb")]
-          (sldb.fill-sldb-buf thread level condition restarts frames))))))
+          (sldb.fill-sldb-buf thread level condition restarts frames))
+        (logger.debug "ui.on-debug: fill-sldb-buf returned")))
+    (logger.debug "ui.on-debug: EXIT")))
 
 (fn ui.on-debug-activate [self conn thread level select]
   "Opens SLDB window and positions cursor.
