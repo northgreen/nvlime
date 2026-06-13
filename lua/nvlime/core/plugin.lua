@@ -13,6 +13,7 @@ require("nvlime.core.connection.events")
 local contrib = require("nvlime.core.contrib")
 local server = require("nvlime.core.server")
 local uc = require("nvlime.ui_cursors")
+local logger = require("nvlime.logger")
 local plugin = {}
 local function input_check_edit_flag(edit, text)
   if edit then

@@ -18,6 +18,7 @@
 (local contrib (require "nvlime.core.contrib"))
 (local server (require "nvlime.core.server"))
 (local uc (require "nvlime.ui_cursors"))
+(local logger (require "nvlime.logger"))
 
 (local plugin {})
 
