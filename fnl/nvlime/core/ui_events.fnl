@@ -56,15 +56,15 @@ Also exports private callbacks used by input buffer completion."
                       :frames frames
                       :level level}])]
     (logger.debug (.. "ui.on-debug: sldb.open returned, bufnr=" (tostring bufnr)))
-    (ui.with-buffer
-      bufnr
+    (vim.api.nvim_buf_call bufnr
       (fn []
-        (logger.debug (.. "ui.on-debug: inside with-buffer bufnr=" (tostring bufnr) " about to require sldb"))
+        (logger.debug (.. "ui.on-debug: nvim_buf_call bufnr=" (tostring bufnr) " about to require sldb"))
         (let [sldb (require "nvlime.core.ui.sldb")]
           (logger.debug "ui.on-debug: require returned, about to call fill-sldb-buf")
           (sldb.fill-sldb-buf thread level condition restarts frames)
-          (logger.debug "ui.on-debug: fill-sldb-buf returned")))
-      (logger.debug "ui.on-debug: EXIT"))))
+          (logger.debug "ui.on-debug: fill-sldb-buf returned"))))
+    (logger.debug "ui-on-debug: EXIT")
+    ))
 
 (fn ui.on-debug-activate [self conn thread level select]
   "Opens SLDB window and positions cursor.

@@ -28,13 +28,14 @@ ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames
   local bufnr = _let_2_[2]
   logger.debug(("ui.on-debug: sldb.open returned, bufnr=" .. tostring(bufnr)))
   local function _3_()
-    logger.debug(("ui.on-debug: inside with-buffer bufnr=" .. tostring(bufnr) .. " about to require sldb"))
+    logger.debug(("ui.on-debug: nvim_buf_call bufnr=" .. tostring(bufnr) .. " about to require sldb"))
     local sldb = require("nvlime.core.ui.sldb")
     logger.debug("ui.on-debug: require returned, about to call fill-sldb-buf")
     sldb["fill-sldb-buf"](thread, level, condition, restarts, frames)
     return logger.debug("ui.on-debug: fill-sldb-buf returned")
   end
-  return ui["with-buffer"](bufnr, _3_, logger.debug("ui.on-debug: EXIT"))
+  vim.api.nvim_buf_call(bufnr, _3_)
+  return logger.debug("ui-on-debug: EXIT")
 end
 ui["on-debug-activate"] = function(self, conn, thread, level, select)
   local _let_4_ = luaeval("require('nvlime.window.main.sldb').open(_A[1], _A[2])", {{}, {["conn-name"] = conn.cb_data.name, thread = thread}})
