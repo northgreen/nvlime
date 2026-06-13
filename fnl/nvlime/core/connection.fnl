@@ -2,6 +2,7 @@
        vim.fn)
 
 (local async (require "nvlime.core.async"))
+(local logger (require "nvlime.logger"))
 
 (local connection {})
 

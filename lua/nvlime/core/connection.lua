@@ -1,5 +1,6 @@
 local chanclose = vim.fn.chanclose
 local async = require("nvlime.core.async")
+local logger = require("nvlime.logger")
 local connection = {}
 connection.sym = function(package, name)
   return {name = name, package = package}
