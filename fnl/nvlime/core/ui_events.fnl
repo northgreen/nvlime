@@ -64,7 +64,7 @@ Also exports private callbacks used by input buffer completion."
           (logger.debug "ui.on-debug: require returned, about to call fill-sldb-buf")
           (sldb.fill-sldb-buf thread level condition restarts frames)
           (logger.debug "ui.on-debug: fill-sldb-buf returned")))
-      (logger.debug "ui.on-debug: EXIT")))
+      (logger.debug "ui.on-debug: EXIT"))))
 
 (fn ui.on-debug-activate [self conn thread level select]
   "Opens SLDB window and positions cursor.

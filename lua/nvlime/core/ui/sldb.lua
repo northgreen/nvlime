@@ -1,3 +1,4 @@
+local nvim_set_option_value = vim.api.nvim_set_option_value
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local luaeval = vim.fn.luaeval
 local bufnr = vim.fn.bufnr
@@ -318,7 +319,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
   sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
     logger.debug(("sldb.fill-sldb-buf: ENTER thread=" .. tostring(thread0) .. " level=" .. tostring(level)))
     logger.debug("sldb.fill-sldb-buf: about to setlocal modifiable")
-    vim.cmd("setlocal modifiable")
+    nvim_set_option_value("modifiable", true, {buf = 0})
     logger.debug("sldb.fill-sldb-buf: modifiable set, about to clear buffer")
     nvim_buf_set_lines(0, 0, -1, false, {})
     logger.debug("sldb.fill-sldb-buf: buffer cleared, about to append thread header")
@@ -356,7 +357,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
       end
     end
     ui["append-string"](frames_str)
-    return vim.cmd("setlocal nomodifiable")
+    return nvim_set_option_value("modifiable", false, {buf = 0})
   end
   sldb["choose-cur-restart"] = function()
     do
