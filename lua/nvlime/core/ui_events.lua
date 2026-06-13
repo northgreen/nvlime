@@ -31,6 +31,7 @@ ui["on-debug"] = function(self, conn, thread, level, condition, restarts, frames
     logger.debug(("ui.on-debug: nvim_buf_call bufnr=" .. tostring(bufnr) .. " about to require sldb"))
     local sldb = require("nvlime.core.ui.sldb")
     logger.debug("ui.on-debug: require returned, about to call fill-sldb-buf")
+    logger.debug(("ui.on-debug: sldb type=" .. tostring(type(sldb)) .. " has-fill=" .. tostring(type(sldb["fill-sldb-buf"]))))
     sldb["fill-sldb-buf"](thread, level, condition, restarts, frames)
     return logger.debug("ui.on-debug: fill-sldb-buf returned")
   end
