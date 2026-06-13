@@ -44,6 +44,8 @@ Functions deferred to later files:
 
 (local ui {})
 
+(local logger (require "nvlime.logger"))
+
 ;;; ============================================================================
 ;;; Global variables
 ;;; ============================================================================
@@ -221,12 +223,14 @@ Functions deferred to later files:
 (fn ui.with-buffer [buf func ev-ignore]
   "Call func with buf set as the current buffer.
   ev-ignore specifies what autocmd events to ignore (default: 'all')."
+  (logger.debug (.. "ui.with-buffer: ENTER buf=" (tostring buf)))
   (let [buf-win (bufwinid buf)
         buf-visible (>= buf-win 0)
         old-win (win-getid-safe)
         old-lazyredraw vim.o.lazyredraw
         old-ei vim.o.eventignore
         ev-ignore (or ev-ignore "all")]
+    (logger.debug (.. "ui.with-buffer: buf-win=" (tostring buf-win) " buf-visible=" (tostring buf-visible)))
     (set vim.o.lazyredraw true)
     (set vim.o.eventignore ev-ignore)
     (let [(success# result-or-err#) (pcall (fn []
@@ -243,7 +247,9 @@ Functions deferred to later files:
 
 (fn ui.with-buffer-visible [buf-win func old-ei]
   "Execute func with a visible buffer's window active."
+  (logger.debug (.. "ui.with-buffer-visible: ENTER buf-win=" (tostring buf-win)))
   (nvim_set_current_win buf-win)
+  (logger.debug "ui.with-buffer-visible: after nvim_set_current_win")
   (let [saved-ei vim.o.eventignore]
     (set vim.o.eventignore old-ei)
     (let [result (func)]
@@ -252,9 +258,12 @@ Functions deferred to later files:
 
 (fn ui.with-buffer-hidden [buf func old-ei ev-ignore]
   "Execute func with a hidden buffer (opens/closes temp window)."
+  (logger.debug (.. "ui.with-buffer-hidden: ENTER buf=" (tostring buf)))
   (let [old-layout (ui.get-cur-window-layout)]
     (pcall (fn []
+             (logger.debug (.. "ui.with-buffer-hidden: calling open-buffer buf=" (tostring buf)))
              (ui.open-buffer buf false)
+             (logger.debug "ui.with-buffer-hidden: open-buffer returned")
              (let [tmp-win-id (win_getid)]
                (let [saved-ei vim.o.eventignore]
                  (set vim.o.eventignore old-ei)

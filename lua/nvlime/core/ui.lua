@@ -32,6 +32,7 @@ local matchlist = vim.fn.matchlist
 local escape = vim.fn.escape
 local copy = vim.fn.copy
 local ui = {}
+local logger = require("nvlime.logger")
 vim.g["nvlime_horiz_sep"] = "\226\148\128"
 vim.g["nvlime_vert_sep"] = "\226\148\130"
 vim.g["nvlime_default_window_settings"] = {mrepl = {pos = "botright", size = 0, vertical = false}, trace = {pos = "botright", size = 0, vertical = false}}
@@ -177,12 +178,14 @@ local function win_getid_safe()
   return win_getid()
 end
 ui["with-buffer"] = function(buf, func, ev_ignore)
+  logger.debug(("ui.with-buffer: ENTER buf=" .. tostring(buf)))
   local buf_win = bufwinid(buf)
   local buf_visible = (buf_win >= 0)
   local old_win = win_getid_safe()
   local old_lazyredraw = vim.o.lazyredraw
   local old_ei = vim.o.eventignore
   local ev_ignore0 = (ev_ignore or "all")
+  logger.debug(("ui.with-buffer: buf-win=" .. tostring(buf_win) .. " buf-visible=" .. tostring(buf_visible)))
   vim.o.lazyredraw = true
   vim.o.eventignore = ev_ignore0
   local success_23, result_or_err_23
@@ -207,7 +210,9 @@ ui["with-buffer"] = function(buf, func, ev_ignore)
   end
 end
 ui["with-buffer-visible"] = function(buf_win, func, old_ei)
+  logger.debug(("ui.with-buffer-visible: ENTER buf-win=" .. tostring(buf_win)))
   nvim_set_current_win(buf_win)
+  logger.debug("ui.with-buffer-visible: after nvim_set_current_win")
   local saved_ei = vim.o.eventignore
   vim.o.eventignore = old_ei
   local result = func()
@@ -215,9 +220,12 @@ ui["with-buffer-visible"] = function(buf_win, func, old_ei)
   return result
 end
 ui["with-buffer-hidden"] = function(buf, func, old_ei, ev_ignore)
+  logger.debug(("ui.with-buffer-hidden: ENTER buf=" .. tostring(buf)))
   local old_layout = ui["get-cur-window-layout"]()
   local function _18_()
+    logger.debug(("ui.with-buffer-hidden: calling open-buffer buf=" .. tostring(buf)))
     ui["open-buffer"](buf, false)
+    logger.debug("ui.with-buffer-hidden: open-buffer returned")
     local tmp_win_id = win_getid()
     local saved_ei = vim.o.eventignore
     vim.o.eventignore = old_ei
