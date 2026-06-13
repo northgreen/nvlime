@@ -2,6 +2,7 @@
 ;;; Provides REPL creation and listener evaluation via SWANK's SWANK-REPL contrib.
 
 (local connection (require "nvlime.core.connection"))
+(local logger (require "nvlime.logger"))
 
 ;;; Private helper
 
@@ -9,16 +10,21 @@
   "Validates return status. On ABORT or unknown error, writes to UI and returns nil.
   Returns true on OK status."
   (let [status (. return-msg 2 1)]
+    (logger.debug (.. "check-and-report-return-status: status=" (tostring (vim.inspect status)) " caller=" caller))
     (if (= status.name "OK")
-        true
+        (do
+          (logger.debug "check-and-report-return-status: OK")
+          true)
         (if (= status.name "ABORT")
             (do
+              (logger.warn (.. "check-and-report-return-status: ABORT - " (. return-msg 2 2)))
               ((. (: conn :ui) :OnWriteString)
                conn
                (.. (. return-msg 2 2) "\n")
                {:name "ABORT-REASON" :package "KEYWORD"})
               nil)
             (do
+              (logger.warn (.. "check-and-report-return-status: UNKNOWN-ERROR - " (vim.inspect (. return-msg 2))))
               ((. (: conn :ui) :OnWriteString)
                conn
                (vim.inspect (. return-msg 2))
@@ -43,10 +49,13 @@
   "Evaluate EXPR in the listener REPL.
   Results delivered via CALLBACK: (callback self result).
   Handles ABORT status by writing to UI instead of throwing."
+  (logger.debug (.. "listener-eval: expr=" expr))
   (self:send (self:emacs-rex
                [(connection.sym "SWANK-REPL" "LISTENER-EVAL") expr])
              (fn [chan msg]
+               (logger.debug (.. "listener-eval callback: msg-len=" (tostring (length msg))))
                (when (check-and-report-return-status self msg "nvlime#contrib#repl#ListenerEval")
+                 (logger.debug "listener-eval callback: calling user callback")
                  (self:try-to-call callback [self (. msg 2 2)])))))
 
 (fn connection.init-repl [self]

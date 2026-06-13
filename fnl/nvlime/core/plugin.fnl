@@ -113,20 +113,26 @@
 
 (fn on-listener-eval-complete [conn result]
   "Handle listener eval result - display values in REPL."
-  (when (and (= (type result) "table")
-             (> (length result) 0)
-             (= (type (. result 1)) "table")
-             (= (. result 1 :name) "VALUES")
-             (. conn :ui))
-    (let [result-values (vim.list_slice result 2)]
-      (if (> (length result-values) 0)
-          (each [_ val (ipairs result-values)]
-            ((. conn.ui :on-write-string) conn
-             (.. val "\n")
-             {:name "REPL-RESULT" :package "KEYWORD"}))
-          ((. conn.ui :on-write-string) conn
-           "; No value\n"
-           {:name "REPL-RESULT" :package "KEYWORD"}))))
+  (logger.debug (.. "on-listener-eval-complete: result-type=" (tostring (type result)) " result-len=" (tostring (length result))))
+  (if (and (= (type result) "table")
+           (> (length result) 0)
+           (= (type (. result 1)) "table")
+           (= (. result 1 :name) "VALUES")
+           (. conn :ui))
+      (do
+        (logger.debug "on-listener-eval-complete: result format VALID (VALUES)")
+        (let [result-values (vim.list_slice result 2)]
+          (if (> (length result-values) 0)
+              (do
+                (logger.debug (.. "on-listener-eval-complete: writing " (tostring (length result-values)) " values"))
+                (each [_ val (ipairs result-values)]
+                  ((. conn.ui :on-write-string) conn
+                   (.. val "\n")
+                   {:name "REPL-RESULT" :package "KEYWORD"})))
+              ((. conn.ui :on-write-string) conn
+               "; No value\n"
+               {:name "REPL-RESULT" :package "KEYWORD"}))))
+      (logger.warn (.. "on-listener-eval-complete: result format INVALID, expected VALUES, got " (tostring (. result 1 :name)))))
   (reset-arglist-state))
 
 (fn on-compilation-complete [orig-win conn result]

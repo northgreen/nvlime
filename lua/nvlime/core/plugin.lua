@@ -83,9 +83,12 @@ local function on_load_file_complete(fname, conn, result)
   return reset_arglist_state()
 end
 local function on_listener_eval_complete(conn, result)
+  logger.debug(("on-listener-eval-complete: result-type=" .. tostring(type(result)) .. " result-len=" .. tostring(#result)))
   if ((type(result) == "table") and (#result > 0) and (type(result[1]) == "table") and (result[1].name == "VALUES") and conn.ui) then
+    logger.debug("on-listener-eval-complete: result format VALID (VALUES)")
     local result_values = vim.list_slice(result, 2)
     if (#result_values > 0) then
+      logger.debug(("on-listener-eval-complete: writing " .. tostring(#result_values) .. " values"))
       for _, val in ipairs(result_values) do
         conn.ui["on-write-string"](conn, (val .. "\n"), {name = "REPL-RESULT", package = "KEYWORD"})
       end
@@ -93,6 +96,7 @@ local function on_listener_eval_complete(conn, result)
       conn.ui["on-write-string"](conn, "; No value\n", {name = "REPL-RESULT", package = "KEYWORD"})
     end
   else
+    logger.warn(("on-listener-eval-complete: result format INVALID, expected VALUES, got " .. tostring(result[1].name)))
   end
   return reset_arglist_state()
 end
