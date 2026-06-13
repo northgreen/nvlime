@@ -1,6 +1,7 @@
 local chanclose = vim.fn.chanclose
 local async = require("nvlime.core.async")
 local logger = require("nvlime.logger")
+local ui = require("nvlime.core.ui")
 local connection = {}
 connection.sym = function(package, name)
   return {name = name, package = package}
@@ -25,8 +26,8 @@ connection.get = function(dict, key, default)
     return (dict[key] or default)
   end
 end
-connection.new = function(cb_data, ui)
-  local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui, server_event_handlers = {}}
+connection.new = function(cb_data, ui0)
+  local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui0, server_event_handlers = {}}
   require("nvlime.core.connection.channels")
   require("nvlime.core.connection.messages")
   require("nvlime.core.connection.sldb")
@@ -40,6 +41,15 @@ connection.new = function(cb_data, ui)
     else
     end
   end
+  if self.ui then
+    for k, v in pairs(ui0) do
+      if (type(v) == "function") then
+        self.ui[k] = v
+      else
+      end
+    end
+  else
+  end
   setmetatable(self, {__index = connection})
   connection.setup_event_handlers(self)
   return self
@@ -47,10 +57,10 @@ end
 connection.connect = function(self, host, port, prefix, timeout)
   do
     local callback
-    local function _4_(chan, msg)
+    local function _6_(chan, msg)
       return self["on-server-event"](self, chan, msg)
     end
-    callback = _4_
+    callback = _6_
     self.channel = async["ch-open"](host, port, callback, timeout)
   end
   if not self.channel.is_connected then
@@ -89,10 +99,10 @@ connection["fix-remote-path"] = function(self, path)
   if (string.len(prefix) == 0) then
     return path
   else
-    local case_8_ = type(path)
-    if (case_8_ == "string") then
+    local case_10_ = type(path)
+    if (case_10_ == "string") then
       return (prefix .. path)
-    elseif (case_8_ == "table") then
+    elseif (case_10_ == "table") then
       local loc_data = path[2]
       if loc_data then
         local loc_type = loc_data[1]
@@ -109,7 +119,7 @@ connection["fix-remote-path"] = function(self, path)
         return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
       end
     else
-      local _ = case_8_
+      local _ = case_10_
       return error(("nvlime#FixRemotePath: unknown path: " .. tostring(path)))
     end
   end

@@ -3,6 +3,7 @@
 
 (local async (require "nvlime.core.async"))
 (local logger (require "nvlime.logger"))
+(local ui (require "nvlime.core.ui"))
 
 (local connection {})
 
@@ -63,6 +64,12 @@
     (each [k v (pairs connection)]
       (when (= (type v) "function")
         (tset self k v)))
+    ;; Copy ui module methods onto ui instance so they survive metatable loss
+    ;; when connection is stored via vim.b.* variables.
+    (when self.ui
+      (each [k v (pairs ui)]
+        (when (= (type v) "function")
+          (tset self.ui k v))))
     ;; Still set metatable as fallback for dynamically added methods
     (setmetatable self {:__index connection})
     ;; Register all server event handlers (WRITE-STRING, DEBUG, etc.)

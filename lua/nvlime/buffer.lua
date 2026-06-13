@@ -50,14 +50,20 @@ buffer["vim-call!"] = function(bufnr, cmds)
 end
 buffer["set-conn-var!"] = function(bufnr)
   local conn_manager = require("nvlime.core.conn_manager")
-  conn_manager.get(false)
+  do
+    local conn = conn_manager.get(false)
+    if conn then
+      nvim_buf_set_var(bufnr, "nvlime_conn", conn)
+    else
+    end
+  end
   return nil
 end
 buffer["get-conn-var!"] = function(bufnr)
   buffer["set-conn-var!"](bufnr)
-  local case_2_, case_3_ = pcall(nvim_buf_get_var, bufnr, "nvlime_conn")
-  if ((case_2_ == true) and (nil ~= case_3_)) then
-    local conn = case_3_
+  local case_3_, case_4_ = pcall(nvim_buf_get_var, bufnr, "nvlime_conn")
+  if ((case_3_ == true) and (nil ~= case_4_)) then
+    local conn = case_4_
     return conn
   else
     return nil
@@ -68,14 +74,14 @@ buffer.create = function(name, listed_3f, callback)
   nvim_buf_set_name(bufnr, name)
   buffer["set-opts"](bufnr, {buftype = "nofile", modeline = false, modifiable = false, swapfile = false})
   if not listed_3f then
-    local function _5_()
+    local function _6_()
       return buffer["set-opts"](bufnr, {buflisted = false})
     end
-    nvim_create_autocmd("BufWinEnter", {buffer = bufnr, callback = _5_})
-    local function _6_()
+    nvim_create_autocmd("BufWinEnter", {buffer = bufnr, callback = _6_})
+    local function _7_()
       return nvim_clear_autocmds({event = "BufWinEnter", buffer = bufnr})
     end
-    nvim_create_autocmd("BufWipeout", {buffer = bufnr, callback = _6_, once = true})
+    nvim_create_autocmd("BufWipeout", {buffer = bufnr, callback = _7_, once = true})
   else
   end
   if callback then
@@ -92,34 +98,34 @@ buffer["create-if-not-exists"] = function(name, listed_3f, callback)
   end
 end
 buffer["create-listed"] = function(name, filetype)
-  local function _10_(_241)
-    return buffer["set-opts"](_241, {filetype = filetype})
-  end
-  return buffer["create-if-not-exists"](name, true, _10_)
-end
-buffer["create-nolisted"] = function(name, filetype)
   local function _11_(_241)
     return buffer["set-opts"](_241, {filetype = filetype})
   end
-  return buffer["create-if-not-exists"](name, false, _11_)
+  return buffer["create-if-not-exists"](name, true, _11_)
 end
-buffer["create-scratch"] = function(name, filetype)
+buffer["create-nolisted"] = function(name, filetype)
   local function _12_(_241)
-    return buffer["set-opts"](_241, {filetype = filetype, bufhidden = "wipe"})
+    return buffer["set-opts"](_241, {filetype = filetype})
   end
   return buffer["create-if-not-exists"](name, false, _12_)
 end
+buffer["create-scratch"] = function(name, filetype)
+  local function _13_(_241)
+    return buffer["set-opts"](_241, {filetype = filetype, bufhidden = "wipe"})
+  end
+  return buffer["create-if-not-exists"](name, false, _13_)
+end
 buffer["create-scratch-with-conn-var!"] = function(name, filetype)
   local callback
-  local function _13_(bufnr)
+  local function _14_(bufnr)
     buffer["set-conn-var!"](bufnr)
     return buffer["set-opts"](bufnr, {filetype = filetype, bufhidden = "wipe"})
   end
-  callback = _13_
-  local function _14_(_241)
+  callback = _14_
+  local function _15_(_241)
     return callback(_241)
   end
-  return buffer["create-if-not-exists"](name, false, _14_)
+  return buffer["create-if-not-exists"](name, false, _15_)
 end
 buffer["fill!"] = function(bufnr, ...)
   local args = {...}
@@ -128,14 +134,14 @@ buffer["fill!"] = function(bufnr, ...)
   local old_mod_2_auto = nvim_get_option_value("modifiable", {buf = bufnr})
   nvim_set_option_value("modifiable", true, {buf = bufnr})
   local ok_3_auto, err_4_auto
-  local function _15_()
+  local function _16_()
     nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     for _, ls in ipairs(args) do
       nvim_buf_set_lines(bufnr, -1, -1, false, ls)
     end
     return nil
   end
-  ok_3_auto, err_4_auto = pcall(_15_)
+  ok_3_auto, err_4_auto = pcall(_16_)
   nvim_set_option_value("modifiable", old_mod_2_auto, {buf = bufnr})
   if not ok_3_auto then
     return error(err_4_auto)
@@ -148,7 +154,7 @@ buffer["append!"] = function(bufnr, ...)
   local old_mod_2_auto = nvim_get_option_value("modifiable", {buf = bufnr})
   nvim_set_option_value("modifiable", true, {buf = bufnr})
   local ok_3_auto, err_4_auto
-  local function _17_()
+  local function _18_()
     if (#args > 0) then
       for _, ls in ipairs(args) do
         nvim_buf_set_lines(bufnr, -1, -1, false, ls)
@@ -158,7 +164,7 @@ buffer["append!"] = function(bufnr, ...)
       return nil
     end
   end
-  ok_3_auto, err_4_auto = pcall(_17_)
+  ok_3_auto, err_4_auto = pcall(_18_)
   nvim_set_option_value("modifiable", old_mod_2_auto, {buf = bufnr})
   if not ok_3_auto then
     return error(err_4_auto)
