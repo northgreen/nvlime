@@ -10,6 +10,8 @@
 
 (local conn (require "nvlime.core.connection"))
 
+(local ui (require "nvlime.core.ui"))
+
 ;;; Module-level state
 
 (local connections {})
@@ -33,7 +35,8 @@
   "Create a new Nvlime connection, register it, and return it.
   If name is nil, auto-generate 'nvlime-{id}'."
   (let [conn-name (or name (.. "nvlime-" next-conn-id))
-        new-conn (conn.new {:id next-conn-id :name conn-name} nil)]
+        ui-obj (ui.get-ui)
+        new-conn (conn.new {:id next-conn-id :name conn-name} ui-obj)]
     (tset connections next-conn-id new-conn)
     (set next-conn-id (+ next-conn-id 1))
     new-conn))

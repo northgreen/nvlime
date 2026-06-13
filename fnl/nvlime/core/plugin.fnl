@@ -308,12 +308,20 @@
         text
         (fn [str]
           (logger.debug (.. "send-to-repl callback: str=" str))
+          (logger.debug (.. "send-to-repl callback: conn=" (tostring (if conn (. conn :cb_data :name) "nil")) " conn.ui=" (tostring (. conn :ui))))
+          (when (not conn)
+            (logger.warn "send-to-repl callback: conn IS NIL!"))
+          (when (and conn (not (. conn :ui)))
+            (logger.warn "send-to-repl callback: conn.ui IS NIL!"))
           (when (and conn (. conn :ui))
+            (logger.debug "send-to-repl callback: entering when block")
             ((. conn.ui :on-write-string) conn "--\n"
              {:name "REPL-SEP" :package "KEYWORD"})
+            (logger.debug "send-to-repl callback: on-write-string returned")
             (conn:with-thread
               {:name "REPL-THREAD" :package "KEYWORD"}
               (fn []
+                (logger.debug "send-to-repl callback: inside with-thread")
                 (conn:listener-eval str on-listener-eval-complete)))))
         " Send to REPL "
         default

@@ -1,6 +1,7 @@
 local nvim_err_writeln = vim.api.nvim_err_writeln
 local inputlist = vim.fn.inputlist
 local conn = require("nvlime.core.connection")
+local ui = require("nvlime.core.ui")
 local connections = {}
 local next_conn_id = 1
 local conn_manager = {}
@@ -13,7 +14,8 @@ conn_manager["normalize-conn-id"] = function(id)
 end
 conn_manager.new = function(name)
   local conn_name = (name or ("nvlime-" .. next_conn_id))
-  local new_conn = conn.new({id = next_conn_id, name = conn_name}, nil)
+  local ui_obj = ui["get-ui"]()
+  local new_conn = conn.new({id = next_conn_id, name = conn_name}, ui_obj)
   connections[next_conn_id] = new_conn
   next_conn_id = (next_conn_id + 1)
   return new_conn
