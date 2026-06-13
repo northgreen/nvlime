@@ -957,7 +957,12 @@ plugin["interaction-mode"] = function(enable)
   return vim.cmd(("echom 'Interaction mode " .. _162_ .. ".'"))
 end
 local function _164_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(plugin, {__index = _164_})
 return plugin

@@ -563,7 +563,12 @@ sldb["return-from-cur-frame"] = function()
   return input["from-buffer"](vim.b.nvlime_conn, "Return from frame (evaluated):", nil, _83_)
 end
 local function _84_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(sldb, {__index = _84_})
 return sldb

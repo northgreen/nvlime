@@ -246,7 +246,12 @@ local function server_output_cb(server_obj, auto_connect, data)
   return server["stop-cur-server"]
 end
 local function _30_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(server, {__index = _30_})
 return server

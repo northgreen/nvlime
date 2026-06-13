@@ -896,7 +896,8 @@
 ;;; This metatable maps snake_case access to kebab-case keys
 (setmetatable plugin
   {:__index (fn [self key]
-              (. self (string.gsub key "_" "-")))})
+              (let [new-key (string.gsub key "_" "-")]
+                (if (= new-key key) nil (. self new-key))))})
 
 ;;; Module export
 plugin

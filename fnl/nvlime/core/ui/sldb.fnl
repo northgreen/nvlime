@@ -644,6 +644,7 @@ lookup, eval, inspect, disassemble, return."
 ;;; Hyphen/underscore compatibility for VimScript shim
 (setmetatable sldb
   {:__index (fn [self key]
-              (. self (string.gsub key "_" "-")))})
+              (let [new-key (string.gsub key "_" "-")]
+                (if (= new-key key) nil (. self new-key))))})
 
 sldb

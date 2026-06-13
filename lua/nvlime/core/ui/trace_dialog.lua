@@ -667,7 +667,12 @@ trace_dialog["build-fold-text"] = function(...)
   end
 end
 local function _81_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(trace_dialog, {__index = _81_})
 return trace_dialog
