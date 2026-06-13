@@ -322,9 +322,9 @@
               (conn.ui:on-write-string conn "--\n"
                {:name "REPL-SEP" :package "KEYWORD"})
               (logger.debug "send-to-repl callback: on-write-string returned")
-              (conn:with-thread
-                {:name "REPL-THREAD" :package "KEYWORD"}
-                (fn []
+               (conn:with-thread
+                 "REPL-THREAD"
+                 (fn []
                   (logger.debug "send-to-repl callback: inside with-thread")
                   (conn:listener-eval str on-listener-eval-complete)))))
           " Send to REPL "

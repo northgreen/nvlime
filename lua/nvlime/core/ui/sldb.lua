@@ -316,6 +316,7 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
     end
   end
   sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
+    logger.debug(("sldb.fill-sldb-buf: ENTER thread=" .. tostring(thread0) .. " level=" .. tostring(level)))
     vim.cmd("setlocal modifiable")
     nvim_buf_set_lines(0, 0, -1, false, {})
     ui["append-string"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
