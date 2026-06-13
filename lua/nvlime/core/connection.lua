@@ -33,6 +33,7 @@ connection.new = function(cb_data, ui)
   require("nvlime.core.connection.inspector")
   require("nvlime.core.connection.swank")
   require("nvlime.core.connection.events")
+  require("nvlime.core.ui_events")
   for k, v in pairs(connection) do
     if (type(v) == "function") then
       self[k] = v

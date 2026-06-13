@@ -827,7 +827,12 @@ ui["show-source"] = function(conn, loc, edit_cmd, force_open)
   end
 end
 local function _94_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(ui, {__index = _94_})
 return ui

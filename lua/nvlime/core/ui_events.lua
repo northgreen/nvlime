@@ -142,7 +142,12 @@ ui["on-threads"] = function(self, conn, thread_list)
   return threads["fill-threads-buf"](conn, thread_list)
 end
 local function _19_(self, key)
-  return self[string.gsub(key, "_", "-")]
+  local new_key = string.gsub(key, "_", "-")
+  if (new_key == key) then
+    return nil
+  else
+    return self[new_key]
+  end
 end
 setmetatable(ui, {__index = _19_})
 return ui

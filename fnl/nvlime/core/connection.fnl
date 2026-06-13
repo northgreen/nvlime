@@ -57,6 +57,7 @@
     (require "nvlime.core.connection.inspector")
     (require "nvlime.core.connection.swank")
     (require "nvlime.core.connection.events")
+    (require "nvlime.core.ui_events")
     ;; Copy all methods from the connection MODULE directly onto the instance.
     ;; This ensures methods survive when metatable is lost via vim.b.* storage.
     (each [k v (pairs connection)]
