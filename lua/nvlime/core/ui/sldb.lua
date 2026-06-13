@@ -317,8 +317,11 @@ sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread,
   end
   sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
     logger.debug(("sldb.fill-sldb-buf: ENTER thread=" .. tostring(thread0) .. " level=" .. tostring(level)))
+    logger.debug("sldb.fill-sldb-buf: about to setlocal modifiable")
     vim.cmd("setlocal modifiable")
+    logger.debug("sldb.fill-sldb-buf: modifiable set, about to clear buffer")
     nvim_buf_set_lines(0, 0, -1, false, {})
+    logger.debug("sldb.fill-sldb-buf: buffer cleared, about to append thread header")
     ui["append-string"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
     local condition_str = ""
     for _, c in ipairs(condition) do

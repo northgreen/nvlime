@@ -59,11 +59,12 @@ Also exports private callbacks used by input buffer completion."
     (ui.with-buffer
       bufnr
       (fn []
-        (logger.debug "ui.on-debug: inside with-buffer, calling fill-sldb-buf")
+        (logger.debug (.. "ui.on-debug: inside with-buffer bufnr=" (tostring bufnr) " about to require sldb"))
         (let [sldb (require "nvlime.core.ui.sldb")]
-          (sldb.fill-sldb-buf thread level condition restarts frames))
-        (logger.debug "ui.on-debug: fill-sldb-buf returned")))
-    (logger.debug "ui.on-debug: EXIT")))
+          (logger.debug "ui.on-debug: require returned, about to call fill-sldb-buf")
+          (sldb.fill-sldb-buf thread level condition restarts frames)
+          (logger.debug "ui.on-debug: fill-sldb-buf returned")))
+      (logger.debug "ui.on-debug: EXIT")))
 
 (fn ui.on-debug-activate [self conn thread level select]
   "Opens SLDB window and positions cursor.

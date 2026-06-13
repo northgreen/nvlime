@@ -387,8 +387,11 @@ lookup, eval, inspect, disassemble, return."
   restarts: array of [name description] pairs
   frames: array of [index name flags?] tuples"
   (logger.debug (.. "sldb.fill-sldb-buf: ENTER thread=" (tostring thread) " level=" (tostring level)))
+  (logger.debug "sldb.fill-sldb-buf: about to setlocal modifiable")
   (vim.cmd "setlocal modifiable")
+  (logger.debug "sldb.fill-sldb-buf: modifiable set, about to clear buffer")
   (nvim_buf_set_lines 0 0 -1 false [])
+  (logger.debug "sldb.fill-sldb-buf: buffer cleared, about to append thread header")
 
   ;; Thread and level header
   (ui.append-string
