@@ -82,7 +82,7 @@ Functions deferred to later files:
   "Get the current Common Lisp package from buffer-local variable.
    Returns package name string, or empty string if not found.
    Full buffer parsing implementation deferred to ui_cursor.fnl."
-  (or (vim.b.nvlime_cur_pkg) ""))
+  (or vim.b.nvlime_cur_pkg ""))
 
 (fn ui.get-current-package [self buf]
   "Return the Common Lisp package bound to the specified buffer.

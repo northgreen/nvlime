@@ -49,7 +49,7 @@ ui["get-ui"] = function()
   return ui_instance
 end
 ui["cur-in-package"] = function()
-  return (vim.b.nvlime_cur_pkg() or "")
+  return (vim.b.nvlime_cur_pkg or "")
 end
 ui["get-current-package"] = function(self, buf)
   local cur_buf = bufnr((buf or "%"))

@@ -24,7 +24,7 @@ local function repl_banner(conn)
   else
     _3_ = nil
   end
-  banner = ("SWANK " .. _1_ .. _3_ .. "remote " .. data.remote_host .. ":" .. data.remote_port)
+  banner = ("SWANK " .. _1_ .. _3_ .. "remote " .. (data.remote_host or "unknown") .. ":" .. (data.remote_port or "?"))
   local border = string.rep("=", #banner)
   return {banner, border, ""}
 end

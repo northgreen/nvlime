@@ -22,7 +22,7 @@
                        "")
                    (if data.pid
                        (.. "pid " data.pid ", "))
-                   "remote " data.remote_host ":" data.remote_port)
+                    "remote " (or data.remote_host "unknown") ":" (or data.remote_port "?"))
         border (string.rep "=" (length banner))]
     [banner border ""]))
 

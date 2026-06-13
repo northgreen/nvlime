@@ -128,7 +128,7 @@ connection["fix-local-path"] = function(self, path)
 end
 connection["get-current-package"] = function(self)
   if self.ui then
-    return self.ui["get-current-package"](self.ui)
+    return self.ui["get-current-package"](self.ui, nil)
   else
     return {"COMMON-LISP-USER", "CL-USER"}
   end

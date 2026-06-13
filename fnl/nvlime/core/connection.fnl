@@ -143,7 +143,7 @@
   "Returns the current Common Lisp package bound to the buffer.
    Falls back to CL-USER when no UI is attached."
   (if self.ui
-      (self.ui:get-current-package)
+      (self.ui:get-current-package nil)
        ;; Default package when no UI context - matches SWANK's default behavior
        ["COMMON-LISP-USER" "CL-USER"]))
 
