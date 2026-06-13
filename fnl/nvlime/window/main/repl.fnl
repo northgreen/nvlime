@@ -2,6 +2,7 @@
 (local logger (require "nvlime.logger"))
 (local main (require "nvlime.window.main"))
 (local ut (require "nvlime.utilities"))
+(local connection (require "nvlime.core.connection"))
 (local presentations (require "nvlime.contrib.presentations"))
 (local {: nvim_win_set_cursor
        : nvim_buf_clear_namespace

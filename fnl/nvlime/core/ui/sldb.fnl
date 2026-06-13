@@ -25,6 +25,7 @@ lookup, eval, inspect, disassemble, return."
 (local messages (require "nvlime.core.connection.messages"))
 (local events (require "nvlime.core.connection.events"))
 (local conn (require "nvlime.core.connection"))
+(local logger (require "nvlime.logger"))
 
 (local sldb {})
 
@@ -357,8 +358,8 @@ lookup, eval, inspect, disassemble, return."
                 (c :WithThread
                    {"name" "REPL-THREAD" "package" "KEYWORD"}
                    (fn []
-                        ((. c :ListenerEval) "cl-user::*")))))))
-          (ui.err-msg "Canceled."))))
+                        ((. c :ListenerEval) "cl-user::*"))))))))
+        (ui.err-msg "Canceled."))))
 
 (fn sldb.return-from-cur-frame-input-complete [frame thread]
   "Callback for ReturnFromCurFrame input — returns from frame with value.
@@ -474,7 +475,7 @@ lookup, eval, inspect, disassemble, return."
               (vim.cmd "setlocal modifiable")
               (deletebufline (bufnr "%") (+ cur-line 1) (- next-frame-line 1))
               (vim.cmd "setlocal nomodifiable")))))
-     1)))
+     1))
 
 (fn sldb.open-frame-source [...]
   "Open the source location for the frame under cursor.

@@ -4,7 +4,7 @@ local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local function text__3elines(text)
   if text then
     if psl["string?"](text) then
-      return vim.split(text, "\n", {trimempty = true})
+      return vim.split(text, "\n", {trimempty = false})
     else
       return text
     end

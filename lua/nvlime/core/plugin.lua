@@ -308,65 +308,27 @@ plugin["select-cur-connection"] = function()
   end
 end
 plugin["send-to-repl"] = function(content, edit)
-  logger.debug(("send-to-repl: content=" .. tostring(content) .. " edit=" .. tostring(edit)))
   local conn = conn_manager.get(true)
-  local function _42_()
-    if conn then
-      return conn.cb_data.name
-    else
-      return "nil"
-    end
-  end
-  logger.debug(("send-to-repl: conn=" .. tostring(_42_())))
   if not conn then
-    logger.warn("send-to-repl: no connection available")
     ui["err-msg"]("Not connected. Use :NvlimeConnect first.")
   else
   end
   if conn then
-    local _let_44_ = input_check_edit_flag((edit or false), content)
-    local text = _let_44_[1]
-    local default = _let_44_[2]
-    logger.debug(("send-to-repl: text=" .. tostring(text) .. " default=" .. tostring(default)))
-    local function _45_(str)
-      logger.debug(("send-to-repl callback: str=" .. str))
-      local function _46_()
-        if conn then
-          return conn.cb_data.name
-        else
-          return "nil"
-        end
-      end
-      local function _47_()
-        if conn then
-          return conn.ui
-        else
-          return "nil"
-        end
-      end
-      logger.debug(("send-to-repl callback: conn=" .. tostring(_46_()) .. " conn.ui=" .. tostring(_47_())))
-      if not conn then
-        logger.warn("send-to-repl callback: conn IS NIL!")
-      else
-      end
-      if (conn and not conn.ui) then
-        logger.warn("send-to-repl callback: conn.ui IS NIL!")
-      else
-      end
+    local _let_43_ = input_check_edit_flag((edit or false), content)
+    local text = _let_43_[1]
+    local default = _let_43_[2]
+    local function _44_(str)
       if (conn and conn.ui) then
-        logger.debug("send-to-repl callback: entering when block")
         conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
-        logger.debug("send-to-repl callback: on-write-string returned")
-        local function _50_()
-          logger.debug("send-to-repl callback: inside with-thread")
+        local function _45_()
           return conn["listener-eval"](conn, str, on_listener_eval_complete)
         end
-        return conn["with-thread"](conn, true, _50_)
+        return conn["with-thread"](conn, true, _45_)
       else
         return nil
       end
     end
-    return input["maybe-input"](text, _45_, " Send to REPL ", default, conn)
+    return input["maybe-input"](text, _44_, " Send to REPL ", default, conn)
   else
     return nil
   end
@@ -376,23 +338,23 @@ plugin.compile = function(content, policy, edit)
   if not conn then
   else
   end
-  local _let_54_ = input_check_edit_flag((edit or false), content)
-  local text = _let_54_[1]
-  local default = _let_54_[2]
-  local function _55_(str)
+  local _let_49_ = input_check_edit_flag((edit or false), content)
+  local text = _let_49_[1]
+  local default = _let_49_[2]
+  local function _50_(str)
     if conn.ui then
       conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
       local win = vim.fn.win_getid()
       local policy0 = (policy or config.compiler_policy)
-      local function _56_(c, r)
+      local function _51_(c, r)
         return on_compilation_complete(win, c, r)
       end
-      return conn["compile-string-for-emacs"](conn, str, nil, 1, nil, policy0, _56_)
+      return conn["compile-string-for-emacs"](conn, str, nil, 1, nil, policy0, _51_)
     else
       return nil
     end
   end
-  return input["maybe-input"](text, _55_, " Compile ", default, conn)
+  return input["maybe-input"](text, _50_, " Compile ", default, conn)
 end
 plugin["compile-defun"] = function()
   return ui["err-msg"]("compile-defun: blocked on ui_cursor.fnl (cursor-based form extraction not yet implemented)")
@@ -402,16 +364,16 @@ plugin["load-file"] = function(file_name, edit)
   if not conn then
   else
   end
-  local _let_59_ = input_check_edit_flag((edit or false), file_name)
-  local text = _let_59_[1]
-  local default = _let_59_[2]
-  local function _60_(fname)
-    local function _61_(c, r)
+  local _let_54_ = input_check_edit_flag((edit or false), file_name)
+  local text = _let_54_[1]
+  local default = _let_54_[2]
+  local function _55_(fname)
+    local function _56_(c, r)
       return on_load_file_complete(fname, c, r)
     end
-    return conn["load-file"](conn, fname, _61_)
+    return conn["load-file"](conn, fname, _56_)
   end
-  return input["maybe-input"](text, _60_, " Load file ", (default or ""), nil, "file")
+  return input["maybe-input"](text, _55_, " Load file ", (default or ""), nil, "file")
 end
 plugin["set-package"] = function(pkg)
   local conn = conn_manager.get(true)
@@ -425,78 +387,78 @@ plugin["set-package"] = function(pkg)
   else
     default = "COMMON-LISP-USER"
   end
-  local function _64_(p)
+  local function _59_(p)
     return conn["set-package"](conn, p)
   end
-  return input["maybe-input"](pkg, _64_, " Set package ", default, conn)
+  return input["maybe-input"](pkg, _59_, " Set package ", default, conn)
 end
 plugin.inspect = function(content, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_66_ = input_check_edit_flag((edit or false), content)
-  local text = _let_66_[1]
-  local default = _let_66_[2]
-  local function _67_(str)
-    local function _68_(c, r)
+  local _let_61_ = input_check_edit_flag((edit or false), content)
+  local text = _let_61_[1]
+  local default = _let_61_[2]
+  local function _62_(str)
+    local function _63_(c, r)
       return c.ui["on-inspect"](c.ui, c, r, nil, nil)
     end
-    return conn["init-inspector"](conn, str, _68_)
+    return conn["init-inspector"](conn, str, _63_)
   end
-  return input["maybe-input"](text, _67_, " Inspect ", default, conn)
+  return input["maybe-input"](text, _62_, " Inspect ", default, conn)
 end
 plugin["compile-file"] = function(file_name, policy, load, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_70_ = input_check_edit_flag((edit or false), file_name)
-  local text = _let_70_[1]
-  local default = _let_70_[2]
-  local function _71_(fname)
+  local _let_65_ = input_check_edit_flag((edit or false), file_name)
+  local text = _let_65_[1]
+  local default = _let_65_[2]
+  local function _66_(fname)
     if conn.ui then
       conn.ui["on-write-string"](conn.ui, conn, "--\n", {name = "REPL-SEP", package = "KEYWORD"})
       local win = vim.fn.win_getid()
       local policy0 = (policy or config.compiler_policy)
       local load0 = (load or true)
-      local function _72_(c, r)
+      local function _67_(c, r)
         return on_compilation_complete(win, c, r)
       end
-      return conn["compile-file-for-emacs"](conn, fname, load0, policy0, _72_)
+      return conn["compile-file-for-emacs"](conn, fname, load0, policy0, _67_)
     else
       return nil
     end
   end
-  return input["maybe-input"](text, _71_, " Compile file ", (default or ""), nil, "file")
+  return input["maybe-input"](text, _66_, " Compile file ", (default or ""), nil, "file")
 end
 plugin["expand-macro"] = function(expr, type, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_75_ = input_check_edit_flag((edit or false), expr)
-  local text = _let_75_[1]
-  local default = _let_75_[2]
+  local _let_70_ = input_check_edit_flag((edit or false), expr)
+  local text = _let_70_[1]
+  local default = _let_70_[2]
   local cb_fn
   do
-    local case_76_ = (type or "expand")
-    if (case_76_ == "all") then
-      local function _77_(e)
+    local case_71_ = (type or "expand")
+    if (case_71_ == "all") then
+      local function _72_(e)
         return conn["swank-macro-expand-all"](conn, e, show_async_result)
       end
-      cb_fn = _77_
-    elseif (case_76_ == "one") then
-      local function _78_(e)
+      cb_fn = _72_
+    elseif (case_71_ == "one") then
+      local function _73_(e)
         return conn["swank-macro-expand-one"](conn, e, show_async_result)
       end
-      cb_fn = _78_
+      cb_fn = _73_
     else
-      local _ = case_76_
-      local function _79_(e)
+      local _ = case_71_
+      local function _74_(e)
         return conn["swank-macro-expand"](conn, e, show_async_result)
       end
-      cb_fn = _79_
+      cb_fn = _74_
     end
   end
   return input["maybe-input"](text, cb_fn, "Expand macro: ", default, conn)
@@ -506,78 +468,78 @@ plugin["disassemble-form"] = function(content, edit)
   if not conn then
   else
   end
-  local _let_82_ = input_check_edit_flag((edit or false), content)
-  local text = _let_82_[1]
-  local default = _let_82_[2]
-  local function _83_(expr)
+  local _let_77_ = input_check_edit_flag((edit or false), content)
+  local text = _let_77_[1]
+  local default = _let_77_[2]
+  local function _78_(expr)
     return conn["disassemble-form"](conn, expr, ui["show-disassemble-form"])
   end
-  return input["maybe-input"](text, _83_, " Disassemble ", default, conn)
+  return input["maybe-input"](text, _78_, " Disassemble ", default, conn)
 end
 plugin["describe-symbol"] = function(symbol, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_85_ = input_check_edit_flag((edit or false), symbol)
-  local text = _let_85_[1]
-  local default = _let_85_[2]
-  local function _86_(sym)
+  local _let_80_ = input_check_edit_flag((edit or false), symbol)
+  local text = _let_80_[1]
+  local default = _let_80_[2]
+  local function _81_(sym)
     return conn["describe-symbol"](conn, sym, show_symbol_description)
   end
-  return input["maybe-input"](text, _86_, " Describe symbol ", default, conn)
+  return input["maybe-input"](text, _81_, " Describe symbol ", default, conn)
 end
 plugin["documentation-symbol"] = function(symbol, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_88_ = input_check_edit_flag((edit or false), symbol)
-  local text = _let_88_[1]
-  local default = _let_88_[2]
-  local function _89_(sym)
+  local _let_83_ = input_check_edit_flag((edit or false), symbol)
+  local text = _let_83_[1]
+  local default = _let_83_[2]
+  local function _84_(sym)
     return conn["documentation-symbol"](conn, sym, show_symbol_documentation)
   end
-  return input["maybe-input"](text, _89_, " Documentation for symbol ", default, conn)
+  return input["maybe-input"](text, _84_, " Documentation for symbol ", default, conn)
 end
 plugin["apropos-list"] = function(pattern, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_91_ = input_check_edit_flag((edit or false), pattern)
-  local text = _let_91_[1]
-  local default = _let_91_[2]
-  local function _92_(pat)
+  local _let_86_ = input_check_edit_flag((edit or false), pattern)
+  local text = _let_86_[1]
+  local default = _let_86_[2]
+  local function _87_(pat)
     return conn["apropos-list-for-emacs"](conn, pat, false, false, nil, on_apropos_list_complete)
   end
-  return input["maybe-input"](text, _92_, " Apropos search ", default, conn)
+  return input["maybe-input"](text, _87_, " Apropos search ", default, conn)
 end
 plugin["find-definition"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_94_ = input_check_edit_flag((edit or false), sym)
-  local text = _let_94_[1]
-  local default = _let_94_[2]
-  local function _95_(s)
+  local _let_89_ = input_check_edit_flag((edit or false), sym)
+  local text = _let_89_[1]
+  local default = _let_89_[2]
+  local function _90_(s)
     return conn["find-definitions-for-emacs"](conn, s, on_xref_complete)
   end
-  return input["maybe-input"](text, _95_, " Definition of symbol ", default, conn)
+  return input["maybe-input"](text, _90_, " Definition of symbol ", default, conn)
 end
 plugin["xref-symbol"] = function(ref_type, sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_97_ = input_check_edit_flag((edit or false), sym)
-  local text = _let_97_[1]
-  local default = _let_97_[2]
-  local function _98_(s)
+  local _let_92_ = input_check_edit_flag((edit or false), sym)
+  local text = _let_92_[1]
+  local default = _let_92_[2]
+  local function _93_(s)
     return conn:xref(ref_type, s, on_xref_complete)
   end
-  return input["maybe-input"](text, _98_, " XRef symbol ", default, conn)
+  return input["maybe-input"](text, _93_, " XRef symbol ", default, conn)
 end
 plugin["xref-symbol-wrapper"] = function()
   local conn = conn_manager.get(true)
@@ -621,11 +583,11 @@ plugin["show-operator-arglist"] = function(op, edit)
   if not conn then
   else
   end
-  local _let_105_ = input_check_edit_flag((edit or false), op)
-  local text = _let_105_[1]
-  local default = _let_105_[2]
-  local function _106_(operator)
-    local function _107_(c, result)
+  local _let_100_ = input_check_edit_flag((edit or false), op)
+  local text = _let_100_[1]
+  local default = _let_100_[2]
+  local function _101_(operator)
+    local function _102_(c, result)
       if result then
         ui["show-arglist"](c, result)
         last_arglist_op = operator
@@ -634,9 +596,9 @@ plugin["show-operator-arglist"] = function(op, edit)
         return nil
       end
     end
-    return conn["operator-arg-list"](conn, operator, _107_)
+    return conn["operator-arg-list"](conn, operator, _102_)
   end
-  return input["maybe-input"](text, _106_, " Arglist for operator ", default, conn)
+  return input["maybe-input"](text, _101_, " Arglist for operator ", default, conn)
 end
 plugin["cur-autodoc"] = function()
   local conn = conn_manager.get(true)
@@ -654,50 +616,50 @@ plugin["set-breakpoint"] = function(sym, edit)
   if not conn then
   else
   end
-  local _let_112_ = input_check_edit_flag((edit or false), sym)
-  local text = _let_112_[1]
-  local default = _let_112_[2]
-  local function _113_(symbol)
+  local _let_107_ = input_check_edit_flag((edit or false), sym)
+  local text = _let_107_[1]
+  local default = _let_107_[2]
+  local function _108_(symbol)
     return conn["sldb-break"](conn, symbol, on_sldb_break_complete)
   end
-  return input["maybe-input"](text, _113_, " Set breakpoint at function ", default, conn)
+  return input["maybe-input"](text, _108_, " Set breakpoint at function ", default, conn)
 end
 plugin["list-threads"] = function()
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local function _115_(c, result)
+  local function _110_(c, result)
     if c.ui then
       return c.ui["on-threads"](c.ui, c, result)
     else
       return nil
     end
   end
-  return conn["list-threads"](conn, _115_)
+  return conn["list-threads"](conn, _110_)
 end
 plugin["undefine-function"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_118_ = input_check_edit_flag((edit or false), sym)
-  local text = _let_118_[1]
-  local default = _let_118_[2]
-  local function _119_(symbol)
+  local _let_113_ = input_check_edit_flag((edit or false), sym)
+  local text = _let_113_[1]
+  local default = _let_113_[2]
+  local function _114_(symbol)
     return conn["undefine-function"](conn, symbol, on_undefine_function_complete)
   end
-  return input["maybe-input"](text, _119_, " Undefine function ", default, conn)
+  return input["maybe-input"](text, _114_, " Undefine function ", default, conn)
 end
 plugin["unintern-symbol"] = function(sym, edit)
   local conn = conn_manager.get(true)
   if not conn then
   else
   end
-  local _let_121_ = input_check_edit_flag((edit or false), sym)
-  local text = _let_121_[1]
-  local default = _let_121_[2]
-  local function _122_(raw_sym)
+  local _let_116_ = input_check_edit_flag((edit or false), sym)
+  local text = _let_116_[1]
+  local default = _let_116_[2]
+  local function _117_(raw_sym)
     local matched = vim.fn.matchlist(raw_sym, "\\(\\([^:]\\+\\)\\?::\\?\\)\\?\\(\\k\\+\\)")
     if (#matched > 0) then
       local sym_name = matched[3]
@@ -717,7 +679,7 @@ plugin["unintern-symbol"] = function(sym, edit)
       return nil
     end
   end
-  return input["maybe-input"](text, _122_, " Unintern symbol ", default, conn)
+  return input["maybe-input"](text, _117_, " Unintern symbol ", default, conn)
 end
 plugin["undefine-unintern-wrapper"] = function()
   local conn = conn_manager.get(true)
@@ -736,10 +698,10 @@ plugin["swank-require"] = function(contribs, do_init)
   if not conn then
   else
   end
-  local function _128_(c, r)
+  local function _123_(c, r)
     return on_swank_require_complete((do_init or true), c, r)
   end
-  return conn["swank-require"](conn, contribs, _128_)
+  return conn["swank-require"](conn, contribs, _123_)
 end
 plugin["dialog-toggle-trace"] = function(func, edit)
   local conn = conn_manager.get(true)
@@ -750,16 +712,16 @@ plugin["dialog-toggle-trace"] = function(func, edit)
     ui["err-msg"]("SWANK-TRACE-DIALOG is not available.")
   else
   end
-  local _let_131_ = input_check_edit_flag((edit or false), func)
-  local text = _let_131_[1]
-  local default = _let_131_[2]
-  local function _132_(func_spec)
-    local function _133_(c, r)
+  local _let_126_ = input_check_edit_flag((edit or false), func)
+  local text = _let_126_[1]
+  local default = _let_126_[2]
+  local function _127_(func_spec)
+    local function _128_(c, r)
       return vim.cmd("echom 'Traced state toggled.'")
     end
-    return conn:DialogToggleTrace(func_spec, _133_)
+    return conn:DialogToggleTrace(func_spec, _128_)
   end
-  return input["maybe-input"](text, _132_, " Toggle tracing ", default, conn)
+  return input["maybe-input"](text, _127_, " Toggle tracing ", default, conn)
 end
 plugin["open-trace-dialog"] = function()
   local conn = conn_manager.get(true)
@@ -770,14 +732,14 @@ plugin["open-trace-dialog"] = function()
     ui["err-msg"]("SWANK-TRACE-DIALOG is not available.")
   else
   end
-  local function _136_(c, r)
+  local function _131_(c, r)
     if r then
       return vim.fn.luaeval("require(\"nvlime.window.trace\").open(_A)", r)
     else
       return nil
     end
   end
-  return conn:ReportSpecs(_136_)
+  return conn:ReportSpecs(_131_)
 end
 plugin["create-mrepl"] = function()
   local conn = conn_manager.get(true)
@@ -785,10 +747,10 @@ plugin["create-mrepl"] = function()
   else
   end
   if conn_has_contrib(conn, "SWANK-MREPL") then
-    local function _139_(c, r)
+    local function _134_(c, r)
       return vim.cmd("echom 'MREPL created.'")
     end
-    return conn:CreateMREPL(vim.v.null, _139_)
+    return conn:CreateMREPL(vim.v.null, _134_)
   else
     return nil
   end
@@ -891,15 +853,15 @@ plugin.completefunc = function(find_start, base)
       local raw_pos = vim.list_slice(vim.fn.getcurpos(), 2, 3)
       local cur_pos = {vim.fn.bufnr("%"), raw_pos[1], (raw_pos[2] + string.len(base))}
       if conn_has_contrib(conn, "SWANK-FUZZY") then
-        local function _153_(c, r)
+        local function _148_(c, r)
           return on_fuzzy_completions_complete((start_col + 1), cur_pos, c, r)
         end
-        conn["fuzzy-completions"](conn, base, _153_)
+        conn["fuzzy-completions"](conn, base, _148_)
       else
-        local function _154_(c, r)
+        local function _149_(c, r)
           return on_simple_completions_complete((start_col + 1), cur_pos, c, r)
         end
-        conn["simple-completions"](conn, base, _154_)
+        conn["simple-completions"](conn, base, _149_)
       end
       return {words = {}, refresh = "always"}
     end
@@ -948,15 +910,15 @@ plugin["interaction-mode"] = function(enable)
     vim.cmd("nnoremap <buffer> <CR> <CR>")
     vim.cmd("vnoremap <buffer> <CR> <CR>")
   end
-  local _162_
+  local _157_
   if enable0 then
-    _162_ = "enabled"
+    _157_ = "enabled"
   else
-    _162_ = "disabled"
+    _157_ = "disabled"
   end
-  return vim.cmd(("echom 'Interaction mode " .. _162_ .. ".'"))
+  return vim.cmd(("echom 'Interaction mode " .. _157_ .. ".'"))
 end
-local function _164_(self, key)
+local function _159_(self, key)
   local new_key = string.gsub(key, "_", "-")
   if (new_key == key) then
     return nil
@@ -964,5 +926,5 @@ local function _164_(self, key)
     return self[new_key]
   end
 end
-setmetatable(plugin, {__index = _164_})
+setmetatable(plugin, {__index = _159_})
 return plugin

@@ -2,6 +2,7 @@ local buffer = require("nvlime.buffer")
 local logger = require("nvlime.logger")
 local main = require("nvlime.window.main")
 local ut = require("nvlime.utilities")
+local connection = require("nvlime.core.connection")
 local presentations = require("nvlime.contrib.presentations")
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
 local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace

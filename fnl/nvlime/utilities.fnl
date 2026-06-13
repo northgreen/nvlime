@@ -6,7 +6,7 @@
 (fn text->lines [text]
   (if text
       (if (psl.string? text)
-          (vim.split text "\n" {:trimempty true})
+          (vim.split text "\n" {:trimempty false})
           text)
       []))
 

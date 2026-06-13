@@ -17,6 +17,7 @@ local input = require("nvlime.core.ui.input")
 local messages = require("nvlime.core.connection.messages")
 local events = require("nvlime.core.connection.events")
 local conn = require("nvlime.core.connection")
+local logger = require("nvlime.logger")
 local sldb = {}
 sldb["find-max-restart-name-len"] = function(restarts)
   local max_name_len = 0
@@ -286,134 +287,131 @@ sldb["eval-string-in-cur-frame-input-complete"] = function(frame, thread, packag
   end
 end
 sldb["send-value-in-cur-frame-to-repl-input-complete"] = function(frame, thread, package)
+  local content = ui["cur-buffer-content"](true)
+  if (#content > 0) then
+    local escaped_content = select(1, string.gsub(content, "\"", "\\\""))
+    local eval_expr = ("(setf cl-user::* #.(read-from-string \"" .. escaped_content .. "\"))")
+    local function _39_()
+      local function _40_(c, _r)
+        local function _41_()
+          return c.ListenerEval("cl-user::*")
+        end
+        return c("WithThread", {name = "REPL-THREAD", package = "KEYWORD"}, _41_)
+      end
+      return vim.b.nvlime_conn("EvalStringInFrame", eval_expr, frame, package, _40_)
+    end
+    return vim.b.nvlime_conn("WithThread", thread, _39_)
+  else
+    return ui["err-msg"]("Canceled.")
+  end
+end
+sldb["return-from-cur-frame-input-complete"] = function(frame, thread)
+  local content = ui["cur-buffer-content"](true)
+  if (#content > 0) then
+    local function _43_()
+      return vim.b.nvlime_conn("SLDBReturnFromFrame", frame, content)
+    end
+    return vim.b.nvlime_conn("WithThread", thread, _43_)
+  else
+    return ui["err-msg"]("Canceled.")
+  end
+end
+sldb["fill-sldb-buf"] = function(thread, level, condition, restarts, frames)
+  logger.debug(("sldb.fill-sldb-buf: ENTER thread=" .. tostring(thread) .. " level=" .. tostring(level)))
+  logger.debug("sldb.fill-sldb-buf: about to setlocal modifiable")
+  nvim_set_option_value("modifiable", true, {buf = 0})
+  logger.debug("sldb.fill-sldb-buf: modifiable set, about to clear buffer")
+  nvim_buf_set_lines(0, 0, -1, false, {})
+  logger.debug("sldb.fill-sldb-buf: buffer cleared, about to append thread header")
+  ui["append-string"](("Thread: " .. thread .. "; Level: " .. tostring(level) .. "\n\n"))
+  local condition_str = ""
+  for _, c in ipairs(condition) do
+    if (type(c) == "string") then
+      condition_str = (condition_str .. c .. "\n")
+    else
+    end
+  end
+  condition_str = (condition_str .. "\n")
+  ui["append-string"](condition_str)
+  local restarts_str = "Restarts:\n"
   do
-    local content = ui["cur-buffer-content"](true)
-    if (#content > 0) then
-      local escaped_content = select(1, string.gsub(content, "\"", "\\\""))
-      local eval_expr = ("(setf cl-user::* #.(read-from-string \"" .. escaped_content .. "\"))")
-      local function _39_()
-        local function _40_(c, _r)
-          local function _41_()
-            return c.ListenerEval("cl-user::*")
-          end
-          return c("WithThread", {name = "REPL-THREAD", package = "KEYWORD"}, _41_)
+    local _let_46_ = sldb["find-max-restart-name-len"](restarts)
+    local max_name_len = _let_46_[1]
+    local has_star = _let_46_[2]
+    local max_digits = string.len(tostring((#restarts - 1)))
+    for ri = 0, (#restarts - 1) do
+      local r = restarts[(ri + 1)]
+      local idx_str = ui.pad(tostring(ri), ".", max_digits)
+      local restart_line = sldb["format-restart-line"](r, max_name_len, has_star)
+      restarts_str = (restarts_str .. "  R " .. idx_str .. restart_line .. "\n")
+    end
+  end
+  restarts_str = (restarts_str .. "\n")
+  ui["append-string"](restarts_str)
+  local frames_str = "Frames:\n"
+  do
+    local max_digits = string.len(tostring((#frames - 1)))
+    for _, f in ipairs(frames) do
+      local idx_str = ui.pad(tostring(f[1]), ".", max_digits)
+      frames_str = (frames_str .. "  F " .. idx_str .. f[2] .. "\n")
+    end
+  end
+  ui["append-string"](frames_str)
+  return nvim_set_option_value("modifiable", false, {buf = 0})
+end
+sldb["choose-cur-restart"] = function()
+  do
+    local nth = sldb["match-restart"]()
+    if (nth >= 0) then
+      vim.b.nvlime_conn("InvokeNthRestartForEmacs", vim.b.nvlime_sldb_level, nth)
+    else
+    end
+  end
+  if (sldb["show-frame-details"]() > -1) then
+  else
+  end
+  local _let_49_ = sldb["match-file"]()
+  local fn_name = _let_49_[1]
+  local pos = _let_49_[2]
+  if (#fn_name > 0) then
+    return sldb["open-frame-source"]()
+  else
+    return nil
+  end
+end
+sldb["show-frame-details"] = function()
+  local nth = sldb["match-frame"]()
+  if (nth < 0) then
+  else
+  end
+  do
+    local cur_line = line(".")
+    local frame_line_pattern = "^\\s*F \\d\\+\\|^\\%$"
+    if __fnl_global___21_3d(vim.fn.match(getline((cur_line + 1)), frame_line_pattern), -1) then
+      local frame = vim.b.nvlime_sldb_frames[(nth + 1)]
+      local restartable = sldb["frame-restartable"](frame)
+      local function _52_(continuation)
+        local function _53_(c, r)
+          return continuation(nth, restartable, cur_line, c, r)
         end
-        return vim.b.nvlime_conn("EvalStringInFrame", eval_expr, frame, package, _40_)
+        return vim.b.nvlime_conn("FrameLocalsAndCatchTags", nth, _53_)
       end
-      vim.b.nvlime_conn("WithThread", thread, _39_)
-      ui["err-msg"]("Canceled.")
-    else
-    end
-  end
-  sldb["return-from-cur-frame-input-complete"] = function(frame0, thread0)
-    local content = ui["cur-buffer-content"](true)
-    if (#content > 0) then
-      local function _43_()
-        return vim.b.nvlime_conn("SLDBReturnFromFrame", frame0, content)
+      local function _54_(...)
+        local args = {...}
+        return apply(sldb["show-frame-locals-cb"], args)
       end
-      return vim.b.nvlime_conn("WithThread", thread0, _43_)
+      messages["chain-callbacks"](nil, _52_, _54_)
     else
-      return ui["err-msg"]("Canceled.")
-    end
-  end
-  sldb["fill-sldb-buf"] = function(thread0, level, condition, restarts, frames)
-    logger.debug(("sldb.fill-sldb-buf: ENTER thread=" .. tostring(thread0) .. " level=" .. tostring(level)))
-    logger.debug("sldb.fill-sldb-buf: about to setlocal modifiable")
-    nvim_set_option_value("modifiable", true, {buf = 0})
-    logger.debug("sldb.fill-sldb-buf: modifiable set, about to clear buffer")
-    nvim_buf_set_lines(0, 0, -1, false, {})
-    logger.debug("sldb.fill-sldb-buf: buffer cleared, about to append thread header")
-    ui["append-string"](("Thread: " .. thread0 .. "; Level: " .. tostring(level) .. "\n\n"))
-    local condition_str = ""
-    for _, c in ipairs(condition) do
-      if (type(c) == "string") then
-        condition_str = (condition_str .. c .. "\n")
+      local next_frame_line = search(frame_line_pattern, "nW")
+      if (next_frame_line > 0) then
+        vim.cmd("setlocal modifiable")
+        deletebufline(bufnr("%"), (cur_line + 1), (next_frame_line - 1))
+        vim.cmd("setlocal nomodifiable")
       else
       end
     end
-    condition_str = (condition_str .. "\n")
-    ui["append-string"](condition_str)
-    local restarts_str = "Restarts:\n"
-    do
-      local _let_46_ = sldb["find-max-restart-name-len"](restarts)
-      local max_name_len = _let_46_[1]
-      local has_star = _let_46_[2]
-      local max_digits = string.len(tostring((#restarts - 1)))
-      for ri = 0, (#restarts - 1) do
-        local r = restarts[(ri + 1)]
-        local idx_str = ui.pad(tostring(ri), ".", max_digits)
-        local restart_line = sldb["format-restart-line"](r, max_name_len, has_star)
-        restarts_str = (restarts_str .. "  R " .. idx_str .. restart_line .. "\n")
-      end
-    end
-    restarts_str = (restarts_str .. "\n")
-    ui["append-string"](restarts_str)
-    local frames_str = "Frames:\n"
-    do
-      local max_digits = string.len(tostring((#frames - 1)))
-      for _, f in ipairs(frames) do
-        local idx_str = ui.pad(tostring(f[1]), ".", max_digits)
-        frames_str = (frames_str .. "  F " .. idx_str .. f[2] .. "\n")
-      end
-    end
-    ui["append-string"](frames_str)
-    return nvim_set_option_value("modifiable", false, {buf = 0})
   end
-  sldb["choose-cur-restart"] = function()
-    do
-      local nth = sldb["match-restart"]()
-      if (nth >= 0) then
-        vim.b.nvlime_conn("InvokeNthRestartForEmacs", vim.b.nvlime_sldb_level, nth)
-      else
-      end
-    end
-    if (sldb["show-frame-details"]() > -1) then
-    else
-    end
-    local _let_49_ = sldb["match-file"]()
-    local fn_name = _let_49_[1]
-    local pos = _let_49_[2]
-    if (#fn_name > 0) then
-      return sldb["open-frame-source"]()
-    else
-      return nil
-    end
-  end
-  sldb["show-frame-details"] = function()
-    local nth = sldb["match-frame"]()
-    if (nth < 0) then
-    else
-    end
-    do
-      local cur_line = line(".")
-      local frame_line_pattern = "^\\s*F \\d\\+\\|^\\%$"
-      if __fnl_global___21_3d(vim.fn.match(getline((cur_line + 1)), frame_line_pattern), -1) then
-        local frame0 = vim.b.nvlime_sldb_frames[(nth + 1)]
-        local restartable = sldb["frame-restartable"](frame0)
-        local function _52_(continuation)
-          local function _53_(c, r)
-            return continuation(nth, restartable, cur_line, c, r)
-          end
-          return vim.b.nvlime_conn("FrameLocalsAndCatchTags", nth, _53_)
-        end
-        local function _54_(...)
-          local args = {...}
-          return apply(sldb["show-frame-locals-cb"], args)
-        end
-        messages["chain-callbacks"](nil, _52_, _54_)
-      else
-        local next_frame_line = search(frame_line_pattern, "nW")
-        if (next_frame_line > 0) then
-          vim.cmd("setlocal modifiable")
-          deletebufline(bufnr("%"), (cur_line + 1), (next_frame_line - 1))
-          vim.cmd("setlocal nomodifiable")
-        else
-        end
-      end
-    end
-    return 1
-  end
-  return sldb["show-frame-details"]
+  return 1
 end
 sldb["open-frame-source"] = function(...)
   local edit_cmd = (select(1, ...) or "hide edit")
