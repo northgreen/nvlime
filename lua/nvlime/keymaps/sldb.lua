@@ -18,8 +18,8 @@ sldb.add = function()
   km.buffer.normal(sm.normal.local_var.inspect, "<Cmd>lua require('nvlime.core.ui.sldb').inspect_var_in_cur_frame()<CR>", "nvlime: Inspect a variable in the frame under the cursor")
   km.buffer.normal(sm.normal.step_over, "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('next')<CR>", "nvlime: Step over the current function call")
   km.buffer.normal(sm.normal.step_out, "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('out')<CR>", "nvlime: Step out of the current function")
-  km.buffer.normal(sm.normal.abort, "<Cmd>call b:nvlime_conn.SLDBAbort()<CR>", "nvlime: Invoke the restart labeled ABORT")
-  km.buffer.normal(sm.normal.continue, "<Cmd>call b:nvlime_conn.SLDBContinue()<CR>", "nvlime: Invoke the restart labeled CONTINUE")
+  km.buffer.normal(sm.normal.abort, "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-abort'](c)<CR>", "nvlime: Invoke the restart labeled ABORT")
+  km.buffer.normal(sm.normal.continue, "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-continue'](c)<CR>", "nvlime: Invoke the restart labeled CONTINUE")
   return km.buffer.normal(sm.normal.inspect_condition, "<Cmd>lua require('nvlime.core.ui.sldb').inspect_cur_condition()<CR>", "nvlime: Inspect the current condition object")
 end
 return sldb

@@ -91,12 +91,12 @@ local function yank_cur_presentation()
 end
 local function inspect_cur_presentation()
   local function _15_(coord)
-    return buffer["vim-call!"](0, {("call b:nvlime_conn.InspectPresentation(" .. coord.id .. ", v:true, " .. "{c, r -> c.ui.OnInspect(c, r, v:null, v:null)})")})
+    return presentation.inspect(coord.id)
   end
   return do_cur_presentation(_15_)
 end
 repl.add = function()
-  km.buffer.normal(rm.normal.interrupt, "<Cmd>call b:nvlime_conn.Interrupt({'name': 'REPL-THREAD', 'package': 'KEYWORD'})<CR>", "nvlime: Interrupt the REPL thread")
+  km.buffer.normal(rm.normal.interrupt, "<Cmd>lua local c=vim.b.nvlime_conn;c['interrupt'](c, {name='REPL-THREAD',package='KEYWORD'})<CR>", "nvlime: Interrupt the REPL thread")
   local function _16_()
     return repl_win.clear()
   end

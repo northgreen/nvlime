@@ -74,18 +74,11 @@
 (fn inspect-cur-presentation []
   (do-cur-presentation
     (fn [coord]
-      ;; NOTE: This uses buffer.vim-call! because InspectPresentation
-      ;; requires a callback with closure capture. Once Conn has a native
-      ;; Fennel InspectPresentation method that accepts Fennel callbacks,
-      ;; this should be rewritten to: (conn:InspectPresentation id true cb)
-      (buffer.vim-call!
-        0 [(.. "call b:nvlime_conn.InspectPresentation("
-               (. coord :id) ", v:true, "
-               "{c, r -> c.ui.OnInspect(c, r, v:null, v:null)})")]))))
+      (presentation.inspect (. coord :id)))))
 
 (fn repl.add []
   (km.buffer.normal rm.normal.interrupt
-                    "<Cmd>call b:nvlime_conn.Interrupt({'name': 'REPL-THREAD', 'package': 'KEYWORD'})<CR>"
+                    "<Cmd>lua local c=vim.b.nvlime_conn;c['interrupt'](c, {name='REPL-THREAD',package='KEYWORD'})<CR>"
                     "nvlime: Interrupt the REPL thread")
   (km.buffer.normal rm.normal.clear
                     #(repl-win.clear)

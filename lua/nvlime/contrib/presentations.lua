@@ -78,4 +78,15 @@ presentation.on_end = function(_, msg)
   end
   return nil
 end
+presentation.inspect = function(pres_id)
+  local conn = (vim.b.nvlime_conn or require("nvlime.core.conn_manager").get[false])
+  if conn then
+    local function _8_(c, r)
+      return c.ui["on-inspect"](c.ui, c, r, nil, nil)
+    end
+    return conn["inspect-presentation"](conn, pres_id, true, _8_)
+  else
+    return nil
+  end
+end
 return presentation

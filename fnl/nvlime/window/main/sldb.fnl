@@ -17,10 +17,9 @@
   (buffer.set-vars
     bufnr {:nvlime_sldb_level opts.level
            :nvlime_sldb_frames opts.frames})
-  (buffer.set-conn-var! bufnr)
-  (buffer.vim-call!
-    bufnr [(.. "call b:nvlime_conn.SetCurrentThread("
-               opts.thread ")")]))
+  (let [conn (buffer.set-conn-var! bufnr)]
+    (when conn
+      (conn:set-current-thread opts.thread))))
 
 ;;; TODO should process config.stepping?
 ;;; TODO remove flickering of stepping and continue

@@ -37,10 +37,10 @@
 
 ;;; Connection factory
 
-(fn connection.new [cb_data ui]
+(fn connection.new [cb_data ui-obj]
   "Creates a new NvlimeConnection object.
   cb_data: arbitrary user data
-  ui: NvlimeUI instance (or nil)"
+  ui-obj: NvlimeUI instance (or nil)"
   (let [self {:cb_data cb_data
               :channel nil
               :remote_prefix ""
@@ -48,7 +48,7 @@
               :next_local_channel_id 1
               :local_channels {}
               :remote_channels {}
-              :ui ui
+              :ui ui-obj
               :server_event_handlers {}}]
     ;; Load all mixin modules to register their methods on the connection module.
     ;; require is idempotent - safe to call on every new() after first load.

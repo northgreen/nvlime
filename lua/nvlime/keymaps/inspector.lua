@@ -11,6 +11,6 @@ inspector.add = function()
   km.buffer.normal(im.normal.inspected.next, "<Cmd>lua require('nvlime.core.ui.inspector').inspector_next()<CR>", "nvlime: Move to the next inspected object")
   km.buffer.normal(im.normal.next_field, "<Cmd>lua require('nvlime.core.ui.inspector').next_field(v:true)<CR>", "nvlime: Select the next interactable field/button")
   km.buffer.normal(im.normal.prev_field, "<Cmd>lua require('nvlime.core.ui.inspector').next_field(v:false)<CR>", "nvlime: Select the previous interactable field/button")
-  return km.buffer.normal(im.normal.refresh, "<Cmd>call b:nvlime_conn.InspectorReinspect({c, r -> c.ui.OnInspect(c, r, v:null, v:null)})<CR>", "nvlime: Refresh the inspector")
+  return km.buffer.normal(im.normal.refresh, "<Cmd>lua require('nvlime.core.ui.inspector').reinspect()<CR>", "nvlime: Refresh the inspector")
 end
 return inspector

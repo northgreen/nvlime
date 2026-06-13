@@ -254,6 +254,13 @@ Provides inspector buffer interactions: select, navigate, REPL send, source look
      (fn [conn result]
        (inspector.on-inspector-pop-complete "next" conn result))))
 
+(fn inspector.reinspect []
+  "Reinspect the current object in the inspector buffer."
+  (let [conn (or vim.b.nvlime_conn (. (require "nvlime.core.conn_manager") :get false))]
+    (when conn
+      (conn:inspector-reinspect
+        (fn [c r] (c.ui:on-inspect c r nil nil))))))
+
 ;;; ============================================================================
 ;;; Module export
 ;;; ============================================================================

@@ -97,8 +97,8 @@ key - var name, value - var value."
   (local conn-manager (require "nvlime.core.conn_manager"))
   (let [conn (conn-manager.get false)]
     (when conn
-      (nvim_buf_set_var bufnr "nvlime_conn" conn)))
-  nil)
+      (nvim_buf_set_var bufnr "nvlime_conn" conn))
+    conn))
 
 ;;; BufNr -> ?{any}
 (fn buffer.get-conn-var! [bufnr]

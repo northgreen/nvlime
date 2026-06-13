@@ -53,10 +53,10 @@
                     "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('out')<CR>"
                     "nvlime: Step out of the current function")
   (km.buffer.normal sm.normal.abort
-                    "<Cmd>call b:nvlime_conn.SLDBAbort()<CR>"
+                    "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-abort'](c)<CR>"
                     "nvlime: Invoke the restart labeled ABORT")
   (km.buffer.normal sm.normal.continue
-                    "<Cmd>call b:nvlime_conn.SLDBContinue()<CR>"
+                    "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-continue'](c)<CR>"
                     "nvlime: Invoke the restart labeled CONTINUE")
   (km.buffer.normal sm.normal.inspect_condition
                     "<Cmd>lua require('nvlime.core.ui.sldb').inspect_cur_condition()<CR>"

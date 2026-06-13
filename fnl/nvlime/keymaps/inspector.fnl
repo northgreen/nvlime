@@ -32,7 +32,7 @@
                     "<Cmd>lua require('nvlime.core.ui.inspector').next_field(v:false)<CR>"
                     "nvlime: Select the previous interactable field/button")
   (km.buffer.normal im.normal.refresh
-                    "<Cmd>call b:nvlime_conn.InspectorReinspect({c, r -> c.ui.OnInspect(c, r, v:null, v:null)})<CR>"
+                    "<Cmd>lua require('nvlime.core.ui.inspector').reinspect()<CR>"
                     "nvlime: Refresh the inspector"))
 
 inspector

@@ -26,8 +26,8 @@ connection.get = function(dict, key, default)
     return (dict[key] or default)
   end
 end
-connection.new = function(cb_data, ui0)
-  local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui0, server_event_handlers = {}}
+connection.new = function(cb_data, ui_obj)
+  local self = {cb_data = cb_data, channel = nil, remote_prefix = "", ping_tag = 1, next_local_channel_id = 1, local_channels = {}, remote_channels = {}, ui = ui_obj, server_event_handlers = {}}
   require("nvlime.core.connection.channels")
   require("nvlime.core.connection.messages")
   require("nvlime.core.connection.sldb")
@@ -42,7 +42,7 @@ connection.new = function(cb_data, ui0)
     end
   end
   if self.ui then
-    for k, v in pairs(ui0) do
+    for k, v in pairs(ui) do
       if (type(v) == "function") then
         self.ui[k] = v
       else

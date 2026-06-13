@@ -190,4 +190,15 @@ inspector["inspector-next"] = function()
   end
   return vim.b.nvlime_conn:InspectorNext(_29_)
 end
+inspector.reinspect = function()
+  local conn = (vim.b.nvlime_conn or require("nvlime.core.conn_manager").get[false])
+  if conn then
+    local function _30_(c, r)
+      return c.ui["on-inspect"](c.ui, c, r, nil, nil)
+    end
+    return conn["inspector-reinspect"](conn, _30_)
+  else
+    return nil
+  end
+end
 return inspector

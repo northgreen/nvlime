@@ -79,4 +79,11 @@
         (highlight-presentation *repl-bufnr* pending-coord))))
   nil)
 
+(fn presentation.inspect [pres-id]
+  "Inspect the presentation with given ID in REPL."
+  (let [conn (or vim.b.nvlime_conn (. (require "nvlime.core.conn_manager") :get false))]
+    (when conn
+      (conn:inspect-presentation pres-id true
+        (fn [c r] (c.ui:on-inspect c r nil nil))))))
+
 presentation

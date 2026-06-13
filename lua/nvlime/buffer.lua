@@ -50,14 +50,12 @@ buffer["vim-call!"] = function(bufnr, cmds)
 end
 buffer["set-conn-var!"] = function(bufnr)
   local conn_manager = require("nvlime.core.conn_manager")
-  do
-    local conn = conn_manager.get(false)
-    if conn then
-      nvim_buf_set_var(bufnr, "nvlime_conn", conn)
-    else
-    end
+  local conn = conn_manager.get(false)
+  if conn then
+    nvim_buf_set_var(bufnr, "nvlime_conn", conn)
+  else
   end
-  return nil
+  return conn
 end
 buffer["get-conn-var!"] = function(bufnr)
   buffer["set-conn-var!"](bufnr)

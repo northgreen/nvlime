@@ -10,8 +10,12 @@ local _2bfiletype_2b = buffer["gen-filetype"](buffer.names.sldb)
 local function buf_callback(bufnr, opts)
   buffer["set-opts"](bufnr, {filetype = _2bfiletype_2b})
   buffer["set-vars"](bufnr, {nvlime_sldb_level = opts.level, nvlime_sldb_frames = opts.frames})
-  buffer["set-conn-var!"](bufnr)
-  return buffer["vim-call!"](bufnr, {("call b:nvlime_conn.SetCurrentThread(" .. opts.thread .. ")")})
+  local conn = buffer["set-conn-var!"](bufnr)
+  if conn then
+    return conn["set-current-thread"](conn, opts.thread)
+  else
+    return nil
+  end
 end
 sldb["on-debug-return"] = function(config)
   local exists_3f, bufnr = pbuf["exists?"](buffer["gen-sldb-name"](config["conn-name"], config.thread))
@@ -35,10 +39,10 @@ sldb["on-debug-return"] = function(config)
 end
 sldb.open = function(content, config)
   local bufnr
-  local function _4_(_241)
+  local function _5_(_241)
     return buf_callback(_241, config)
   end
-  bufnr = buffer["create-if-not-exists"](buffer["gen-sldb-name"](config["conn-name"], config.thread), true, _4_)
+  bufnr = buffer["create-if-not-exists"](buffer["gen-sldb-name"](config["conn-name"], config.thread), true, _5_)
   return {main.sldb:open(bufnr, true), bufnr}
 end
 return sldb
