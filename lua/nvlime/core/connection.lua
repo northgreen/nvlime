@@ -153,14 +153,14 @@ connection["set-current-package"] = function(self, package)
 end
 connection["get-current-thread"] = function(self)
   if self.ui then
-    return self.ui["get-current-thread"](self.ui)
+    return self.ui["get-current-thread"](self.ui, nil)
   else
     return true
   end
 end
 connection["set-current-thread"] = function(self, thread)
   if self.ui then
-    return self.ui["set-current-thread"](self.ui, thread)
+    return self.ui["set-current-thread"](self.ui, thread, nil)
   else
     return nil
   end

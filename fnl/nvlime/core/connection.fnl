@@ -162,11 +162,11 @@
 (fn connection.get-current-thread [self]
   "Returns the thread bound to the current buffer.
   Returns true (not nil) when no UI is present - matches original behavior."
-  (if self.ui (self.ui:get-current-thread) true))
+  (if self.ui (self.ui:get-current-thread nil) true))
 
 (fn connection.set-current-thread [self thread]
   "Binds a thread to the current buffer."
-  (when self.ui (self.ui:set-current-thread thread)))
+  (when self.ui (self.ui:set-current-thread thread nil)))
 
 (fn connection.with-thread [self thread func]
   "Temporarily sets thread, runs func, restores original thread."
