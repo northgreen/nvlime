@@ -1,4 +1,5 @@
 local buffer = require("nvlime.buffer")
+local logger = require("nvlime.logger")
 local main = require("nvlime.window.main")
 local psl = require("parsley")
 local pbuf = require("parsley.buffer")
@@ -23,7 +24,7 @@ local function buf_callback(bufnr, opts)
     logger.debug(("sldb.buf-callback: conn=" .. tostring(_1_())))
     if conn then
       logger.debug(("sldb.buf-callback: calling set-current-thread thread=" .. tostring(opts.thread)))
-      conn["set-current-thread"](conn, opts.thread)
+      conn.ui["set-current-thread"](conn.ui, opts.thread, bufnr)
       logger.debug("sldb.buf-callback: set-current-thread returned")
     else
     end

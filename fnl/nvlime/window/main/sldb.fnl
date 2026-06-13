@@ -1,4 +1,5 @@
 (local buffer (require "nvlime.buffer"))
+(local logger (require "nvlime.logger"))
 (local main (require "nvlime.window.main"))
 (local psl (require "parsley"))
 (local pbuf (require "parsley.buffer"))
@@ -22,7 +23,7 @@
     (logger.debug (.. "sldb.buf-callback: conn=" (tostring (if conn (. conn :cb_data :name) "nil"))))
     (when conn
       (logger.debug (.. "sldb.buf-callback: calling set-current-thread thread=" (tostring opts.thread)))
-      (conn:set-current-thread opts.thread)
+      (conn.ui:set-current-thread opts.thread bufnr)
       (logger.debug "sldb.buf-callback: set-current-thread returned")))
   (logger.debug "sldb.buf-callback: EXIT"))
 
