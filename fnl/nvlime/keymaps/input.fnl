@@ -5,9 +5,9 @@
         : nvim_win_get_cursor}
        vim.api)
 
-(local input {})
+(local Input {})
 
-(fn input.add []
+(fn Input.add []
   (km.buffer.normal im.normal.complete
                     "<Cmd>lua require('nvlime.core.ui.input').from_buffer_complete()<CR>"
                     "nvlime: Complete the input")
@@ -30,4 +30,4 @@
                        (km.feedkeys "<Esc>"))
                     "Close window or leave insert mode"))
 
-input
+Input

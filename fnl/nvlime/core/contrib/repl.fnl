@@ -35,8 +35,9 @@
 
 (fn connection.create-repl [self coding-system callback]
   "Create a new REPL session on the Lisp server.
-  CODING-SYSTEM is optional. Results delivered via CALLBACK: (callback self result)."
-  (let [cmd [(connection.sym "SWANK-REPL" "CREATE-REPL")]]
+  TARGET is required (must be nil). CODING-SYSTEM is optional keyword.
+  Results delivered via CALLBACK: (callback self result)."
+  (let [cmd [(connection.sym "SWANK-REPL" "CREATE-REPL") vim.NIL]]
     (when (not= coding-system nil)
       (table.insert cmd (connection.kw "CODING-SYSTEM"))
       (table.insert cmd coding-system))

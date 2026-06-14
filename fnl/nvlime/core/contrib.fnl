@@ -31,22 +31,26 @@
 (fn connection.call-initializers [self ?contribs ?callback]
   "Iterates over CONTRIBS list and calls the appropriate init function for each.
   If CONTRIBS is nil, uses self.cb_data.contribs.
-  Calls CALLBACK(self) after all initializers complete."
+  Calls CALLBACK(self) after all initializers complete.
+  
+  IMPORTANT: REPL must be initialized BEFORE presentation-streams.
+  create-repl sets up the connection's output streams (user-output, repl-results, etc.),
+  then init-presentation-streams monkey-patches them for presentation support."
   (let [contribs (or ?contribs (. self.cb_data :contribs) [])
-        ;; 先找 presentation-streams 的 init 函数
-        init-ps (. contrib-initializers "SWANK-PRESENTATION-STREAMS")
-        ;; 再找 repl 的 init 函数
-        init-repl (. contrib-initializers "SWANK-REPL")]
-    (if (and init-ps init-repl)
-        ;; 按顺序初始化: presentation-streams -> repl -> 其他
-        (init-ps self
+        ;; 先找 repl 的 init 函数
+        init-repl (. contrib-initializers "SWANK-REPL")
+        ;; 再找 presentation-streams 的 init 函数
+        init-ps (. contrib-initializers "SWANK-PRESENTATION-STREAMS")]
+    (if (and init-repl init-ps)
+        ;; 按顺序初始化: repl -> presentation-streams -> 其他
+        (init-repl self
           (fn [_]
-            (init-repl self
+            (init-ps self
               (fn [_]
                 ;; 初始化其他所有 contrib
                 (each [_ c (ipairs contribs)]
-                  (when (and (not (= c "SWANK-PRESENTATION-STREAMS"))
-                             (not (= c "SWANK-REPL")))
+                  (when (and (not (= c "SWANK-REPL"))
+                             (not (= c "SWANK-PRESENTATION-STREAMS")))
                     (when-let [init-fn (. contrib-initializers c)]
                       (init-fn self))))
                 (when (= (type ?callback) "function")

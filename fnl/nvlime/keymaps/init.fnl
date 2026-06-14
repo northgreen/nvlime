@@ -6,7 +6,7 @@
         : nvim_buf_get_keymap}
        vim.api)
 
-(local keymaps
+(local Keymaps
        {:leader opts.leader
         :buffer {}})
 
@@ -198,7 +198,7 @@
         :xref xref-mappings
         :mrepl mrepl-mappings})
 
-(tset keymaps :mappings (vim.tbl_deep_extend
+(tset Keymaps :mappings (vim.tbl_deep_extend
                           "force"
                           default-mappings
                           (or vim.g.nvlime_mappings {})))
@@ -206,7 +206,7 @@
 (fn from-keycode [key]
   (nvim_replace_termcodes key true false true))
 
-(fn keymaps.feedkeys [keys]
+(fn Keymaps.feedkeys [keys]
   (nvim_feedkeys (from-keycode keys) "n" false))
 
 ;;; string string fn|string string ->
@@ -229,16 +229,16 @@
       (each [_ l (ipairs lhs)]
         (set-buf-map mode l rhs desc))))
 
-(fn keymaps.buffer.normal [lhs rhs desc]
+(fn Keymaps.buffer.normal [lhs rhs desc]
   (set-buf-map* "n" lhs rhs desc))
 
-(fn keymaps.buffer.insert [lhs rhs desc]
+(fn Keymaps.buffer.insert [lhs rhs desc]
   (set-buf-map* "i" lhs rhs desc))
 
-(fn keymaps.buffer.visual [lhs rhs desc]
+(fn Keymaps.buffer.visual [lhs rhs desc]
   (set-buf-map* "v" lhs rhs desc))
 
-(fn keymaps.buffer.get []
+(fn Keymaps.buffer.get []
   (let [maps []]
     (each [_ mode (ipairs ["n" "i" "v"])]
       (icollect [_ map (ipairs (nvim_buf_get_keymap 0 mode))
@@ -249,4 +249,4 @@
            :desc (string.gsub map.desc "^nvlime: " "")})))
     maps))
 
-keymaps
+Keymaps

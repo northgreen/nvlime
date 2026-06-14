@@ -74,7 +74,6 @@
   (let [cl-impl (or cl-impl
                     config.implementation)
         nvlime-loader (.. nvlime-home path-sep "lisp" path-sep "load-nvlime.lisp")]
-
     (cond
       ;; User-defined VimScript builder exists
       ((> (exists (.. "*" "NvlimeBuildServerCommandFor_" cl-impl)) 0)

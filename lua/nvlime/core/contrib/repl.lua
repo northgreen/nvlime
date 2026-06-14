@@ -19,7 +19,7 @@ local function check_and_report_return_status(conn, return_msg, caller)
   end
 end
 connection["create-repl"] = function(self, coding_system, callback)
-  local cmd = {connection.sym("SWANK-REPL", "CREATE-REPL")}
+  local cmd = {connection.sym("SWANK-REPL", "CREATE-REPL"), vim.NIL}
   if (coding_system ~= nil) then
     table.insert(cmd, connection.kw("CODING-SYSTEM"))
     table.insert(cmd, coding_system)
