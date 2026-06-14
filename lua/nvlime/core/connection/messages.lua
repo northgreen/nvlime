@@ -25,7 +25,9 @@ connection["emacs-rex"] = function(self, cmd)
     pkg = pkg_info[1]
   end
   local thread = self["get-current-thread"](self)
-  return {connection.kw("EMACS-REX"), cmd, pkg, thread}
+  local msg = {connection.kw("EMACS-REX"), cmd, pkg, thread}
+  logger.debug(("emacs-rex: sending message=" .. vim.inspect(msg)))
+  return msg
 end
 connection.ping = function(self)
   local cur_tag = self.ping_tag

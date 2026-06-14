@@ -36,7 +36,7 @@
 (fn connection.create-repl [self coding-system callback]
   "Create a new REPL session on the Lisp server.
   CODING-SYSTEM is optional. Results delivered via CALLBACK: (callback self result)."
-  (let [cmd [(connection.sym "SWANK-REPL" "CREATE-REPL") nil]]
+  (let [cmd [(connection.sym "SWANK-REPL" "CREATE-REPL")]]
     (when (not= coding-system nil)
       (table.insert cmd (connection.kw "CODING-SYSTEM"))
       (table.insert cmd coding-system))
@@ -51,18 +51,21 @@
   Handles ABORT status by writing to UI instead of throwing."
   (logger.debug (.. "listener-eval: expr=" expr))
   (self:send (self:emacs-rex
-               [(connection.sym "SWANK-REPL" "LISTENER-EVAL") expr])
+               [(connection.sym "SWANK-REPL" "LISTENER-EVAL") expr (connection.kw "WINDOW-WIDTH") 80])
              (fn [chan msg]
+               (logger.debug (.. "listener-eval callback: msg=" (vim.inspect msg)))
                (logger.debug (.. "listener-eval callback: msg-len=" (tostring (length msg))))
                (when (check-and-report-return-status self msg "nvlime#contrib#repl#ListenerEval")
                  (logger.debug "listener-eval callback: calling user callback")
                  (self:try-to-call callback [self (. msg 2 2)])))))
 
-(fn connection.init-repl [self]
-  "Register REPL methods on connection object and create default REPL."
+(fn connection.init-repl [self callback]
+  "Register REPL methods on connection object and create default REPL.
+  Calls callback when done."
   (tset self :CreateREPL connection.create-repl)
   (tset self :ListenerEval connection.listener-eval)
-  (self:create-repl)
-  self)
+  (self:create-repl nil (fn [_ _]
+                        (when callback
+                          (callback self)))))
 
 connection

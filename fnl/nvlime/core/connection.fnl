@@ -110,6 +110,7 @@
 
 (fn connection.send [self msg callback]
   "Asynchronous send via channel."
+  (logger.debug (.. "connection.send: sending=" (vim.inspect msg)))
   (async.ch-sendexpr self.channel msg callback))
 
 ;;; Path fixing - remote/local path conversion

@@ -282,7 +282,7 @@
   "Activates debugger UI via self.ui:on-debug.
    Uses reentrancy guard to prevent stack overflow when nvim_set_current_win
    triggers processing of pending channel messages."
-  (logger.debug "connection.on-debug: ENTER")
+  (logger.debug (.. "connection.on-debug: ENTER, msg=" (vim.inspect msg)))
   (when (and self.ui (not processing-debug))
     (set processing-debug true)
     (let [thread (. msg 2)
@@ -291,7 +291,7 @@
           restarts (. msg 5)
           frames (. msg 6)
           conts (. msg 7)]
-      (logger.debug (.. "connection.on-debug: calling ui.on-debug, thread=" (tostring thread) " level=" (tostring level)))
+      (logger.debug (.. "connection.on-debug: calling ui.on-debug, thread=" (tostring thread) " level=" (tostring level) " condition=" (vim.inspect condition)))
       (self.ui:on-debug self thread level condition restarts frames conts)
       (logger.debug "connection.on-debug: AFTER ui.on-debug call"))
     (set processing-debug false))

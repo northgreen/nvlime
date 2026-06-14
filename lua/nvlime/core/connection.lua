@@ -92,6 +92,7 @@ connection.call = function(self, msg)
   end
 end
 connection.send = function(self, msg, callback)
+  logger.debug(("connection.send: sending=" .. vim.inspect(msg)))
   return async["ch-sendexpr"](self.channel, msg, callback)
 end
 connection["fix-remote-path"] = function(self, path)

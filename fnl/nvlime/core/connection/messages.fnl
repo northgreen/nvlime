@@ -27,8 +27,10 @@
         pkg (if (not= (type pkg-info) "table")
                   nil
                   (. pkg-info 1))
-        thread (self:get-current-thread)]
-    [(connection.kw "EMACS-REX") cmd pkg thread]))
+        thread (self:get-current-thread)
+        msg [(connection.kw "EMACS-REX") cmd pkg thread]]
+    (logger.debug (.. "emacs-rex: sending message=" (vim.inspect msg)))
+    msg))
 
 (fn connection.ping [self]
   "Sends PING request and validates response.

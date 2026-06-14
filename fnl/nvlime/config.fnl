@@ -47,14 +47,15 @@
         :block 1})
 
 (local default-contribs
-       ["SWANK-ARGLISTS"
-        "SWANK-ASDF"
-        "SWANK-C-P-C"
-        "SWANK-FANCY-INSPECTOR"
-        "SWANK-FUZZY"
-        "SWANK-PACKAGE-FU"
-        "SWANK-PRESENTATIONS"
-        "SWANK-REPL"])
+  ["SWANK-ARGLISTS"
+   "SWANK-ASDF"
+   "SWANK-C-P-C"
+   "SWANK-FANCY-INSPECTOR"
+   "SWANK-FUZZY"
+   "SWANK-PACKAGE-FU"
+   "SWANK-PRESENTATION-STREAMS"
+   "SWANK-PRESENTATIONS"
+   "SWANK-REPL"])
 
 (local
   default-opts

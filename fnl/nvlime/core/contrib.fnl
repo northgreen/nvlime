@@ -30,15 +30,34 @@
 
 (fn connection.call-initializers [self ?contribs ?callback]
   "Iterates over CONTRIBS list and calls the appropriate init function for each.
-   If CONTRIBS is nil, uses self.cb_data.contribs.
-   Calls CALLBACK(self) after all initializers complete."
-  (let [contribs (or ?contribs (. self.cb_data :contribs) [])]
-    (each [_ contrib (ipairs contribs)]
-      (let [init-fn (. contrib-initializers contrib)]
-        (when init-fn
-          (init-fn self)))))
-  (when (= (type ?callback) "function")
-    (?callback self))
+  If CONTRIBS is nil, uses self.cb_data.contribs.
+  Calls CALLBACK(self) after all initializers complete."
+  (let [contribs (or ?contribs (. self.cb_data :contribs) [])
+        ;; 先找 presentation-streams 的 init 函数
+        init-ps (. contrib-initializers "SWANK-PRESENTATION-STREAMS")
+        ;; 再找 repl 的 init 函数
+        init-repl (. contrib-initializers "SWANK-REPL")]
+    (if (and init-ps init-repl)
+        ;; 按顺序初始化: presentation-streams -> repl -> 其他
+        (init-ps self
+          (fn [_]
+            (init-repl self
+              (fn [_]
+                ;; 初始化其他所有 contrib
+                (each [_ c (ipairs contribs)]
+                  (when (and (not (= c "SWANK-PRESENTATION-STREAMS"))
+                             (not (= c "SWANK-REPL")))
+                    (when-let [init-fn (. contrib-initializers c)]
+                      (init-fn self))))
+                (when (= (type ?callback) "function")
+                  (?callback self))))))
+        ;; 如果没有这两个，就正常初始化
+        (do
+          (each [_ c (ipairs contribs)]
+            (when-let [init-fn (. contrib-initializers c)]
+              (init-fn self)))
+          (when (= (type ?callback) "function")
+            (?callback self)))))
   self)
 
 connection

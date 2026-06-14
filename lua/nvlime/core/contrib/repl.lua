@@ -19,7 +19,7 @@ local function check_and_report_return_status(conn, return_msg, caller)
   end
 end
 connection["create-repl"] = function(self, coding_system, callback)
-  local cmd = {connection.sym("SWANK-REPL", "CREATE-REPL"), nil}
+  local cmd = {connection.sym("SWANK-REPL", "CREATE-REPL")}
   if (coding_system ~= nil) then
     table.insert(cmd, connection.kw("CODING-SYSTEM"))
     table.insert(cmd, coding_system)
@@ -34,6 +34,7 @@ end
 connection["listener-eval"] = function(self, expr, callback)
   logger.debug(("listener-eval: expr=" .. expr))
   local function _5_(chan, msg)
+    logger.debug(("listener-eval callback: msg=" .. vim.inspect(msg)))
     logger.debug(("listener-eval callback: msg-len=" .. tostring(#msg)))
     if check_and_report_return_status(self, msg, "nvlime#contrib#repl#ListenerEval") then
       logger.debug("listener-eval callback: calling user callback")
@@ -42,12 +43,18 @@ connection["listener-eval"] = function(self, expr, callback)
       return nil
     end
   end
-  return self:send(self["emacs-rex"](self, {connection.sym("SWANK-REPL", "LISTENER-EVAL"), expr}), _5_)
+  return self:send(self["emacs-rex"](self, {connection.sym("SWANK-REPL", "LISTENER-EVAL"), expr, connection.kw("WINDOW-WIDTH"), 80}), _5_)
 end
-connection["init-repl"] = function(self)
+connection["init-repl"] = function(self, callback)
   self["CreateREPL"] = connection["create-repl"]
   self["ListenerEval"] = connection["listener-eval"]
-  self["create-repl"](self)
-  return self
+  local function _7_(_, _0)
+    if callback then
+      return callback(self)
+    else
+      return nil
+    end
+  end
+  return self["create-repl"](self, nil, _7_)
 end
 return connection
