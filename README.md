@@ -81,6 +81,17 @@ of auxiliary functions. So it should be installed too. After that run `sbcl
 If it's your first time running the server, Nvlime will try to install it's
 dependencies via Quicklisp.
 
+A example for Lazy
+```lua
+return {
+  "northgreen/nvlime",
+  build = "make",
+  dependencies = {
+    "northgreen/parsley"
+  },
+}
+```
+
 ### Usage
 
 When the server is up and running, use Neovim to start editing a CL source
