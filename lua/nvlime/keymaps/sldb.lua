@@ -1,0 +1,25 @@
+local km = require("nvlime.keymaps")
+local sm = km.mappings.sldb
+local sldb = {}
+sldb.add = function()
+  km.buffer.normal(sm.normal.action, "<Cmd>lua require('nvlime.core.ui.sldb').choose_cur_restart()<CR>", "nvlime: Choose a restart, toggle a frame or jump to the source code.")
+  km.buffer.normal(sm.normal.details, "<Cmd>lua require('nvlime.core.ui.sldb').show_frame_details()<CR>", "nvlime: Show the details of the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.source, "<Cmd>lua require('nvlime.core.ui.sldb').open_frame_source()<CR>", "nvlime: Open the source code for the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.source_split, "<Cmd>lua require('nvlime.core.ui.sldb').open_frame_source('split')<CR>", "nvlime: Open the source code for the frame under the cursor in a new split")
+  km.buffer.normal(sm.normal.frame.source_vsplit, "<Cmd>lua require('nvlime.core.ui.sldb').open_frame_source('vsplit')<CR>", "nvlime: Open the source code for the frame under the cursor in a new vertical split")
+  km.buffer.normal(sm.normal.frame.source_tab, "<Cmd>lua require('nvlime.core.ui.sldb').open_frame_source('tabedit')<CR>", "nvlime: Open the source code for the frame under the cursor in a new tabpage")
+  km.buffer.normal(sm.normal.frame.restart, "<Cmd>lua require('nvlime.core.ui.sldb').restart_cur_frame()<CR>", "nvlime: Restart the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.eval_expr, "<Cmd>lua require('nvlime.core.ui.sldb').eval_string_in_cur_frame()<CR>", "nvlime: Evaluate an expression in the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.send_expr, "<Cmd>lua require('nvlime.core.ui.sldb').send_value_in_cur_frame_to_repl()<CR>", "nvlime: Evaluate an expression in the frame under the cursor and send the result to the REPL")
+  km.buffer.normal(sm.normal.frame.disassemble, "<Cmd>lua require('nvlime.core.ui.sldb').disassemble_cur_frame()<CR>", "nvlime: Disassemble the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.return_result, "<Cmd>lua require('nvlime.core.ui.sldb').return_from_cur_frame()<CR>", "nvlime: Return a manually specified result from the frame under the cursor")
+  km.buffer.normal(sm.normal.frame.step, "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('step')<CR>", "nvlime: Start stepping in the frame under the cursor")
+  km.buffer.normal(sm.normal.local_var.source, "<Cmd>lua require('nvlime.core.ui.sldb').find_source()<CR>", "nvlime: Open the source code for a local variable")
+  km.buffer.normal(sm.normal.local_var.inspect, "<Cmd>lua require('nvlime.core.ui.sldb').inspect_var_in_cur_frame()<CR>", "nvlime: Inspect a variable in the frame under the cursor")
+  km.buffer.normal(sm.normal.step_over, "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('next')<CR>", "nvlime: Step over the current function call")
+  km.buffer.normal(sm.normal.step_out, "<Cmd>lua require('nvlime.core.ui.sldb').step_cur_or_last_frame('out')<CR>", "nvlime: Step out of the current function")
+  km.buffer.normal(sm.normal.abort, "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-abort'](c)<CR>", "nvlime: Invoke the restart labeled ABORT")
+  km.buffer.normal(sm.normal.continue, "<Cmd>lua local c=vim.b.nvlime_conn;c['sldb-continue'](c)<CR>", "nvlime: Invoke the restart labeled CONTINUE")
+  return km.buffer.normal(sm.normal.inspect_condition, "<Cmd>lua require('nvlime.core.ui.sldb').inspect_cur_condition()<CR>", "nvlime: Inspect the current condition object")
+end
+return sldb
