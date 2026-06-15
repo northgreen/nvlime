@@ -8,7 +8,9 @@
 
 (fn check-and-report-return-status [conn return-msg caller]
   "Validates return status. On ABORT or unknown error, writes to UI and returns nil.
-  Returns true on OK status."
+  Returns true on OK status.
+  NOTE: This function only handles standard (:ok value) list format, not bare :ok keyword.
+  Only used by listener-eval which always returns standard format."
   (let [status (. return-msg 2 1)]
     (logger.debug (.. "check-and-report-return-status: status=" (tostring (vim.inspect status)) " caller=" caller))
     (if (= status.name "OK")

@@ -51,15 +51,17 @@
                 (each [_ c (ipairs contribs)]
                   (when (and (not (= c "SWANK-REPL"))
                              (not (= c "SWANK-PRESENTATION-STREAMS")))
-                    (when-let [init-fn (. contrib-initializers c)]
-                      (init-fn self))))
+                    (let [init-fn (. contrib-initializers c)]
+                      (when init-fn
+                        (init-fn self)))))
                 (when (= (type ?callback) "function")
                   (?callback self))))))
         ;; 如果没有这两个，就正常初始化
         (do
           (each [_ c (ipairs contribs)]
-            (when-let [init-fn (. contrib-initializers c)]
-              (init-fn self)))
+            (let [init-fn (. contrib-initializers c)]
+              (when init-fn
+                (init-fn self))))
           (when (= (type ?callback) "function")
             (?callback self)))))
   self)

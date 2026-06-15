@@ -3,8 +3,8 @@ local im = km.mappings.input
 local km_window = require("nvlime.window.keymaps")
 local nvim_win_close = vim.api.nvim_win_close
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
-local input = {}
-input.add = function()
+local Input = {}
+Input.add = function()
   km.buffer.normal(im.normal.complete, "<Cmd>lua require('nvlime.core.ui.input').from_buffer_complete()<CR>", "nvlime: Complete the input")
   local function _1_()
     return km_window.toggle()
@@ -25,4 +25,4 @@ input.add = function()
   end
   return km.buffer.insert(im.insert.leave_insert, _2_, "Close window or leave insert mode")
 end
-return input
+return Input

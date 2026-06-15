@@ -1,8 +1,8 @@
 local pbuf = require("parsley.buffer")
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_buf_call = vim.api.nvim_buf_call
-local nvim_get_option_value = vim.api.nvim_get_option_value
 local nvim_set_option_value = vim.api.nvim_set_option_value
+local nvim_get_option_value = vim.api.nvim_get_option_value
 local nvim_buf_set_name = vim.api.nvim_buf_set_name
 local nvim_buf_set_var = vim.api.nvim_buf_set_var
 local nvim_clear_autocmds = vim.api.nvim_clear_autocmds
@@ -10,36 +10,36 @@ local nvim_create_buf = vim.api.nvim_create_buf
 local nvim_buf_set_lines = vim.api.nvim_buf_set_lines
 local nvim_buf_get_var = vim.api.nvim_buf_get_var
 local nvim_exec = vim.api.nvim_exec
-local buffer = {}
-buffer["names"] = {repl = "repl", sldb = "sldb", xref = "xref", input = "input", notes = "notes", trace = "trace", server = "server", apropos = "apropos", arglist = "arglist", keymaps = "keymaps", threads = "threads", inspector = "inspector", description = "description", disassembly = "disassembly", macroexpand = "macroexpand", documentation = "documentation"}
-buffer["gen-name"] = function(...)
+local M = {}
+M["names"] = {repl = "repl", sldb = "sldb", xref = "xref", input = "input", notes = "notes", trace = "trace", server = "server", apropos = "apropos", arglist = "arglist", keymaps = "keymaps", threads = "threads", inspector = "inspector", description = "description", disassembly = "disassembly", macroexpand = "macroexpand", documentation = "documentation"}
+M["gen-name"] = function(...)
   return ("nvlime://" .. table.concat({...}, "/"))
 end
-buffer["gen-repl-name"] = function(conn_name)
-  return buffer["gen-name"]((conn_name or "default"), buffer.names.repl)
+M["gen-repl-name"] = function(conn_name)
+  return M["gen-name"]((conn_name or "default"), M.names.repl)
 end
-buffer["gen-sldb-name"] = function(conn_name, thread)
-  return buffer["gen-name"](conn_name, buffer.names.sldb, thread)
+M["gen-sldb-name"] = function(conn_name, thread)
+  return M["gen-name"](conn_name, M.names.sldb, thread)
 end
-buffer["gen-filetype"] = function(suffix)
+M["gen-filetype"] = function(suffix)
   return ("nvlime_" .. suffix)
 end
-buffer["get-opt"] = function(bufnr, opt)
+M["get-opt"] = function(bufnr, opt)
   return nvim_get_option_value(opt, {buf = bufnr})
 end
-buffer["set-opts"] = function(bufnr, opts)
+M["set-opts"] = function(bufnr, opts)
   for opt, val in pairs(opts) do
     nvim_set_option_value(opt, val, {buf = bufnr})
   end
   return nil
 end
-buffer["set-vars"] = function(bufnr, vars)
+M["set-vars"] = function(bufnr, vars)
   for v, val in pairs(vars) do
     nvim_buf_set_var(bufnr, v, val)
   end
   return nil
 end
-buffer["vim-call!"] = function(bufnr, cmds)
+M["vim-call!"] = function(bufnr, cmds)
   local function _1_()
     for _, c in ipairs(cmds) do
       nvim_exec(c, false)
@@ -48,7 +48,7 @@ buffer["vim-call!"] = function(bufnr, cmds)
   end
   return nvim_buf_call(bufnr, _1_)
 end
-buffer["set-conn-var!"] = function(bufnr)
+M["set-conn-var!"] = function(bufnr)
   local conn_manager = require("nvlime.core.conn_manager")
   local conn = conn_manager.get(false)
   if conn then
@@ -57,8 +57,8 @@ buffer["set-conn-var!"] = function(bufnr)
   end
   return conn
 end
-buffer["get-conn-var!"] = function(bufnr)
-  buffer["set-conn-var!"](bufnr)
+M["get-conn-var!"] = function(bufnr)
+  M["set-conn-var!"](bufnr)
   local case_3_, case_4_ = pcall(nvim_buf_get_var, bufnr, "nvlime_conn")
   if ((case_3_ == true) and (nil ~= case_4_)) then
     local conn = case_4_
@@ -67,13 +67,13 @@ buffer["get-conn-var!"] = function(bufnr)
     return nil
   end
 end
-buffer.create = function(name, listed_3f, callback)
+M.create = function(name, listed_3f, callback)
   local bufnr = nvim_create_buf(listed_3f, false)
   nvim_buf_set_name(bufnr, name)
-  buffer["set-opts"](bufnr, {buftype = "nofile", modeline = false, modifiable = false, swapfile = false})
+  M["set-opts"](bufnr, {buftype = "nofile", modeline = false, modifiable = false, swapfile = false})
   if not listed_3f then
     local function _6_()
-      return buffer["set-opts"](bufnr, {buflisted = false})
+      return M["set-opts"](bufnr, {buflisted = false})
     end
     nvim_create_autocmd("BufWinEnter", {buffer = bufnr, callback = _6_})
     local function _7_()
@@ -88,44 +88,44 @@ buffer.create = function(name, listed_3f, callback)
   end
   return bufnr
 end
-buffer["create-if-not-exists"] = function(name, listed_3f, callback)
+M["create-if-not-exists"] = function(name, listed_3f, callback)
   if pbuf["exists?"](name) then
     return vim.fn.bufnr(name)
   else
-    return buffer.create(name, listed_3f, callback)
+    return M.create(name, listed_3f, callback)
   end
 end
-buffer["create-listed"] = function(name, filetype)
+M["create-listed"] = function(name, filetype)
   local function _11_(_241)
-    return buffer["set-opts"](_241, {filetype = filetype})
+    return M["set-opts"](_241, {filetype = filetype})
   end
-  return buffer["create-if-not-exists"](name, true, _11_)
+  return M["create-if-not-exists"](name, true, _11_)
 end
-buffer["create-nolisted"] = function(name, filetype)
+M["create-nolisted"] = function(name, filetype)
   local function _12_(_241)
-    return buffer["set-opts"](_241, {filetype = filetype})
+    return M["set-opts"](_241, {filetype = filetype})
   end
-  return buffer["create-if-not-exists"](name, false, _12_)
+  return M["create-if-not-exists"](name, false, _12_)
 end
-buffer["create-scratch"] = function(name, filetype)
+M["create-scratch"] = function(name, filetype)
   local function _13_(_241)
-    return buffer["set-opts"](_241, {filetype = filetype, bufhidden = "wipe"})
+    return M["set-opts"](_241, {filetype = filetype, bufhidden = "wipe"})
   end
-  return buffer["create-if-not-exists"](name, false, _13_)
+  return M["create-if-not-exists"](name, false, _13_)
 end
-buffer["create-scratch-with-conn-var!"] = function(name, filetype)
+M["create-scratch-with-conn-var!"] = function(name, filetype)
   local callback
   local function _14_(bufnr)
-    buffer["set-conn-var!"](bufnr)
-    return buffer["set-opts"](bufnr, {filetype = filetype, bufhidden = "wipe"})
+    M["set-conn-var!"](bufnr)
+    return M["set-opts"](bufnr, {filetype = filetype, bufhidden = "wipe"})
   end
   callback = _14_
   local function _15_(_241)
     return callback(_241)
   end
-  return buffer["create-if-not-exists"](name, false, _15_)
+  return M["create-if-not-exists"](name, false, _15_)
 end
-buffer["fill!"] = function(bufnr, ...)
+M["fill!"] = function(bufnr, ...)
   local args = {...}
   local lines = args[1]
   table.remove(args, 1)
@@ -147,7 +147,7 @@ buffer["fill!"] = function(bufnr, ...)
     return nil
   end
 end
-buffer["append!"] = function(bufnr, ...)
+M["append!"] = function(bufnr, ...)
   local args = {...}
   local old_mod_2_auto = nvim_get_option_value("modifiable", {buf = bufnr})
   nvim_set_option_value("modifiable", true, {buf = bufnr})
@@ -170,4 +170,4 @@ buffer["append!"] = function(bufnr, ...)
     return nil
   end
 end
-return buffer
+return M

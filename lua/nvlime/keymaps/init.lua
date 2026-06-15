@@ -4,7 +4,7 @@ local nvim_replace_termcodes = vim.api.nvim_replace_termcodes
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_buf_set_keymap = vim.api.nvim_buf_set_keymap
 local nvim_buf_get_keymap = vim.api.nvim_buf_get_keymap
-local keymaps = {leader = opts.leader, buffer = {}}
+local Keymaps = {leader = opts.leader, buffer = {}}
 local function with_leader(key)
   return (opts.leader .. key)
 end
@@ -22,11 +22,11 @@ local trace_mappings = {normal = {action = "<CR>", refresh = "R", inspect_value 
 local xref_mappings = {normal = {source = "<CR>", source_split = "<C-s>", source_vsplit = "<C-v>", source_tab = "<C-t>"}}
 local mrepl_mappings = {normal = {clear = with_leader("C"), disconnect = with_leader("D")}, insert = {space_arglist = "<Space>", cr_arglist = "<C-j>", submit = "<CR>", interrupt = "<C-c>"}}
 local default_mappings = {global = global_mappings, lisp = lisp_mappings, input = input_mappings, repl = repl_mappings, sldb = sldb_mappings, apropos = apropos_mappings, inspector = inspector_mappings, notes = notes_mappings, server = server_mappings, threads = threads_mappings, trace = trace_mappings, xref = xref_mappings, mrepl = mrepl_mappings}
-keymaps["mappings"] = vim.tbl_deep_extend("force", default_mappings, (vim.g.nvlime_mappings or {}))
+Keymaps["mappings"] = vim.tbl_deep_extend("force", default_mappings, (vim.g.nvlime_mappings or {}))
 local function from_keycode(key)
   return nvim_replace_termcodes(key, true, false, true)
 end
-keymaps.feedkeys = function(keys)
+Keymaps.feedkeys = function(keys)
   return nvim_feedkeys(from_keycode(keys), "n", false)
 end
 local function set_buf_map(mode, lhs, rhs, desc)
@@ -52,16 +52,16 @@ local function set_buf_map_2a(mode, lhs, rhs, desc)
     return nil
   end
 end
-keymaps.buffer.normal = function(lhs, rhs, desc)
+Keymaps.buffer.normal = function(lhs, rhs, desc)
   return set_buf_map_2a("n", lhs, rhs, desc)
 end
-keymaps.buffer.insert = function(lhs, rhs, desc)
+Keymaps.buffer.insert = function(lhs, rhs, desc)
   return set_buf_map_2a("i", lhs, rhs, desc)
 end
-keymaps.buffer.visual = function(lhs, rhs, desc)
+Keymaps.buffer.visual = function(lhs, rhs, desc)
   return set_buf_map_2a("v", lhs, rhs, desc)
 end
-keymaps.buffer.get = function()
+Keymaps.buffer.get = function()
   local maps = {}
   for _, mode in ipairs({"n", "i", "v"}) do
     local tbl_24_ = maps
@@ -77,4 +77,4 @@ keymaps.buffer.get = function()
   end
   return maps
 end
-return keymaps
+return Keymaps

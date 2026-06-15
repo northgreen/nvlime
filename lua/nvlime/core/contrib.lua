@@ -41,7 +41,11 @@ connection["call-initializers"] = function(self, _3fcontribs, _3fcallback)
         local function _6_(_0)
           for _1, c in ipairs(contribs) do
             if (not (c == "SWANK-REPL") and not (c == "SWANK-PRESENTATION-STREAMS")) then
-              __fnl_global__when_2dlet({__fnl_global__init_2dfn, contrib_initializers[c]}, __fnl_global__init_2dfn(self))
+              local init_fn = contrib_initializers[c]
+              if init_fn then
+                init_fn(self)
+              else
+              end
             else
             end
           end
@@ -56,7 +60,11 @@ connection["call-initializers"] = function(self, _3fcontribs, _3fcallback)
       init_repl(self, _5_)
     else
       for _, c in ipairs(contribs) do
-        __fnl_global__when_2dlet({__fnl_global__init_2dfn, contrib_initializers[c]}, __fnl_global__init_2dfn(self))
+        local init_fn = contrib_initializers[c]
+        if init_fn then
+          init_fn(self)
+        else
+        end
       end
       if (type(_3fcallback) == "function") then
         _3fcallback(self)

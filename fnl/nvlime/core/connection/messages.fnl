@@ -7,8 +7,13 @@
 ;;; Module-level helpers
 
 (fn check-return-status [return-msg caller]
-  "Validates return status is OK. Throws on failure."
-  (let [status (. return-msg 2 1)]
+  "Validates return status is OK. Throws on failure.
+  Handles both (:ok value) list and bare :ok keyword formats."
+  (let [return-value (. return-msg 2)
+        ;; Compatible formats:
+        ;; - Standard: (:ok value) → return-value = [{:name "OK"}, value], take [1]
+        ;; - Bare :ok  : :ok        → return-value = {:name "OK"} (dict itself is status)
+        status (or (. return-value 1) return-value)]
     (when (not (= status.name "OK"))
       (let [payload (. return-msg 2)]
         (error (.. caller " returned: " (vim.inspect payload)))))))
@@ -42,7 +47,9 @@
                       [(connection.sym "SWANK" "PING") cur-tag]))]
       (when (and (= (type result) "string") (= (string.len result) 0))
         (error "nvlime#Ping: failed"))
-      (check-return-status result "nvlime#Ping")
+      (let [(ok err) (pcall check-return-status result "nvlime#Ping")]
+        (when (not ok)
+          (error (.. "nvlime#Ping: " (tostring err)))))
       (when (not= (. result 2 2) cur-tag)
         (error "nvlime#Ping: bad tag")))))
 
@@ -59,10 +66,10 @@
                      (let [(ok err) (pcall check-return-status msg "nvlime#ConnectionInfo")]
                        (when (not ok)
                              (logger.warn (.. "msg: " (tostring err)))
-                           (return))
-                       (if return-dict
-                         (try-to-call callback
-                           [self (self:plist-to-dict (. msg 2 2))])
+                            (lua "return"))
+                        (if return-dict
+                          (try-to-call callback
+                            [self (self:plist-to-dict (. msg 2 2))])
                          (try-to-call callback
                             [self (. msg 2 2)]))))]
     (self:send (self:emacs-rex
@@ -89,14 +96,13 @@
 
 (fn connection.simple-send-cb [self callback caller chan msg]
   "Generic callback wrapper. Checks return status, calls callback with result."
-  (let [status (. msg 2 1)]
-    (let [(ok err) (pcall check-return-status msg caller)]
-      (when (not ok)
-          (logger.warn (.. "msg: " (tostring err)))
-        ;; 错误情况下传空列表给回调，让补全显示为空而非完全无响应
-        (try-to-call callback [self []])
-        (return)))
-    (try-to-call callback [self (. msg 2 2)])))
+  (let [(ok err) (pcall check-return-status msg caller)]
+    (when (not ok)
+      (logger.warn (.. "msg: " (tostring err)))
+      ;; 错误情况下传空列表给回调，让补全显示为空而非完全无响应
+      (try-to-call callback [self []])
+      (lua "return")))
+  (try-to-call callback [self (. msg 2 2)]))
 
 (fn connection.sldb-send-cb [self callback caller chan msg]
   "SLDB-specific callback wrapper.
@@ -137,6 +143,10 @@
       (first-fn (fn [...]
                     (chain-cb (vim.list_slice cbs 2) ...))))))
 
-(set connection.check-return-status check-return-status)
-(set connection.try-to-call try-to-call)
+(fn connection.check-return-status [self return-msg caller]
+  "Wrapper for check-return-status. Accepts self (discarded) for :method calling convention."
+  (check-return-status return-msg caller))
+(fn connection.try-to-call [self callback args]
+  "Wrapper for try-to-call. Accepts self (discarded) for :method calling convention."
+  (try-to-call callback args))
 connection
